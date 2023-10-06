@@ -1,0 +1,14 @@
+.map-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh; /* Adjust the height as needed */
+}
+
+.map-container {
+  
+  width: 95%; /* Adjust the width as needed */
+  /* max-width: 1000px; Adjust the maximum width as needed */
+  height: 100%; /* Adjust the height as needed */
+  border: 1px solid #ccc; /* Optional border for the map container */
+}
