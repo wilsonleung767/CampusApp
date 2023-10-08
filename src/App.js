@@ -7,11 +7,9 @@ import HomePage from './HomePage';
 function App() {
   return (
     <Router>
-      <div className="App">
       <Routes>
         <Route exact path="/" element={<HomePage />} />
       </Routes>
-      </div>
     </Router>
   );
 }
