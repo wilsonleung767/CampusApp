@@ -196,3 +196,20 @@ export default HomePage;
 
 
 
+<Autocomplete 
+                    onLoad={onLoad}
+                    onPlaceChanged={onPlaceChanged}
+                    options={{
+                      componentRestrictions: { country: "HK" },
+                  }}
+                  style={{ flex: 2 }}
+                >
+                    <TextField 
+                      label="Destination" 
+                      fullWidth 
+                      variant="outlined" 
+                      size="small"
+                      value={destinationName}
+                      onChange={e => setDestinationName(e.target.value)}
+                    />
+                </Autocomplete> 

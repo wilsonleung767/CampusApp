@@ -9,7 +9,13 @@ const InfoWindowComponent = ({ marker, onClose }) => {
         >
             <div>
                 <h4>{marker.name}</h4>
-                {/* Additional content here */}
+                <button onClick={() => {
+                    setDestination(`${marker.lat}, ${marker.lng}`);
+                    setDestinationName(marker.name);
+                    onClose();
+                    }}>
+                    Choose as Destination
+                </button>
             </div>
         </InfoWindow>
     );

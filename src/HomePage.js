@@ -1,25 +1,29 @@
 
 import React, { useMemo,useState, useEffect, useRef , useLayoutEffect} from "react";
-import { GoogleMap, useLoadScript,  MarkerF,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow} from "@react-google-maps/api";
+import { GoogleMap, useLoadScript,  MarkerF,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow,Marker} from "@react-google-maps/api";
 // import {Box,Button,ButtonGroup,Flex,HStack,IconButton,Input,SkeletonText,Text} from '@chakra-ui/react'
 import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment} from "@mui/material";
 import LocationPicker from "location-picker";
 import { FaLocationArrow, FaTimes } from 'react-icons/fa'
 import {FaLocationCrosshairs} from 'react-icons/fa6'
-// import InfoWindowComponent from "./InfoWindowCompoent";
+import {MdKeyboardArrowUp} from 'react-icons/md'
+import InfoPage from "./components/InfoPage";
 // import './HomePage.css'; // Import your CSS file for styling
 
 
 const HomePage = () => {
   
+  // Search Bar
+  const [showOriginSearch, setShowOriginSearch] = useState(false);
+
   const [showToiletLayer, setShowToiletLayer] = useState(false);
   const center = useMemo(() => ({ lat: 22.418426709637526, lng: 114.20771628364456 }), []);
   const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY
   
   const google = window.google;
-  const [destination, setDestination] = useState('');
+  const [destinationCoord, setDestinationCoord] = useState([]);
   const [destinationName, setDestinationName] = useState('');
-  const [origin, setOrigin] = useState('');
+  const [originCoord, setOriginCoord] = useState([]);
   const [originName, setOriginName] = useState('');
 
   // Info Window
@@ -32,90 +36,161 @@ const HomePage = () => {
   const [duration, setDuration] = useState('')
   const [mapKey, setMapKey] = useState(0); 
   
+  // Real time user location tracking 
+  const accuracyCircle = useRef(null);
+  const [circleProps, setCircleProps] = useState(null);
+  const marker = useRef(null);
+  const [currentUserLocation, setCurrentUserLocation] = useState([]);
+  const blueDot = {
+    path: 'M 0, 0 m -8, 0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0',
+    fillColor: "#4285F4",
+    fillOpacity: 1,
+    scale: 1,
+    strokeColor: "white",
+    strokeWeight: 2
+  };
+
+  // Custom Info page (Pop up)
+  const [showInfoPage, setShowInfoPage] = useState(false);
+  
   // Load GOOGLE MAP API
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey, 
     libraries: ['places'],
   });
   
+  // Function to get the current GPS location
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+  
+    let watcher = null;
+    if ("geolocation" in navigator) {
+      watcher = navigator.geolocation.watchPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+          const currentLocation = { lat: latitude, lng: longitude };
+          setCurrentUserLocation([latitude,longitude])
+          console.log("current user location is ", currentUserLocation)
+          // Update or create marker
+          if (marker.current) {
+            marker.current.setPosition(currentLocation);
+          } else {
+            marker.current = new window.google.maps.Marker({
+              position: currentLocation,
+              map: map,
+              icon: blueDot,
+              title: 'You are here!'
+            });
+          }
+  
+          // Update or create accuracy circle
+          const maxRadius = 20; 
+          if (accuracyCircle.current) {
+            accuracyCircle.current.setMap(null);
+          }
+          accuracyCircle.current = new window.google.maps.Circle({
+            center: currentLocation,
+            fillColor: "#61a0bf",
+            fillOpacity: 0.4,
+            radius: Math.min(position.coords.accuracy, maxRadius),
+            strokeColor: "#1bb6ff",
+            strokeOpacity: 0.4,
+            strokeWeight: 1,
+            zIndex: 1,
+            map: map
+          });
+        },
+        error => {
+          console.error("Error watching position:", error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    }
+  
+    return () => {
+      if (watcher) {
+        navigator.geolocation.clearWatch(watcher);
+      }
+    };
+  }, [isLoaded, map]);
+  
+
+  // Use GPS API to get User current location
+  const GetGPSClick = () => {
+    if (!isLoaded) {
+      console.error("Google Maps script not yet loaded");
+      return;
+    }
+      const [lat,lng] = currentUserLocation
+      setOriginCoord([lat,lng])
+      console.log("OriginCoord after GetGPSclick is", originCoord)
+  };
   
   /** @type React.MutableRefObject<HTMLInputElement> */
-  const originInputRef = useRef()
+  const originInputRef = useRef(null)
   /** @type React.MutableRefObject<HTMLInputElement> */
   const destinationInputRef = useRef(null);
   
   
   
-  
+  // when user input string in input field, we should parse the string into coordinatate and cal route
   async function calculateRoute() {
-    let originValue = origin;
-    let destinationValue = destination;
-    
-    // Check if the destination value is in lat/lng format and process accordingly
-    if (destinationValue.includes(',')) {
-      const [lat, lng] = destinationValue.split(',').map(coord => parseFloat(coord.trim()));
-      destinationValue = new google.maps.LatLng(lat, lng);
-    }
-    if (originValue.includes(',')) {
-      const [lat, lng] = originValue.split(',').map(coord => parseFloat(coord.trim()));
-      originValue = new google.maps.LatLng(lat, lng);
-    }
-    
+    // Convert array [lat, lng] to google.maps.LatLng object
+    let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
+    let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
+  
     if (!originValue || !destinationValue) {
+      console.log("Origin and destination are not valid");
       return;
     }
-    
-    // eslint-disable-next-line no-undef
-    const directionsService = new google.maps.DirectionsService()
-    const results = await directionsService.route({
-      origin: originValue,
-      destination: destinationValue,
-            // eslint-disable-next-line no-undef
-            travelMode: google.maps.TravelMode.WALKING,
-          })
-          setDirectionsResponse(results)
-          setDistance(results.routes[0].legs[0].distance.text)
-          setDuration(results.routes[0].legs[0].duration.text)
-        }
+  
+    const directionsService = new google.maps.DirectionsService();
+    try {
+      const results = await directionsService.route({
+        origin: originValue,
+        destination: destinationValue,
+        travelMode: google.maps.TravelMode.WALKING,
+      });
+      setDirectionsResponse(results);
+      setDistance(results.routes[0].legs[0].distance.text);
+      setDuration(results.routes[0].legs[0].duration.text);
+    } catch (error) {
+      console.error("Failed to calculate route", error);
+    }
+  }
+  
         
-    function clearRoute() {
+    const clearRoute= () => {
           setDirectionsResponse(null);
           setDistance('');
           setDuration('');
           originInputRef.current.value = '';
           destinationInputRef.current.value = '';
-          setOrigin('');
+          setOriginCoord([]);
           setOriginName('');
+          setDestinationCoord([]); // Reset the destinationCoord value
           setDestinationName('');
-          setDestination(''); // Reset the destination value
-          setMapKey(prevKey => prevKey + 1);
+          // setMapKey(prevKey => prevKey + 1);
         }
         
-        const mapOptions = [
+  const mapOptions = [
           {
             streetViewControl: false,
           }
         ]
         
         // ALL the faciliteis layers
-      const toiletMarkers = [
-          { lat: 22.418513526569456, lng: 114.20523001796764, name: "Toilet 1" },
-          { lat: 22.418023226021322, lng: 114.20793097185044, name: "Toilet 2" },
-          // Add more toilet marker data as needed
-        ];
-        const waterFountainMarkers = [
-          
-          
-        ];
-        const touristSpotMarkers = [
-          
-          
-        ];
-
-    useEffect(() => {
-          if (!window.google) return; // Ensure Google scripts are loaded
+    
+  useEffect(() => {
+    if (!window.google) return; // Ensure Google scripts are loaded
       
-          const setupAutocomplete = (inputRef, setLocation, setLocationName) => {
+      const setupAutocomplete = (inputRef, setLocation, setLocationName) => {
               const autocomplete = new window.google.maps.places.Autocomplete(
                   inputRef.current,
                   {
@@ -127,24 +202,38 @@ const HomePage = () => {
                   const place = autocomplete.getPlace();
                   if (place.geometry) {
                       setLocationName(place.formatted_address);
-                      setLocation(`${place.geometry.location.lat()},${place.geometry.location.lng()}`);
+                      setLocation([place.geometry.location.lat(), place.geometry.location.lng()]);
                   }
               });
           };
       
-          if (destinationInputRef.current) {
-              setupAutocomplete(destinationInputRef, setDestination, setDestinationName);
+    if (destinationInputRef.current) {
+              setupAutocomplete(destinationInputRef, setDestinationCoord, setDestinationName);
           }
       
-          if (originInputRef.current) {
-              setupAutocomplete(originInputRef, setOrigin, setOriginName); // assuming you have a state called setOriginName for origin name
+    if (originInputRef.current) {
+              setupAutocomplete(originInputRef, setOriginCoord, setOriginName); // assuming you have a state called setOriginName for originCoord name
           }
       
       }, [destinationInputRef.current, originInputRef.current]);
 
 
-    // Function to render toilet markers
-    const renderToiletMarkers = () => {
+  // Function to render toilet markers
+  const toiletMarkers = [
+      { lat: 22.418513526569456, lng: 114.20523001796764, name: "Toilet 1" },
+      { lat: 22.418023226021322, lng: 114.20793097185044, name: "Toilet 2" },
+      // Add more toilet marker data as needed
+    ];
+  const waterFountainMarkers = [
+      
+      
+    ];
+  const touristSpotMarkers = [
+      
+      
+    ];
+
+  const renderToiletMarkers = () => {
       if (!showToiletLayer) return null;
       
       return toiletMarkers.map((marker, index) => (
@@ -154,8 +243,10 @@ const HomePage = () => {
             title={marker.name}
             onClick={() => handleMarkerClick(marker)}/>
         ));
-      };
-    const renderDirectionsResponse = () =>{
+    };
+
+
+  const renderDirectionsResponse = () =>{
       if (!directionsResponse) return null;
       return <DirectionsRenderer
         directions={directionsResponse}
@@ -164,15 +255,15 @@ const HomePage = () => {
         }}/>
     }
 
-    function handleMarkerClick(marker) {
+  function handleMarkerClick(marker) {
         setSelectedMarker(marker);
         setIsInfoWindowVisible(true);
     }
     
-    const InfoWindowComponent = ({ marker, onClose }) => {
+  const InfoWindowComponent = ({ marker, onClose }) => {
       if (!marker) return null;
   
-      return (
+     return (
           <InfoWindow
               position={{ lat: marker.lat, lng: marker.lng }}
               onCloseClick={onClose}
@@ -180,14 +271,14 @@ const HomePage = () => {
               <div>
                   <h4>{marker.name}</h4>
                   <button onClick={() => {
-                      setOrigin(`${marker.lat}, ${marker.lng}`);
+                      setOriginCoord([marker.lat, marker.lng]);
                       setOriginName(marker.name);
                       onClose();
                   }}>
                       Choose as Origin
                   </button>
                   <button onClick={() => {
-                      setDestination(`${marker.lat}, ${marker.lng}`);
+                      setDestinationCoord([marker.lat, marker.lng]);
                       setDestinationName(marker.name);
                       onClose();
                   }}>
@@ -198,7 +289,11 @@ const HomePage = () => {
         );
       };
 
-    if (!isLoaded) return <div>Loading...</div>;
+
+  // useEffect(()=>{
+  //   getCurrentLocation()
+  // }, [])
+  if (!isLoaded) return <div>Loading...</div>;
 
   return (
     <Box 
@@ -206,55 +301,89 @@ const HomePage = () => {
       display="flex" 
       flexDirection="column" 
       alignItems="center" 
-      height="100vh" 
-      width="100vw">
+      height="100dvh" 
+      width="100vw"
+      >
+        
       {/* Search & Control Area */}
       <Box 
           position="absolute" 
-          top={10} 
-          zIndex={1}
+          top={12} 
+          zIndex={10}
           p={0.8} 
-          borderRadius="8px"
           bgcolor="background.paper" 
           boxShadow="3"
-          width="80%">
-         <Box display="flex" flexDirection="column" alignItems="stretch">
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                <TextField
-                  label="Origin"
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  value={originName}
-                  onChange={(e) => setOriginName(e.target.value)}
-                  inputRef={originInputRef}
-              />
-                <TextField
-                  label="Destination"
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  value={destinationName}
-                  onChange={(e) => setDestinationName(e.target.value)}
-                  inputRef={destinationInputRef}
-                />
+          borderRadius={5}
+          padding={1.2}
+          width="90%">
+         <Box
+            style={{
+              maxHeight: showOriginSearch ? '100px' : '0',  // Adjust these values based on your layout
+              overflow: 'hidden',
+              transition: 'all 0.3s ease-out', // Adjust timing and easing as needed
+              opacity: showOriginSearch ? 1 : 0,
+              paddingBottom: showOriginSearch ? '15px' : '0',
+              paddingTop: showOriginSearch ? '6px' : '0 '
+            }}
+          >
+            <TextField
+              label="Origin"
+              fullWidth
+              variant="outlined"
+              size="small"
+              value={originName}
+              onChange={(e) => setOriginName(e.target.value)}
+              inputRef={originInputRef}
+              InputProps={{
+                style: { borderRadius: '20px', paddingRight: "8px"},
+                endAdornment:(
+                  <IconButton  onClick={GetGPSClick} >
+                    <FaLocationCrosshairs size={25}/>
+                  </IconButton>                  
+                ),
+              }}
+            />
+          </Box>
 
-            </Box>
+          <Box display="flex" alignItems="center" mb={1}>
+            <TextField
+              label="Where are you going?"
+              fullWidth
+              variant="outlined"
+              size="small"
+              value={destinationName}
+              onChange={(e) => setDestinationName(e.target.value)}
+              inputRef={destinationInputRef}
+              InputProps={{
+                style: { borderRadius: '20px', paddingRight: "5px" },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
+                      <MdKeyboardArrowUp size={32} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
 
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Button 
                     variant="contained" 
                     color="primary" 
                     size="small" 
                     style={{ marginRight: '8px' }} 
-                    onClick={calculateRoute}
-                >
+                    onClick={()=>{
+                       calculateRoute();
+                       setShowInfoPage(true);
+                    }}>
                     Go
                 </Button>
                 <IconButton onClick={clearRoute} size="small">
                     <FaTimes />
                 </IconButton>
-            </Box>
+          </Box>
+
         </Box>
 
         <Box display="flex" justifyContent="space-between" mt={2} alignItems="center">
@@ -267,33 +396,43 @@ const HomePage = () => {
             <FaLocationArrow />
           </IconButton>
         </Box>
-      </Box>    
+        
 
       {/* Google Map */}
       <Box 
         position="absolute"        
-        height="70%" 
-        width="95%">
+        height="100%" 
+        width="100%">
         <GoogleMap
           key={mapKey}
           zoom={15.59}
           center={center}
           options={mapOptions}
           mapContainerStyle={{ width: '100%', height: '100%' }}
-          onLoad={map => setMap(map)}>
+          onLoad={map => setMap(map)}
+          onClick={() => setShowInfoPage(false)}
+          >
           {renderToiletMarkers()}
-          {renderDirectionsResponse()}
-          
+          {renderDirectionsResponse()}    
           {isInfoWindowVisible && (
             <InfoWindowComponent 
                 marker={selectedMarker} 
-                onClose={() => setIsInfoWindowVisible(false)}/>
+                onClose={() => setIsInfoWindowVisible(false)}
+                destinationCoord
+                />
           )}
-          
-        
-        </GoogleMap>
-      </Box>
       
+        </GoogleMap>
+        <InfoPage 
+            show={showInfoPage} 
+            originCoord= {originCoord}
+            destinationCoord = {destinationCoord}
+          />
+        
+      </Box>
+
+      
+
       {/* Toggle Toilet Layer Button */}
       <Box 
         position="absolute" 
@@ -304,6 +443,9 @@ const HomePage = () => {
           Toggle Toilet Layer
         </Button>
       </Box>
+
+
+      
     </Box>
            
   );
