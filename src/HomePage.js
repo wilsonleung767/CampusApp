@@ -9,7 +9,9 @@ import {FaLocationCrosshairs} from 'react-icons/fa6'
 import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
 import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker";
-// import './HomePage.css'; // Import your CSS file for styling
+import RenderSuggestions from "./components/RenderSuggestion/RenderSuggestion";
+import { customPlaces } from "./data/Places";
+import './HomePage.css'
 
 
 const HomePage = () => {
@@ -26,6 +28,7 @@ const HomePage = () => {
   const [destinationName, setDestinationName] = useState('');
   const [originCoord, setOriginCoord] = useState([]);
   const [originName, setOriginName] = useState('');
+ 
 
   // Info Window
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -45,11 +48,12 @@ const HomePage = () => {
   const [showInfoPage, setShowInfoPage] = useState(false);
   
   // Load GOOGLE MAP API
+  const [ libraries ] = useState(['places']);
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey, 
-    libraries: ['places'],
+    libraries,
   });
-  
+
 
   // Use GPS API to get User current location
   const GetGPSClick = () => {
@@ -137,37 +141,70 @@ const HomePage = () => {
           }
         ]
         
-        // ALL the faciliteis layers
-    
+  
+  
+
+  // Function to handle place selection
+
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeInput, setActiveInput] = useState(""); // "" or "origin" or "destination"
+
+  const handleInputChange = (value) => {
+    if (activeInput ==="origin") {
+      setOriginName(value);
+    } else {
+      setDestinationName(value);
+    }
+
+    if (value === '') {
+      setSuggestions([]);
+    } else {
+      const filteredSuggestions = customPlaces
+        .map(placeObj => Object.keys(placeObj)[0])
+        .filter(placeName => placeName.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 5);
+  
+      setSuggestions(filteredSuggestions);
+    }
+};
+
+  
+  const selectPlace = (name, isOrigin) => {
+    // Find the coordinates directly from the customPlaces array
+    console.log("Place selected: ", name);
+    let coord;
+    const placeObj = customPlaces.find(p => Object.keys(p)[0] === name);
+    if (placeObj) {
+      coord = placeObj[name];
+    }
+
+    if (!coord) return; // Handle non-existent place
+
+    if (isOrigin) {
+      setOriginName(name);
+      setOriginCoord([coord.lat, coord.lng]);
+    } else {
+      setDestinationName(name);
+      setDestinationCoord([coord.lat, coord.lng]);
+    }
+
+    // After selecting the place, clear suggestions
+    setSuggestions([]);
+  };
+
   useEffect(() => {
-    if (!window.google) return; // Ensure Google scripts are loaded
-      
-      const setupAutocomplete = (inputRef, setLocation, setLocationName) => {
-              const autocomplete = new window.google.maps.places.Autocomplete(
-                  inputRef.current,
-                  {
-                      componentRestrictions: { country: "HK" },
-                  }
-              );
-      
-              autocomplete.addListener("place_changed", () => {
-                  const place = autocomplete.getPlace();
-                  if (place.geometry) {
-                      setLocationName(place.formatted_address);
-                      setLocation([place.geometry.location.lat(), place.geometry.location.lng()]);
-                  }
-              });
-          };
-      
-    if (destinationInputRef.current) {
-              setupAutocomplete(destinationInputRef, setDestinationCoord, setDestinationName);
-          }
-      
-    if (originInputRef.current) {
-              setupAutocomplete(originInputRef, setOriginCoord, setOriginName); // assuming you have a state called setOriginName for originCoord name
-          }
-      
-      }, [destinationInputRef.current, originInputRef.current]);
+    console.log("selected origin name is", originName);
+    console.log("selected origin coordinates are", originCoord);
+    console.log("selected dest name is", destinationName);
+    console.log("selected dest coordinates are", destinationCoord);
+  }, [originName, originCoord, destinationName]);
+// Render the suggestions dropdown
+
+  useEffect(() => {
+    console.log("suggestions is",suggestions);
+  }, [suggestions]);
+
+
 
 
   // Function to render toilet markers
@@ -184,6 +221,9 @@ const HomePage = () => {
       
       
     ];
+
+
+
 
   const renderToiletMarkers = () => {
       if (!showToiletLayer) return null;
@@ -265,9 +305,9 @@ const HomePage = () => {
           padding={1.2}
           width="90%">
          <Box
+            position="relative"
             style={{
-              maxHeight: showOriginSearch ? '100px' : '0',  // Adjust these values based on your layout
-              overflow: 'hidden',
+              maxHeight: showOriginSearch ? '100px' : '0',  
               transition: 'all 0.3s ease-out', // Adjust timing and easing as needed
               opacity: showOriginSearch ? 1 : 0,
               paddingBottom: showOriginSearch ? '15px' : '0',
@@ -280,7 +320,8 @@ const HomePage = () => {
               variant="outlined"
               size="small"
               value={originName}
-              onChange={(e) => setOriginName(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onFocus={() => setActiveInput("origin")}
               inputRef={originInputRef}
               InputProps={{
                 style: { borderRadius: '20px', paddingRight: "8px"},
@@ -291,16 +332,18 @@ const HomePage = () => {
                 ),
               }}
             />
+            {activeInput === "origin" && <RenderSuggestions suggestions={suggestions} activeInput={activeInput} selectPlace={selectPlace}/>}
           </Box>
 
-          <Box display="flex" alignItems="center" mb={1}>
+          <Box  position="relative" alignItems="center" mb={1}>
             <TextField
               label="Where are you going?"
               fullWidth
               variant="outlined"
               size="small"
               value={destinationName}
-              onChange={(e) => setDestinationName(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onFocus={() => setActiveInput("destination")}
               inputRef={destinationInputRef}
               InputProps={{
                 style: { borderRadius: '20px', paddingRight: "5px" },
@@ -318,7 +361,9 @@ const HomePage = () => {
                 ),
               }}
             />
+            {activeInput === "destination" && <RenderSuggestions suggestions={suggestions} activeInput={activeInput} selectPlace={selectPlace}/>}
           </Box>
+         
 
           <Box display="flex" >
                 <Button 
