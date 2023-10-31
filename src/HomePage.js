@@ -2,12 +2,13 @@
 import React, { useMemo,useState, useEffect, useRef , useLayoutEffect} from "react";
 import { GoogleMap, useLoadScript,  MarkerF,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow,Marker} from "@react-google-maps/api";
 // import {Box,Button,ButtonGroup,Flex,HStack,IconButton,Input,SkeletonText,Text} from '@chakra-ui/react'
-import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment} from "@mui/material";
+import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon} from "@mui/material";
 import LocationPicker from "location-picker";
-import { FaLocationArrow, FaTimes } from 'react-icons/fa'
+import { FaLocationArrow, FaTimes,FaRoute } from 'react-icons/fa'
 import {FaLocationCrosshairs} from 'react-icons/fa6'
-import {MdKeyboardArrowUp} from 'react-icons/md'
-import InfoPage from "./components/InfoPage";
+import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
+import InfoPage from "./components/InfoPage/InfoPage";
+import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker";
 // import './HomePage.css'; // Import your CSS file for styling
 
 
@@ -37,18 +38,8 @@ const HomePage = () => {
   const [mapKey, setMapKey] = useState(0); 
   
   // Real time user location tracking 
-  const accuracyCircle = useRef(null);
-  const [circleProps, setCircleProps] = useState(null);
-  const marker = useRef(null);
   const [currentUserLocation, setCurrentUserLocation] = useState([]);
-  const blueDot = {
-    path: 'M 0, 0 m -8, 0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0',
-    fillColor: "#4285F4",
-    fillOpacity: 1,
-    scale: 1,
-    strokeColor: "white",
-    strokeWeight: 2
-  };
+
 
   // Custom Info page (Pop up)
   const [showInfoPage, setShowInfoPage] = useState(false);
@@ -59,79 +50,40 @@ const HomePage = () => {
     libraries: ['places'],
   });
   
-  // Function to get the current GPS location
-  useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-  
-    let watcher = null;
-    if ("geolocation" in navigator) {
-      watcher = navigator.geolocation.watchPosition(
-        position => {
-          const { latitude, longitude } = position.coords;
-          const currentLocation = { lat: latitude, lng: longitude };
-          setCurrentUserLocation([latitude,longitude])
-          console.log("current user location is ", currentUserLocation)
-          // Update or create marker
-          if (marker.current) {
-            marker.current.setPosition(currentLocation);
-          } else {
-            marker.current = new window.google.maps.Marker({
-              position: currentLocation,
-              map: map,
-              icon: blueDot,
-              title: 'You are here!'
-            });
-          }
-  
-          // Update or create accuracy circle
-          const maxRadius = 20; 
-          if (accuracyCircle.current) {
-            accuracyCircle.current.setMap(null);
-          }
-          accuracyCircle.current = new window.google.maps.Circle({
-            center: currentLocation,
-            fillColor: "#61a0bf",
-            fillOpacity: 0.4,
-            radius: Math.min(position.coords.accuracy, maxRadius),
-            strokeColor: "#1bb6ff",
-            strokeOpacity: 0.4,
-            strokeWeight: 1,
-            zIndex: 1,
-            map: map
-          });
-        },
-        error => {
-          console.error("Error watching position:", error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0,
-        }
-      );
-    }
-  
-    return () => {
-      if (watcher) {
-        navigator.geolocation.clearWatch(watcher);
-      }
-    };
-  }, [isLoaded, map]);
-  
 
   // Use GPS API to get User current location
   const GetGPSClick = () => {
     if (!isLoaded) {
-      console.error("Google Maps script not yet loaded");
-      return;
-    }
+          console.error("Google Maps script not yet loaded");
+          return;
+      }
       const [lat,lng] = currentUserLocation
       setOriginCoord([lat,lng])
-      console.log("OriginCoord after GetGPSclick is", originCoord)
+      
+      // Map pan to current user location
+      map.panTo({lat: lat , lng: lng });
+      map.setZoom(17);
+
+      // Create a Geocoder instance
+      const geocoder = new google.maps.Geocoder();
+      
+      // Use the Geocoder to find the address
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === "OK") {
+          if (results[0]) {
+              console.log("Address:", results[0].formatted_address);
+              setOriginName(results[0].formatted_address)  
+            } else {
+              console.log("No results found");
+            }
+          } else {
+            console.error("Geocoder failed due to: " + status);
+          }
+        });
+
+      console.log("OriginCoord after GetGPSclick is", originCoord);
   };
-  
+
   /** @type React.MutableRefObject<HTMLInputElement> */
   const originInputRef = useRef(null)
   /** @type React.MutableRefObject<HTMLInputElement> */
@@ -139,7 +91,7 @@ const HomePage = () => {
   
   
   
-  // when user input string in input field, we should parse the string into coordinatate and cal route
+  // when user input string in input field, we should parse the string into coordinatate and calroute—
   async function calculateRoute() {
     // Convert array [lat, lng] to google.maps.LatLng object
     let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
@@ -289,10 +241,6 @@ const HomePage = () => {
         );
       };
 
-
-  // useEffect(()=>{
-  //   getCurrentLocation()
-  // }, [])
   if (!isLoaded) return <div>Loading...</div>;
 
   return (
@@ -358,35 +306,43 @@ const HomePage = () => {
                 style: { borderRadius: '20px', paddingRight: "5px" },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
-                      <MdKeyboardArrowUp size={32} />
-                    </IconButton>
+                    {showOriginSearch ? 
+                                      <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
+                                        <MdKeyboardArrowUp size={32} />
+                                      </IconButton> 
+                                      :  
+                                      <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
+                                        <MdKeyboardArrowDown size={32} />
+                                      </IconButton>  }
                   </InputAdornment>
                 ),
               }}
             />
           </Box>
 
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box display="flex" >
                 <Button 
                     variant="contained" 
                     color="primary" 
                     size="small" 
-                    style={{ marginRight: '8px' }} 
+                    
+                    style={{display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center" 
+                          }} 
                     onClick={()=>{
-                       calculateRoute();
-                       setShowInfoPage(true);
-                    }}>
-                    Go
+                              calculateRoute();
+                              setShowInfoPage(true);
+                              }}>
+                    <span style={{ marginRight: 8 }}>Search</span>
+                    <FaRoute size={20}/>
+                
                 </Button>
-                <IconButton onClick={clearRoute} size="small">
-                    <FaTimes />
+                <IconButton onClick={clearRoute} size="small" >
+                    <FaTimes size={22}/>
                 </IconButton>
           </Box>
-
-        </Box>
-
-        <Box display="flex" justifyContent="space-between" mt={2} alignItems="center">
+          <Box display="flex" justifyContent="space-between" mt={2} alignItems="center">
           <Typography variant="body2">Distance: {distance}</Typography>
           <Typography variant="body2">Duration: {duration}</Typography>
           <IconButton size="small" onClick={() => {
@@ -396,6 +352,9 @@ const HomePage = () => {
             <FaLocationArrow />
           </IconButton>
         </Box>
+        </Box>
+
+       
         
 
       {/* Google Map */}
@@ -412,6 +371,13 @@ const HomePage = () => {
           onLoad={map => setMap(map)}
           onClick={() => setShowInfoPage(false)}
           >
+          {isLoaded && map && (
+                <RealTimeUserLocationTracker
+                    onLocationUpdate={setCurrentUserLocation}
+                    isLoaded={isLoaded}
+                    map={map}
+                />)
+          }
           {renderToiletMarkers()}
           {renderDirectionsResponse()}    
           {isInfoWindowVisible && (
@@ -443,9 +409,6 @@ const HomePage = () => {
           Toggle Toilet Layer
         </Button>
       </Box>
-
-
-      
     </Box>
            
   );
