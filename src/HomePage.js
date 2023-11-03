@@ -50,7 +50,7 @@ const HomePage = () => {
   // Load GOOGLE MAP API
   const [ libraries ] = useState(['places']);
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: apiKey, 
+    // googleMapsApiKey: apiKey, 
     libraries,
   });
 
@@ -120,9 +120,16 @@ const HomePage = () => {
       console.error("Failed to calculate route", error);
     }
   }
-  
+  const renderDirectionsResponse = () =>{
+    if (!directionsResponse) return null;
+    return <DirectionsRenderer
+      directions={directionsResponse}
+      options={{
+        suppressMarkers: true, // Hide the default route markers
+      }}/>
+  }
         
-    const clearRoute= () => {
+  const clearRoute= () => {
           setDirectionsResponse(null);
           setDistance('');
           setDuration('');
@@ -132,9 +139,55 @@ const HomePage = () => {
           setOriginName('');
           setDestinationCoord([]); // Reset the destinationCoord value
           setDestinationName('');
-          // setMapKey(prevKey => prevKey + 1);
+          
         }
-        
+    
+
+  // Function to calculate the distance from the origin to each toilet
+  function getNearestToilet(origin) {
+  const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
+  const service = new google.maps.DistanceMatrixService();
+  const destinations = toiletMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
+
+  // Return a new Promise
+  return new Promise((resolve, reject) => {
+    service.getDistanceMatrix(
+      {
+        origins: [originLatLng],
+        destinations: destinations,
+        travelMode: 'WALKING', // or 'DRIVING'
+      },
+      (response, status) => {
+        if (status !== 'OK') {
+          console.log('Error was: ' + status);
+          reject(status); // Reject the promise if there's an error
+        } else {
+          let distances = response.rows[0].elements;
+          let minimumDistance = Number.MAX_VALUE;
+          let nearestToiletIndex = -1;
+
+          distances.forEach((distance, index) => {
+            if (distance.distance.value < minimumDistance) {
+              minimumDistance = distance.distance.value;
+              nearestToiletIndex = index;
+            }
+          });
+
+          if (nearestToiletIndex !== -1) {
+            let nearestToilet = toiletMarkers[nearestToiletIndex];
+            console.log('Nearest Toilet:', nearestToilet);
+            resolve(nearestToilet); // Resolve the promise with the nearest toilet
+          } else {
+            reject('No toilets found.'); // Reject if no toilets are found
+          }
+        }
+      }
+    );
+  });
+}
+
+
+
   const mapOptions = [
           {
             streetViewControl: false,
@@ -169,28 +222,48 @@ const HomePage = () => {
 };
 
   
-  const selectPlace = (name, isOrigin) => {
-    // Find the coordinates directly from the customPlaces array
-    console.log("Place selected: ", name);
-    let coord;
-    const placeObj = customPlaces.find(p => Object.keys(p)[0] === name);
-    if (placeObj) {
-      coord = placeObj[name];
+const selectPlace = async (name, isOrigin) => {
+  console.log("Place selected: ", name);
+  // If 'Nearest Toilet' is selected, calculate the nearest toilet
+  if (name === 'Nearest Toilet') {
+      setShowToiletLayer(true);
+      // Determine the origin coordinates based on the current origin or user's location
+      const originCoords = isOrigin ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
+      try {
+        const nearestToilet = await getNearestToilet(originCoords);
+        
+        setDestinationName(nearestToilet.name);
+        setDestinationCoord([nearestToilet.lat, nearestToilet.lng]);
+
+        // Add marker for the nearest toilet
+
+
+        console.log(`Nearest toilet set to: ${nearestToilet.name}`);
+    } catch (error) {
+      console.error('An error occurred while finding the nearest toilet:', error);
     }
+  } else {
+          setShowToiletLayer(false);
+          let coord;
+          const placeObj = customPlaces.find(p => Object.keys(p)[0] === name);
+          if (placeObj) {
+            coord = placeObj[name];
+          }
 
-    if (!coord) return; // Handle non-existent place
+          if (!coord) return; // Handle non-existent place
 
-    if (isOrigin) {
-      setOriginName(name);
-      setOriginCoord([coord.lat, coord.lng]);
-    } else {
-      setDestinationName(name);
-      setDestinationCoord([coord.lat, coord.lng]);
-    }
+          if (isOrigin) {
+            setOriginName(name);
+            setOriginCoord([coord.lat, coord.lng]);
+          } else {
+            setDestinationName(name);
+            setDestinationCoord([coord.lat, coord.lng]);
+          }        
+  }
+  // After selecting the place, clear suggestions
+  setSuggestions([]);
+};
 
-    // After selecting the place, clear suggestions
-    setSuggestions([]);
-  };
 
   useEffect(() => {
     console.log("selected origin name is", originName);
@@ -198,19 +271,16 @@ const HomePage = () => {
     console.log("selected dest name is", destinationName);
     console.log("selected dest coordinates are", destinationCoord);
   }, [originName, originCoord, destinationName]);
-// Render the suggestions dropdown
 
-  useEffect(() => {
-    console.log("suggestions is",suggestions);
-  }, [suggestions]);
-
-
-
+  
 
   // Function to render toilet markers
   const toiletMarkers = [
       { lat: 22.418513526569456, lng: 114.20523001796764, name: "Toilet 1" },
       { lat: 22.418023226021322, lng: 114.20793097185044, name: "Toilet 2" },
+      { lat: 22.4196819	, lng: 114.2039352 , name:"Lee Shau Kee Building Toilet" },
+      { lat: 22.4200548, lng: 114.206562 , name: "Y. C. Liang Hall Toilet"}
+
       // Add more toilet marker data as needed
     ];
   const waterFountainMarkers = [
@@ -238,14 +308,7 @@ const HomePage = () => {
     };
 
 
-  const renderDirectionsResponse = () =>{
-      if (!directionsResponse) return null;
-      return <DirectionsRenderer
-        directions={directionsResponse}
-        options={{
-          suppressMarkers: true, // Hide the default route markers
-        }}/>
-    }
+ 
 
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
@@ -335,7 +398,7 @@ const HomePage = () => {
             {activeInput === "origin" && <RenderSuggestions suggestions={suggestions} activeInput={activeInput} selectPlace={selectPlace}/>}
           </Box>
 
-          <Box  position="relative" alignItems="center" mb={1}>
+          <Box  position="relative" alignItems="center" mb={1} >
             <TextField
               label="Where are you going?"
               fullWidth
@@ -365,37 +428,41 @@ const HomePage = () => {
           </Box>
          
 
-          <Box display="flex" >
+          <Box display="flex" justifyContent="space-between"  paddingLeft={1} paddingRight= {1.6}mt={1.4}>
                 <Button 
                     variant="contained" 
                     color="primary" 
                     size="small" 
                     
                     style={{display: "flex", 
-                            alignItems: "center", 
-                            justifyContent: "center" 
+                            alignItems: "center",
+                            justifyContent: "center",
+                            alignContent: "center" 
                           }} 
                     onClick={()=>{
                               calculateRoute();
                               setShowInfoPage(true);
                               }}>
-                    <span style={{ marginRight: 8 }}>Search</span>
+                    <span style={{ fontSize: 16, marginRight: 7 }}>
+                          Search
+                    </span>
                     <FaRoute size={20}/>
                 
                 </Button>
                 <IconButton onClick={clearRoute} size="small" >
                     <FaTimes size={22}/>
                 </IconButton>
+
           </Box>
           <Box display="flex" justifyContent="space-between" mt={2} alignItems="center">
-          <Typography variant="body2">Distance: {distance}</Typography>
-          <Typography variant="body2">Duration: {duration}</Typography>
-          <IconButton size="small" onClick={() => {
-            map.panTo(center);
-            map.setZoom(15.59);
-          }}>
-            <FaLocationArrow />
-          </IconButton>
+            <Typography variant="body2">Distance: {distance}</Typography>
+            <Typography variant="body2">Duration: {duration}</Typography>
+            <IconButton size="small" onClick={() => {
+              map.panTo(center);
+              map.setZoom(15.59);
+            }}>
+              <FaLocationArrow />
+            </IconButton>
         </Box>
         </Box>
 
