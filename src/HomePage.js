@@ -5,12 +5,13 @@ import { GoogleMap, useLoadScript,  MarkerF,  LoadScript, Autocomplete, Directio
 import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon} from "@mui/material";
 import LocationPicker from "location-picker";
 import { FaLocationArrow, FaTimes,FaRoute } from 'react-icons/fa'
-import {FaLocationCrosshairs} from 'react-icons/fa6'
+import {FaLocationCrosshairs,FaRobot} from 'react-icons/fa6'
 import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
 import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker";
 import RenderSuggestions from "./components/RenderSuggestion/RenderSuggestion";
 import { customPlaces } from "./data/Places";
+import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 
 
@@ -18,6 +19,9 @@ const HomePage = () => {
   
   // Search Bar
   const [showOriginSearch, setShowOriginSearch] = useState(false);
+    // NLP function
+  const [NLPSearchToggle, setNLPSearchToggleToggle] = useState(false);
+  const [NLPQuery, setNLPQuery] = useState("");
 
   const [showToiletLayer, setShowToiletLayer] = useState(false);
   const center = useMemo(() => ({ lat: 22.418426709637526, lng: 114.20771628364456 }), []);
@@ -50,7 +54,7 @@ const HomePage = () => {
   // Load GOOGLE MAP API
   const [ libraries ] = useState(['places']);
   const { isLoaded } = useLoadScript({
-    // googleMapsApiKey: apiKey, 
+    googleMapsApiKey: apiKey, 
     libraries,
   });
 
@@ -116,6 +120,7 @@ const HomePage = () => {
       setDirectionsResponse(results);
       setDistance(results.routes[0].legs[0].distance.text);
       setDuration(results.routes[0].legs[0].duration.text);
+      setShowInfoPage(true);
     } catch (error) {
       console.error("Failed to calculate route", error);
     }
@@ -141,50 +146,54 @@ const HomePage = () => {
           setDestinationName('');
           
         }
-    
+  
+  const handleShowInfoPage= () => {
 
+
+
+  }
   // Function to calculate the distance from the origin to each toilet
   function getNearestToilet(origin) {
-  const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
-  const service = new google.maps.DistanceMatrixService();
-  const destinations = toiletMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
+    const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
+    const service = new google.maps.DistanceMatrixService();
+    const destinations = toiletMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
 
-  // Return a new Promise
-  return new Promise((resolve, reject) => {
-    service.getDistanceMatrix(
-      {
-        origins: [originLatLng],
-        destinations: destinations,
-        travelMode: 'WALKING', // or 'DRIVING'
-      },
-      (response, status) => {
-        if (status !== 'OK') {
-          console.log('Error was: ' + status);
-          reject(status); // Reject the promise if there's an error
-        } else {
-          let distances = response.rows[0].elements;
-          let minimumDistance = Number.MAX_VALUE;
-          let nearestToiletIndex = -1;
-
-          distances.forEach((distance, index) => {
-            if (distance.distance.value < minimumDistance) {
-              minimumDistance = distance.distance.value;
-              nearestToiletIndex = index;
-            }
-          });
-
-          if (nearestToiletIndex !== -1) {
-            let nearestToilet = toiletMarkers[nearestToiletIndex];
-            console.log('Nearest Toilet:', nearestToilet);
-            resolve(nearestToilet); // Resolve the promise with the nearest toilet
+    // Return a new Promise
+    return new Promise((resolve, reject) => {
+      service.getDistanceMatrix(
+        {
+          origins: [originLatLng],
+          destinations: destinations,
+          travelMode: 'WALKING', // or 'DRIVING'
+        },
+        (response, status) => {
+          if (status !== 'OK') {
+            console.log('Error was: ' + status);
+            reject(status); // Reject the promise if there's an error
           } else {
-            reject('No toilets found.'); // Reject if no toilets are found
+            let distances = response.rows[0].elements;
+            let minimumDistance = Number.MAX_VALUE;
+            let nearestToiletIndex = -1;
+
+            distances.forEach((distance, index) => {
+              if (distance.distance.value < minimumDistance) {
+                minimumDistance = distance.distance.value;
+                nearestToiletIndex = index;
+              }
+            });
+
+            if (nearestToiletIndex !== -1) {
+              let nearestToilet = toiletMarkers[nearestToiletIndex];
+              console.log('Nearest Toilet:', nearestToilet);
+              resolve(nearestToilet); // Resolve the promise with the nearest toilet
+            } else {
+              reject('No toilets found.'); // Reject if no toilets are found
+            }
           }
         }
-      }
-    );
-  });
-}
+      );
+    });
+  };
 
 
 
@@ -219,50 +228,53 @@ const HomePage = () => {
   
       setSuggestions(filteredSuggestions);
     }
-};
+  };
+
+  const handleNLPQuery = () => {  
+    // const NLPResult = getNLPResult(NLPQuery)
+    // selectPlace(NLPResult, "destination")
+  };
 
   
-const selectPlace = async (name, isOrigin) => {
-  console.log("Place selected: ", name);
-  // If 'Nearest Toilet' is selected, calculate the nearest toilet
-  if (name === 'Nearest Toilet') {
-      setShowToiletLayer(true);
-      // Determine the origin coordinates based on the current origin or user's location
-      const originCoords = isOrigin ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
-      try {
-        const nearestToilet = await getNearestToilet(originCoords);
-        
-        setDestinationName(nearestToilet.name);
-        setDestinationCoord([nearestToilet.lat, nearestToilet.lng]);
+  const selectPlace = async (inputString, isOrigin) => {
+    console.log("Place selected: ", inputString);
+    // If 'Nearest Toilet' is selected, calculate the nearest toilet
+    if (inputString.toLowerCase() === 'nearest toilet') {
+        setShowToiletLayer(true);
+        // Determine the origin coordinates based on the current origin or user's location
+        const originCoords = isOrigin ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
+        try {
+          const nearestToilet = await getNearestToilet(originCoords);
 
-        // Add marker for the nearest toilet
+          setDestinationName(nearestToilet.name);
+          setDestinationCoord([nearestToilet.lat, nearestToilet.lng]);
+          // Add marker for the nearest toilet
+          console.log(`Nearest toilet set to: ${nearestToilet.name}`);
+      } catch (error) {
+        console.error('An error occurred while finding the nearest toilet:', error);
+      }
 
+    } else {
+            setShowToiletLayer(false);
+            let coord;
+            const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
+            if (placeObj) {
+              coord = placeObj[inputString];
+            }
 
-        console.log(`Nearest toilet set to: ${nearestToilet.name}`);
-    } catch (error) {
-      console.error('An error occurred while finding the nearest toilet:', error);
+            if (!coord) return; // Handle non-existent place
+
+            if (isOrigin) {
+              setOriginName(inputString);
+              setOriginCoord([coord.lat, coord.lng]);
+            } else {
+              setDestinationName(inputString);
+              setDestinationCoord([coord.lat, coord.lng]);
+            }        
     }
-  } else {
-          setShowToiletLayer(false);
-          let coord;
-          const placeObj = customPlaces.find(p => Object.keys(p)[0] === name);
-          if (placeObj) {
-            coord = placeObj[name];
-          }
-
-          if (!coord) return; // Handle non-existent place
-
-          if (isOrigin) {
-            setOriginName(name);
-            setOriginCoord([coord.lat, coord.lng]);
-          } else {
-            setDestinationName(name);
-            setDestinationCoord([coord.lat, coord.lng]);
-          }        
-  }
-  // After selecting the place, clear suggestions
-  setSuggestions([]);
-};
+    // After selecting the place, clear suggestions
+    setSuggestions([]);
+  };
 
 
   useEffect(() => {
@@ -292,9 +304,6 @@ const selectPlace = async (name, isOrigin) => {
       
     ];
 
-
-
-
   const renderToiletMarkers = () => {
       if (!showToiletLayer) return null;
       
@@ -307,8 +316,6 @@ const selectPlace = async (name, isOrigin) => {
         ));
     };
 
-
- 
 
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
@@ -400,18 +407,25 @@ const selectPlace = async (name, isOrigin) => {
 
           <Box  position="relative" alignItems="center" mb={1} >
             <TextField
-              label="Where are you going?"
+              label= {showOriginSearch  ? "Destination" : "Where are you going?" }
               fullWidth
               variant="outlined"
               size="small"
-              value={destinationName}
-              onChange={(e) => handleInputChange(e.target.value)}
-              onFocus={() => setActiveInput("destination")}
+              value={ NLPSearchToggle ? NLPQuery : destinationName}
+              onChange={ NLPSearchToggle ? (e) => setNLPQuery(e.target.value) : (e) => handleInputChange(e.target.value)}
+              onFocus={ NLPSearchToggle ? null : () => setActiveInput("destination")}
               inputRef={destinationInputRef}
               InputProps={{
                 style: { borderRadius: '20px', paddingRight: "5px" },
                 endAdornment: (
                   <InputAdornment position="end">
+                    <IconButton>
+                      <FaRobot onClick={() => {
+                                                setNLPSearchToggleToggle(prev => !prev)
+                                                setDestinationName("")
+                                                setNLPQuery("")
+                                              }} size={25} color = {NLPSearchToggle? "#2f77eb":""} />
+                    </IconButton>
                     {showOriginSearch ? 
                                       <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
                                         <MdKeyboardArrowUp size={32} />
@@ -439,9 +453,8 @@ const selectPlace = async (name, isOrigin) => {
                             justifyContent: "center",
                             alignContent: "center" 
                           }} 
-                    onClick={()=>{
-                              calculateRoute();
-                              setShowInfoPage(true);
+                    onClick = { NLPSearchToggle ? () => {handleNLPQuery()} :
+                                                  () => {calculateRoute();
                               }}>
                     <span style={{ fontSize: 16, marginRight: 7 }}>
                           Search
@@ -465,9 +478,6 @@ const selectPlace = async (name, isOrigin) => {
             </IconButton>
         </Box>
         </Box>
-
-       
-        
 
       {/* Google Map */}
       <Box 
