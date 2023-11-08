@@ -43,7 +43,7 @@ const RealTimeUserLocationTracker = ({onLocationUpdate, isLoaded, map}) => {
                       }
   
                       // Update or create accuracy circle
-                      const maxRadius = 100; 
+                      const maxRadius = 20; 
                       if (accuracyCircle.current) {
                           accuracyCircle.current.setMap(null);
                       }

@@ -11,7 +11,7 @@ import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker";
 import RenderSuggestions from "./components/RenderSuggestion/RenderSuggestion";
 import { customPlaces } from "./data/Places";
-import getNLPResult from "./components/ChatgptSearch/handleSearch";
+// import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 
 
@@ -360,7 +360,7 @@ const HomePage = () => {
       flexDirection="column" 
       alignItems="center" 
       height="100dvh" 
-      width="100vw"
+      width="100%"
       >
         
       {/* Search & Control Area */}
