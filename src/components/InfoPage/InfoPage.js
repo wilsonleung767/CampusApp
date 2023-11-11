@@ -20,7 +20,7 @@ function InfoPage({ show, originCoord, destinationCoord }) {
         // You can adjust the min and max values as per your requirement
         setInfoPageHeight(prevHeight => {
             let newHeight = Math.min(Math.max(parseInt(prevHeight) + delta, 20), 100);
-            return `${newHeight}vh`;
+            return `${newHeight}dvh`;
         });
         
         setLastTouchY(touchY);
@@ -32,8 +32,8 @@ function InfoPage({ show, originCoord, destinationCoord }) {
         setInfoPageHeight(prevHeight => {
             const height = parseInt(prevHeight);
             if (height > 32.5) return '45dvh'; // Close to 45%
-            if (height > 10) return '17dvh'; // Close to 20%
-            return '0vh'; // Otherwise, consider it closed
+            if (height > 10) return '17dvh'; // Close to 17%
+            return '0dvh'; // Otherwise, consider it closed
         });
     };
 
