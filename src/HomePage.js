@@ -8,9 +8,9 @@ import { FaLocationArrow, FaTimes,FaRoute } from 'react-icons/fa'
 import {FaLocationCrosshairs,FaRobot} from 'react-icons/fa6'
 import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
 import InfoPage from "./components/InfoPage/InfoPage";
-import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker";
-import RenderSuggestions from "./components/RenderSuggestion/RenderSuggestion";
-import { customPlaces } from "./data/Places";
+import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
+import RenderSuggestions from "./components/RenderSuggestion/RenderSuggestion.js";
+import { customPlaces } from "./data/Places.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 
