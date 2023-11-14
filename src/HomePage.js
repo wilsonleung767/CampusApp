@@ -1,4 +1,3 @@
-
 import React, { useMemo,useState, useEffect, useRef , useLayoutEffect} from "react";
 import { GoogleMap, useLoadScript,  MarkerF,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow,Marker} from "@react-google-maps/api";
 // import {Box,Button,ButtonGroup,Flex,HStack,IconButton,Input,SkeletonText,Text} from '@chakra-ui/react'
@@ -9,11 +8,12 @@ import {FaLocationCrosshairs,FaRobot} from 'react-icons/fa6'
 import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
 import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
-import RenderSuggestions from "./components/RenderSuggestion/RenderSuggestion.js";
+import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion.js";
 import { customPlaces } from "./data/Places.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
-
+import { FaPersonWalking } from "react-icons/fa6";
+import { FaBusSimple } from "react-icons/fa6";
 
 const HomePage = () => {
   
@@ -102,6 +102,8 @@ const HomePage = () => {
   // when user input string in input field, we should parse the string into coordinatate and calroute—
   async function calculateRoute() {
     // Convert array [lat, lng] to google.maps.LatLng object
+    setDirectionsResponseFromBusStop(null);
+    setDirectionsResponseToBusStop(null);
     let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
     let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
   
@@ -130,12 +132,94 @@ const HomePage = () => {
     return <DirectionsRenderer
       directions={directionsResponse}
       options={{
-        suppressMarkers: true, // Hide the default route markers
+        
       }}/>
   }
-        
+  
+
+  const [directionsResponseToBusStop, setDirectionsResponseToBusStop] = useState(null);
+  const [directionsResponseFromBusStop, setDirectionsResponseFromBusStop] = useState(null);
+  // const [busStart, setBusStart] = useState({ lat: 22.415917172642065, lng: 114.211104527007 });
+  // const [busEnd, setBusEnd] = useState({lat: 22.419788004309634, lng: 114.20867167235077});
+  const [originToStationDuration , setOriginToStationDuration] = useState(null);
+  const [stationToDestDuration , setStationToDestDuration] = useState(null);
+    // Calculate the walking route from origin to busStart
+  const showBusRoute =(busStart, busEnd) =>{
+
+      const calculateWalkingRouteToBusStop = () => {
+        let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
+  
+        const directionsService = new google.maps.DirectionsService();
+        directionsService.route({
+          origin: originValue, // user's current location
+          destination: busStart, // coordinates of the bus stop
+          travelMode: google.maps.TravelMode.WALKING,
+        }, (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK) {
+            setOriginToStationDuration(result.routes[0].legs[0].duration)
+            setDirectionsResponseToBusStop(result);
+          } else {
+            console.error(`error fetching directions ${result}`);
+          }
+        });
+      };
+    
+      // Calculate the walking route from busEnd to destination
+      const calculateWalkingRouteFromBusStop = () => {
+        let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
+  
+        const directionsService = new google.maps.DirectionsService();
+    
+        directionsService.route({
+          origin: busEnd, // coordinates of the bus drop-off
+          destination: destinationValue, // final destination
+          travelMode: google.maps.TravelMode.WALKING,
+        }, (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK) {
+            setStationToDestDuration(result.routes[0].legs[0].duration)
+            setDirectionsResponseFromBusStop(result);
+          } else {
+            console.error(`error fetching directions ${result}`);
+          }
+        });
+      };
+      
+      setDirectionsResponse(null);
+      calculateWalkingRouteToBusStop();
+      calculateWalkingRouteFromBusStop();
+    }
+ 
+  useEffect(()=>{
+    console.log(originToStationDuration , "  ",  stationToDestDuration)
+  },[originToStationDuration ,stationToDestDuration]
+  )
+
+  const renderBusDirectionsResponse = () =>{
+    if (!directionsResponseToBusStop) return null;
+    if (!directionsResponseFromBusStop) return null;
+    return <>
+            <DirectionsRenderer
+                directions={directionsResponseToBusStop}
+                options={{
+                    // options for the renderer, like polyline color
+                    polylineOptions: { strokeColor: '#ff2527' },
+                }}
+            />
+            <DirectionsRenderer
+                directions={directionsResponseFromBusStop}
+                options={{
+                    // different options for this renderer, like a different polyline color
+                    polylineOptions: { strokeColor: '#4285F4' },
+                }}
+            />
+            </>
+  }
+
+
   const clearRoute= () => {
           setDirectionsResponse(null);
+          setDirectionsResponseFromBusStop(null);
+          setDirectionsResponseToBusStop(null);
           setDistance('');
           setDuration('');
           originInputRef.current.value = '';
@@ -476,7 +560,23 @@ const HomePage = () => {
             }}>
               <FaLocationArrow />
             </IconButton>
-        </Box>
+            
+          </Box>
+
+
+          <Box display="flex" justifyContent="space-between" mt={1} alignItems="center" height={"20px"}>
+              <IconButton style={{borderRadius: "8px ", backgroundColor: "#fab0b0"}}>
+                        <FaPersonWalking size={10}/>
+                        Walk
+              </IconButton>
+              <IconButton style={{borderRadius: "8px ", backgroundColor: "#fab0b0"}}>
+                        <FaBusSimple size={10}/>
+                        Bus
+              </IconButton>
+                    
+          </Box>
+
+
         </Box>
 
       {/* Google Map */}
@@ -501,7 +601,12 @@ const HomePage = () => {
                 />)
           }
           {renderToiletMarkers()}
+
           {renderDirectionsResponse()}    
+
+          {renderBusDirectionsResponse()}
+
+
           {isInfoWindowVisible && (
             <InfoWindowComponent 
                 marker={selectedMarker} 
@@ -530,10 +635,13 @@ const HomePage = () => {
         <Button variant="contained" color="primary" onClick={() => setShowToiletLayer(!showToiletLayer)}>
           Toggle Toilet Layer
         </Button>
+        <Button variant="contained" color="primary" onClick={() => showBusRoute({ lat: 22.415917172642065, lng: 114.211104527007 }, {lat: 22.419788004309634, lng: 114.20867167235077} )}>
+          show bus route
+        </Button>
       </Box>
     </Box>
            
-  );
+    );
 };
 
 export default HomePage;

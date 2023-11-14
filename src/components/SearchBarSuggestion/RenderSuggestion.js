@@ -1,5 +1,5 @@
 import React,{useEffect} from "react";
-import '../RenderSuggestion/RenderSuggestion.css'
+import './RenderSuggestion.css'
 
 const RenderSuggestions = ({suggestions, activeInput,selectPlace}) =>{
     if (suggestions.length === 0 || !activeInput) return null;

@@ -4,18 +4,18 @@ import { busDetails } from "../../data/busDetails.mjs";
 const referenceDate = new Date();
 referenceDate.setFullYear(2000, 0, 1);
 
-const searchBusRoute = (startBuilding, endBuilding,  isTeachingDay) => {
-    let resRoute = [];
+const searchBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
+    let res = [];
     let startStations = buildingStationPair[startBuilding];
     let endStations = buildingStationPair[endBuilding];
 
     // Parse the input time for comparison
     let inputTime = new Date();
     inputTime = adjustDateToMatch(inputTime);
-    
-    let inputWeekday= new Date();
-    inputWeekday = getCurrentWeekday(inputWeekday)
-    
+
+    let inputWeekday = new Date();
+    inputWeekday = getCurrentWeekday(inputWeekday);
+
     // Find a route considering the direction, time, and day
     for (let route in busDetails) {
         let routeDetails = busDetails[route];
@@ -31,7 +31,11 @@ const searchBusRoute = (startBuilding, endBuilding,  isTeachingDay) => {
                     let startIndex = stops.indexOf(startStation);
                     for (let endStation of endStations) {
                         if (stops.includes(endStation) && stops.indexOf(endStation) > startIndex) {
-                            resRoute.push(route);
+                            res.push({
+                                busRoute: route,
+                                startStation: startStation,
+                                endStation: endStation
+                            });
                             break; // Found a valid route, no need to check other end stations
                         }
                     }
@@ -40,11 +44,14 @@ const searchBusRoute = (startBuilding, endBuilding,  isTeachingDay) => {
         }
     }
 
-    return resRoute; // Return the list of routes
+    return res; // Return the list of routes with their start and end stations
+    // e.g. { busRoute: '2#', startStation: 'MTRP', endStation: 'SHAWHALL' }
 }
-export default searchBusRoute;
 
-console.log(searchBusRoute("YIAP", "LSK", "TD"))
+// export default searchBusRoute;
+
+
+console.log(searchBusRoute("YIAP", "ULIB", "TD"))
 
 // Helper functions to parse time and check if a given time is within the operating time range
 

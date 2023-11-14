@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import "./InfoPage.css";
-
+import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon} from "@mui/material";
+import { FaPersonWalking } from "react-icons/fa6";
+import { FaBusSimple } from "react-icons/fa6";
 function InfoPage({ show, originCoord, destinationCoord }) {
     const [isDragging, setIsDragging] = useState(false);
     const [lastTouchY, setLastTouchY] = useState(0);
@@ -47,14 +49,7 @@ function InfoPage({ show, originCoord, destinationCoord }) {
         >
             {/* Insert other destination details here */}
             <div className="info-page-handle" />
-                <div className='content-area'>
-
-                    <span>fdjsfjkds</span>
-                    <span>fdjsfjkds</span>
-                    <span>fdjsfjkds</span>
-                    <span>fdjsfjkds</span>
-                    <span>fdjsfjkds</span>
-                </div>
+                
             
                 
         </div>
