@@ -42,9 +42,9 @@ const searchBusRoute = (startBuilding, endBuilding,  isTeachingDay) => {
 
     return resRoute; // Return the list of routes
 }
+export default searchBusRoute;
 
-
-console.log(searchBusRoute("YIAP", "ULIB", "TD"))
+console.log(searchBusRoute("YIAP", "LSK", "TD"))
 
 // Helper functions to parse time and check if a given time is within the operating time range
 
