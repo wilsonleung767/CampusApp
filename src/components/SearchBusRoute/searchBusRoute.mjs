@@ -44,7 +44,7 @@ const searchBusRoute = (startBuilding, endBuilding,  isTeachingDay) => {
 }
 
 
-console.log(searchBusRoute("YIAP", "ULIB", "TD"))
+console.log(searchBusRoute("CCCC", "ULIB", "TD"))
 
 // Helper functions to parse time and check if a given time is within the operating time range
 
