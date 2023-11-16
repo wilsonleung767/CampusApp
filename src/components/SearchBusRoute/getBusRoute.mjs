@@ -1,16 +1,20 @@
 import { buildingStationPair } from "../../data/buildingStationPair.mjs";
 import { busDetails } from "../../data/busDetails.mjs";
 
+
 const referenceDate = new Date();
 referenceDate.setFullYear(2000, 0, 1);
 
-const searchBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
+export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
     let res = [];
     let startStations = buildingStationPair[startBuilding];
     let endStations = buildingStationPair[endBuilding];
 
     // Parse the input time for comparison
     let inputTime = new Date();
+    inputTime.setHours(13);
+    inputTime.setMinutes(15);
+    inputTime.setSeconds(0);
     inputTime = adjustDateToMatch(inputTime);
 
     let inputWeekday = new Date();
@@ -51,7 +55,7 @@ const searchBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
 // export default searchBusRoute;
 
 
-console.log(searchBusRoute("YIAP", "ULIB", "TD"))
+console.log(getBusRoute("YIAP", "ULIB", "TD"))
 
 // Helper functions to parse time and check if a given time is within the operating time range
 

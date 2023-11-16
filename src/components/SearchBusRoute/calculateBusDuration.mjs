@@ -57,13 +57,14 @@ export function calculateBusDuration(route, startStation, endStation) {
 }  // return the duration in minutes after rounded up
 
 
-function parseTime(timeStr) {
-    const [time, station] = timeStr.split('|');
-    const [hours, minutes, seconds] = time.split(':').map(Number);
+export function parseTime(timeInput) {
+    let timeStr = (typeof timeInput === 'string') ? timeInput : timeInput.toISOString().split('T')[1].substring(0, 8);
+    const [hours, minutes, seconds] = timeStr.split(':').map(Number);
     const date = new Date();
     date.setHours(hours, minutes, seconds, 0);
     return date;
 }
+
 
 
 // Example usage
