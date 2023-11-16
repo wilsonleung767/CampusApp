@@ -5,31 +5,40 @@ import { busDetails } from "../../data/busDetails.mjs";
 const referenceDate = new Date();
 referenceDate.setFullYear(2000, 0, 1);
 
+function getCurrentTimeInHongKong() {
+    const currentTimeUTC = new Date(); // Current time in UTC
+    const offsetInHours = 8; // Hong Kong is UTC+8
+    currentTimeUTC.setHours(currentTimeUTC.getUTCHours() + offsetInHours);
+    return currentTimeUTC;
+}
+
+// Updated function to get the current weekday in Hong Kong
+function getCurrentWeekdayInHongKong() {
+    const currentTimeInHongKong = getCurrentTimeInHongKong();
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return weekdays[currentTimeInHongKong.getUTCDay()];
+}
+
 export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
     let res = [];
     let startStations = buildingStationPair[startBuilding];
     let endStations = buildingStationPair[endBuilding];
 
     // Parse the input time for comparison
-    let inputTime = new Date();
-    inputTime.setHours(13);
-    inputTime.setMinutes(15);
-    inputTime.setSeconds(0);
-    inputTime = adjustDateToMatch(inputTime);
 
-    let inputWeekday = new Date();
-    inputWeekday = getCurrentWeekday(inputWeekday);
+    let inputWeekday = getCurrentWeekdayInHongKong();
+    console.log(inputWeekday);
+
 
     // Find a route considering the direction, time, and day
     for (let route in busDetails) {
         let routeDetails = busDetails[route];
         let stops = routeDetails.station;
-        let operatingTime = parseTimeRange(routeDetails.time);
         let operatesOnTeachingDay = routeDetails.teachingDay.includes(isTeachingDay ? 'TD' : 'NT');
         let operatesOnWeekday = routeDetails.weekday.includes(inputWeekday);
 
         // Check if the route operates at the given time and day
-        if (operatesOnTeachingDay && operatesOnWeekday && isWithinTimeRange(inputTime, operatingTime)) {
+        if (operatesOnTeachingDay && operatesOnWeekday ) {
             for (let startStation of startStations) {
                 if (stops.includes(startStation)) {
                     let startIndex = stops.indexOf(startStation);
@@ -56,48 +65,4 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
 
 
 console.log(getBusRoute("YIAP", "ULIB", "TD"))
-
-// Helper functions to parse time and check if a given time is within the operating time range
-
-function parseTime(timeStr) {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const time = new Date(referenceDate); // Using the reference date
-    time.setHours(hours, minutes, 0, 0); // Sets hours, minutes, seconds, milliseconds
-    return time;
-}
-
-
-function parseTimeRange(timeRange) {
-    return timeRange.map(timeStr => parseTime(timeStr));
-}
-
-function isWithinTimeRange(time, timeRange) {
-    const [startTime, endTime] = timeRange;
-    return time >= startTime && time <= endTime;
-}
-
-function adjustDateToMatch(inputTime) {
-    return new Date(
-        referenceDate.getFullYear(), 
-        referenceDate.getMonth(), 
-        referenceDate.getDate(),
-        inputTime.getHours(),
-        inputTime.getMinutes(),
-        inputTime.getSeconds()
-    );
-}
-
-function getCurrentWeekday(inputWeekday) {
-    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const dayOfWeek = weekdays[inputWeekday.getDay()];
-    return dayOfWeek;
-}
-// Example usage
-// let inputTime = new Date();
-// let operatingTime = parseTimeRange(["07:30", "18:40"]);
-// inputTime = adjustDateToMatch(inputTime);
-// console.log(inputTime)
-// console.log(operatingTime)
-// console.log(isWithinTimeRange(inputTime,operatingTime))
-
 

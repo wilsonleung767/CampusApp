@@ -6,9 +6,9 @@ import { timeTable } from "../../data/timeTable.mjs";
 import { calculateBusDuration } from "./calculateBusDuration.mjs";
 import { getBusRoute } from "./getBusRoute.mjs";
 
-function getFastestBusChoice(busRouteList, currentTimeStr, timeOfOriginToStation, timeOfDepartureToDest) {
+export function getFastestBusChoice(busRouteList, timeOfOriginToStation, timeOfDepartureToDest) {
     let busChoices = [];
-    let currentTime = new Date(currentTimeStr);
+    let currentTime = new Date("2023-11-16T18:09:23.813Z");
 
     busRouteList.forEach(bus => {
         const route = bus.busRoute;
@@ -28,13 +28,23 @@ function getFastestBusChoice(busRouteList, currentTimeStr, timeOfOriginToStation
 
                 busChoices.push({
                     route: route,
-                    totalTripTime: totalTripTime,
+                    status: "working",
+                    totalTripTime: Math.ceil(totalTripTime),
                     departureTime: departureDateTime,
                     arrivalTime: arrivalTime
                 });
             }
         }
+        else{
+            busChoices.push({
+                route:route,
+                status: "stopped",
+                totalTripTime:10000
+            })
+        }
     });
+
+
 
     // Sort bus choices by total trip time
     busChoices.sort((a, b) => a.totalTripTime - b.totalTripTime);
@@ -42,7 +52,7 @@ function getFastestBusChoice(busRouteList, currentTimeStr, timeOfOriginToStation
     return busChoices;
 }
 
-function findNextDepartureTime(route, startStation, currentTimeStr, timeOfOriginToStation) {
+function findNextDepartureTime(route, startStation, currentTime, timeOfOriginToStation) {
     if (!timeTable[startStation] || !timeTable[startStation][route]) {
         console.error("Route or station not found in timeTable");
         return null;
@@ -51,7 +61,7 @@ function findNextDepartureTime(route, startStation, currentTimeStr, timeOfOrigin
     let departures = timeTable[startStation][route];
 
     // Convert currentTimeStr to a Date object and adjust for walking time
-    let currentTime = new Date(currentTimeStr); 
+    // let currentTime = new Date(currentTimeStr); 
     let adjustedCurrentTime = new Date(currentTime.getTime() + timeOfOriginToStation * 60000);
 
     // Convert each departure time to UTC for comparison
@@ -72,7 +82,18 @@ function parseTimeToUTC(timeStr, referenceTime) {
     return date;
 }
 
-const currentTime = "2023-11-15T15:10:00.000Z";
 // console.log(findNextDepartureTime("1A", "MTR", currentTime, 3));
+export function getCurrentTimeInHongKong() {
+    const currentTimeUTC = new Date(); // Current time in UTC
+    const offsetInHours = 8; // Hong Kong is UTC+8
+    const oneHourInMilliseconds = 3600000; // Number of milliseconds in one hour
 
+    // Calculate Hong Kong time
+    const currentTimeInHongKong = new Date(currentTimeUTC.getTime() + offsetInHours * oneHourInMilliseconds);
+
+    return currentTimeInHongKong;
+}
+
+const currentTime = "2023-11-16T18:09:23.813Z";
+console.log("Current time in Hong Kong:", currentTime);
 console.log(getFastestBusChoice(getBusRoute("YIAP", "ULIB", "TD"), currentTime, 2,3))

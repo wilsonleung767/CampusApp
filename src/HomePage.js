@@ -14,6 +14,9 @@ import { customPlaces } from "./data/Places.js";
 import './HomePage.css'
 import { FaPersonWalking } from "react-icons/fa6";
 import { FaBusSimple } from "react-icons/fa6";
+import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
+import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
+import { getFastestBusChoice } from "./components/SearchBusRoute/getFastestBusChoice.mjs";
 
 const HomePage = () => {
   
@@ -144,49 +147,56 @@ const HomePage = () => {
   const [originToStationDuration , setOriginToStationDuration] = useState(null);
   const [stationToDestDuration , setStationToDestDuration] = useState(null);
     // Calculate the walking route from origin to busStart
-  const showBusRoute =(busStart, busEnd) =>{
 
-      const calculateWalkingRouteToBusStop = () => {
+
+  const calculateWalkingRouteToBusStop = (busStartCoord) => {
+      return new Promise((resolve, reject) => {
         let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
-  
+    
         const directionsService = new google.maps.DirectionsService();
         directionsService.route({
           origin: originValue, // user's current location
-          destination: busStart, // coordinates of the bus stop
+          destination: busStartCoord, // coordinates of the bus stop
           travelMode: google.maps.TravelMode.WALKING,
         }, (result, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
-            setOriginToStationDuration(result.routes[0].legs[0].duration)
-            setDirectionsResponseToBusStop(result);
+            let durationInMin = Math.ceil(result.routes[0].legs[0].duration.value/60)
+            console.log("duration is",durationInMin)
+            resolve({duration: durationInMin, directionsResponse: result });
           } else {
-            console.error(`error fetching directions ${result}`);
+            console.error(`error fetching directions: ${status}`);
+            reject(`Error fetching directions: ${status}`);
           }
         });
-      };
-    
-      // Calculate the walking route from busEnd to destination
-      const calculateWalkingRouteFromBusStop = () => {
-        let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
-  
+      });
+    };
+  const calculateWalkingRouteFromBusStop = (busEndCoord) => {
+      return new Promise((resolve, reject) => {
+        let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
         const directionsService = new google.maps.DirectionsService();
-    
         directionsService.route({
-          origin: busEnd, // coordinates of the bus drop-off
-          destination: destinationValue, // final destination
+          origin: busEndCoord, // user's current location
+          destination: destinationValue, // coordinates of the bus stop
           travelMode: google.maps.TravelMode.WALKING,
         }, (result, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
-            setStationToDestDuration(result.routes[0].legs[0].duration)
-            setDirectionsResponseFromBusStop(result);
+            let durationInMin = Math.ceil(result.routes[0].legs[0].duration.value/60)
+            console.log("duration is",durationInMin)
+            resolve({duration: durationInMin, directionsResponse: result });
           } else {
-            console.error(`error fetching directions ${result}`);
+            console.error(`error fetching directions: ${status}`);
+            reject(`Error fetching directions: ${status}`);
           }
         });
-      };
+      });
+    };
+
+
+  const showBusRoute =(busStart, busEnd) =>{
       
       setDirectionsResponse(null);
-      calculateWalkingRouteToBusStop();
-      calculateWalkingRouteFromBusStop();
+      calculateWalkingRouteToBusStop(busStart);
+      calculateWalkingRouteFromBusStop(busEnd);
     }
  
   useEffect(()=>{
@@ -235,6 +245,129 @@ const HomePage = () => {
 
 
 
+  }
+  const [startBuilding,setStartBuilding] = useState("");
+  const [endBuilding,setEndBuilding] = useState("");
+
+  async function retrieveNearestBuilding(origin) {
+    try {
+        let startNearestBuilding = await getNearestBuilding(origin);
+        console.log("Nearest building is: " + startNearestBuilding);
+        return startNearestBuilding; // This will be a string
+    } catch (error) {
+        console.error("Error finding the nearest building: " + error);
+    }
+}
+
+  function getNearestBuilding(origin){
+    const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
+    const service = new google.maps.DistanceMatrixService();
+    const destinations = customPlaces.map(place => {  
+      const location = Object.values(place)[0];
+      if (location.lat && location.lng && !isNaN(location.lat) && !isNaN(location.lng)) {
+          return new google.maps.LatLng(location.lat, location.lng);
+      } else {
+          return null; // or handle this case appropriately
+      }
+    }).filter(location => location !== null);
+    // Return a new Promise
+    return new Promise((resolve, reject) => {
+      service.getDistanceMatrix(
+        {
+          origins: [originLatLng],
+          destinations: destinations,
+          travelMode: 'WALKING', // or 'DRIVING'
+        },
+        (response, status) => {
+          if (status !== 'OK') {
+            console.log('Error was: ' + status);
+            reject(status); // Reject the promise if there's an error
+          } else {
+            let distances = response.rows[0].elements;
+            let minimumDistance = Number.MAX_VALUE;
+            let nearestBuildingIndex = -1;
+
+            distances.forEach((distance, index) => {
+              if (distance.distance.value < minimumDistance) {
+                  minimumDistance = distance.distance.value;
+                  nearestBuildingIndex = index;
+              }
+            });
+            
+            if (nearestBuildingIndex !== -1) {
+                let nearestBuildingName = Object.keys(customPlaces[nearestBuildingIndex])[0];
+                console.log('Nearest Building:', nearestBuildingName);
+                resolve(nearestBuildingName); // Resolve the promise with the nearest building name
+            } else {
+                reject('No buildings found.'); // Reject if no buildings are found
+            }
+          }
+        }
+      );
+    });
+  }
+  
+  const [busList, setBusList] = useState([
+    {
+        route: "",
+        startStation: "",
+        endStation: "",
+        timeFromOriginToStation: null,
+        timeFromDepartureToDest: null,
+        directionsResponseFromOriginToStation: null,
+        directionsResponseFromStationToDest: null
+    }
+  ]);
+
+  async function handleSearch(){
+    calculateRoute() 
+    // calculateWalkingRouteToBusStop({ lat: 22.415880, lng: 114.210859 })
+
+    // Define startBuilding and endBuilding
+    let startBuilding, endBuilding;
+
+    // Use await to ensure the values are set before moving on
+    startBuilding = await retrieveNearestBuilding(originCoord);
+    endBuilding = await retrieveNearestBuilding(destinationCoord);
+
+    const startBuildingAlias = pairPlaceAlias(startBuilding)
+    const endBuildingAlias = pairPlaceAlias(endBuilding)
+    
+    
+    // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
+    const busRouteList = [ { busRoute: '2', startStation: 'MTRP', endStation: 'UADM' , startStationLocation:{lat: 22.413901, lng: 114.209770} , endStationLocation: {lat: 22.418799, lng: 114.205340}}
+  ]
+  
+
+  
+    for (let bus of busRouteList){
+      try {
+        const walkingRouteToBusStop = await calculateWalkingRouteToBusStop(bus.startStationLocation);
+        const timeFromOriginToStation = walkingRouteToBusStop.duration;
+        const directionsResponseFromOriginToStation = walkingRouteToBusStop.directionsResponse
+        const walkingRouteFromBusStop = await calculateWalkingRouteToBusStop(bus.endStationLocation);
+        const timeFromDepartureToDest = walkingRouteFromBusStop.duration
+        const directionsResponseFromStationToDest = walkingRouteFromBusStop.directionsResponse
+
+        setBusList(prevBusList => [
+          ...prevBusList,
+          {
+            route: bus.busRoute,
+            startStation: bus.startStation,
+            endStation: bus.endStation,
+            timeFromOriginToStation,
+            timeFromDepartureToDest,
+            directionsResponseFromOriginToStation,
+            directionsResponseFromStationToDest
+          }
+        ])
+        console.log(busList)
+
+      } catch (error) {
+        console.error(error);
+      }
+   
+    }
   }
   // Function to calculate the distance from the origin to each toilet
   function getNearestToilet(origin) {
@@ -318,7 +451,7 @@ const HomePage = () => {
     // const NLPResult = getNLPResult(NLPQuery)
     // selectPlace(NLPResult, "destination")
   };
-
+  
   
   const selectPlace = async (inputString, isOrigin) => {
     console.log("Place selected: ", inputString);
@@ -538,7 +671,8 @@ const HomePage = () => {
                             alignContent: "center" 
                           }} 
                     onClick = { NLPSearchToggle ? () => {handleNLPQuery()} :
-                                                  () => {calculateRoute();
+                                                  () => {handleSearch() 
+                                                          // getNearestBuilding(originCoord)
                               }}>
                     <span style={{ fontSize: 16, marginRight: 7 }}>
                           Search
@@ -637,6 +771,10 @@ const HomePage = () => {
         </Button>
         <Button variant="contained" color="primary" onClick={() => showBusRoute({ lat: 22.415917172642065, lng: 114.211104527007 }, {lat: 22.419788004309634, lng: 114.20867167235077} )}>
           show bus route
+        </Button>
+        <Button variant="contained" color="primary" onClick={() =>{  setOriginCoord([22.416390590230055, 114.2106063761265]) 
+                                                                    getNearestBuilding(originCoord)}}>
+          show nearest building
         </Button>
       </Box>
     </Box>
