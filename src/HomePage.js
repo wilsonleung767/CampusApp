@@ -142,8 +142,9 @@ const HomePage = () => {
   // const [busStart, setBusStart] = useState({ lat: 22.415917172642065, lng: 114.211104527007 });
   // const [busEnd, setBusEnd] = useState({lat: 22.419788004309634, lng: 114.20867167235077});
   const [originToStationDuration , setOriginToStationDuration] = useState(null);
-  const [stationToDestDuration , setStationToDestDuration] = useState(null);
+  const [stationToDestDuration , setDepartureToDestDuration] = useState(null);
     // Calculate the walking route from origin to busStart
+  
   const showBusRoute =(busStart, busEnd) =>{
 
       const calculateWalkingRouteToBusStop = () => {
@@ -176,7 +177,7 @@ const HomePage = () => {
           travelMode: google.maps.TravelMode.WALKING,
         }, (result, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
-            setStationToDestDuration(result.routes[0].legs[0].duration)
+            setDepartureToDestDuration(result.routes[0].legs[0].duration)
             setDirectionsResponseFromBusStop(result);
           } else {
             console.error(`error fetching directions ${result}`);
@@ -318,7 +319,7 @@ const HomePage = () => {
     // const NLPResult = getNLPResult(NLPQuery)
     // selectPlace(NLPResult, "destination")
   };
-
+  
   
   const selectPlace = async (inputString, isOrigin) => {
     console.log("Place selected: ", inputString);
