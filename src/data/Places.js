@@ -4,6 +4,7 @@ export const customPlaces = [
     { "University Sports Centre" : {lat: 22.4186158 , lng: 114.2112792 } },
     { "Cheng Yu Tung Building" : {lat: 22.4121683	, lng: 114.2105302}},
     { "Pommerenke Student Centre (po can , PSC)": {lat: 22.4170907	, lng: 114.2088325}},
+    { "University Library (ULIB)": {lat: 22.419572823075928 , lng: 114.20506416623314}},
     { "Nearest Toilet":{} },
   ];
 

@@ -14,11 +14,8 @@ function findFirstStationOccurrence(route, station) {
 }
 
 
-// function normalizeName(stationName){
-//     // Remove extra characters like "|" or anything after it
-//     return stationName.split('|')[0];
-// }
 
+// used in calDuartionByBUs function 
 export function calculateBusDuration(route, startStation, endStation) {
     const StartStation = findFirstStationOccurrence(route,startStation)
     const EndStation = findFirstStationOccurrence(route,endStation)
@@ -68,5 +65,5 @@ export function parseTime(timeInput) {
 
 
 // Example usage
-let duration = calculateBusDuration("1A", "MTR", "SHHC");
-console.log("Duration:", duration, "minutes");
+// let duration = calculateBusDuration("1A", "MTR", "SHHC");
+// console.log("Duration:", duration, "minutes");
