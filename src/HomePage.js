@@ -250,7 +250,7 @@ const HomePage = () => {
           setDestinationCoord([]); // Reset the destinationCoord value
           setDestinationName('');
           setAfterSearch(false)
-          
+          setShowInfoPage(false)
         }
   
   const handleShowInfoPage= () => {
@@ -337,6 +337,7 @@ const HomePage = () => {
   ]);
 
   async function handleSearch(){
+    try{
     calculateRouteByWalking() 
     // calculateWalkingRouteToBusStop({ lat: 22.415880, lng: 114.210859 })
 
@@ -352,7 +353,7 @@ const HomePage = () => {
     const tempBusList = [];
     
     // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
-    const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHHC' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: {lat: 22.418020, lng: 114.209896}}
+    const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHHC' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: {lat: 22.418020, lng: 114.209896}, passedStations: [ 'MTR', 'SPORTC', 'UADM', 'SHHC' ]}
   ]
   
 
@@ -366,7 +367,7 @@ const HomePage = () => {
         const timeFromDepartureToDest = walkingRouteFromBusStop.duration
         const directionsResponseFromStationToDest = walkingRouteFromBusStop.walkDirectionsResponse
         const busDetails = calculateTripDurationByBus(bus.busRoute, bus.startStation, bus.endStation, timeFromOriginToStation, timeFromDepartureToDest)
-       
+        
         
 
         tempBusList.push({
@@ -382,6 +383,7 @@ const HomePage = () => {
           status: busDetails.status,
           directionsResponseFromOriginToStation,
           directionsResponseFromStationToDest,
+          passedStations: bus.passedStations
         })
 
       } catch (error) {
@@ -401,6 +403,10 @@ const HomePage = () => {
     setAfterSearch(true);
     setTravalType("walk")
     setShowInfoPage(true);
+    }
+    catch(error){
+      console.log(error)
+    }
   }
 
   useEffect(()=>{

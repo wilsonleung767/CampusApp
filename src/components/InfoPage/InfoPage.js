@@ -53,7 +53,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute }) {
         >
 
             {travelType === "bus" && (
-                            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
                                 <div className="info-page-handle" />
                                 <Typography mt={2.4}variant="h6">CU Bus</Typography>
                     
@@ -70,8 +70,8 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute }) {
                                         </Box>
                                     </Box>
                                 ))}
-                            </Box>
-                        )
+                </Box>
+                )
             }
             
             </div>
