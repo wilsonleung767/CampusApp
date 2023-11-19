@@ -66,3 +66,17 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
 
 console.log(getBusRoute("YIAP", "ULIB", "TD"))
 
+
+
+// [
+//     { busRoute: '2', startStation: 'MTRP', endStation: 'UADM' },
+//     { busRoute: '3', startStation: 'YIAP', endStation: 'SCIC' },
+//     { busRoute: '4', startStation: 'YIAP', endStation: 'UADM' },
+//     { busRoute: '5', startStation: 'CCTEA', endStation: 'SHAWHALL' },
+//     { busRoute: '1A', startStation: 'MTR', endStation: 'UADM' },
+//     { busRoute: '1B', startStation: 'MTR', endStation: 'SHAWHALL' },
+//     { busRoute: '2#', startStation: 'MTRP', endStation: 'SHAWHALL' },
+//     { busRoute: 'N', startStation: 'MTR', endStation: 'SHAWHALL' },
+//     { busRoute: 'N#', startStation: 'MTR', endStation: 'SHAWHALL' },
+//     { busRoute: '5#', startStation: 'CCTEA', endStation: 'SHAWHALL' }
+//   ]

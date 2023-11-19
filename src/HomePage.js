@@ -23,6 +23,9 @@ const HomePage = () => {
   
   // Search Bar
   const [showOriginSearch, setShowOriginSearch] = useState(false);
+  const [afterSearch, setAfterSearch] = useState(false);
+  const [travelType, setTravalType] = useState("");
+
     // NLP function
   const [NLPSearchToggle, setNLPSearchToggleToggle] = useState(false);
   const [NLPQuery, setNLPQuery] = useState("");
@@ -43,9 +46,9 @@ const HomePage = () => {
   const [isInfoWindowVisible, setIsInfoWindowVisible] = useState(false);
 
   const [map, setMap] = useState(/** @type google.maps.Map */ (null))
-  const [directionsResponse, setDirectionsResponse] = useState(null)
+  const [walkDirectionsResponse, setWalkDirectionsResponse] = useState(null)
   const [distance, setDistance] = useState('')
-  const [duration, setDuration] = useState('')
+  const [walkDuration, setWalkDistance] = useState('')
   const [mapKey, setMapKey] = useState(0); 
   
   // Real time user location tracking 
@@ -104,10 +107,10 @@ const HomePage = () => {
   
   
   // when user input string in input field, we should parse the string into coordinatate and calroute—
-  async function calculateRoute() {
+  async function calculateRouteByWalking() {
     // Convert array [lat, lng] to google.maps.LatLng object
-    setDirectionsResponseFromBusStop(null);
-    setDirectionsResponseToBusStop(null);
+    setDirectionsResponseFromStationToDest(null);
+    setDirectionsResponseFromOriginToStation(null);
     let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
     let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
   
@@ -123,26 +126,26 @@ const HomePage = () => {
         destination: destinationValue,
         travelMode: google.maps.TravelMode.WALKING,
       });
-      setDirectionsResponse(results);
+      setWalkDirectionsResponse(results);
       setDistance(results.routes[0].legs[0].distance.text);
-      setDuration(results.routes[0].legs[0].duration.text);
+      setWalkDistance(results.routes[0].legs[0].walkDuration);
       setShowInfoPage(true);
     } catch (error) {
       console.error("Failed to calculate route", error);
     }
   }
-  const renderDirectionsResponse = () =>{
-    if (!directionsResponse) return null;
+  const renderWalkDirectionsResponse = () =>{
+    if (!walkDirectionsResponse) return null;
     return <DirectionsRenderer
-      directions={directionsResponse}
+      directions={walkDirectionsResponse}
       options={{
         
       }}/>
   }
   
 
-  const [directionsResponseToBusStop, setDirectionsResponseToBusStop] = useState(null);
-  const [directionsResponseFromBusStop, setDirectionsResponseFromBusStop] = useState(null);
+  const [directionsResponseFromOriginToStation, setDirectionsResponseFromOriginToStation] = useState(null);
+  const [directionsResponseFromStationToDest, setDirectionsResponseFromStationToDest] = useState(null);
   // const [busStart, setBusStart] = useState({ lat: 22.415917172642065, lng: 114.211104527007 });
   // const [busEnd, setBusEnd] = useState({lat: 22.419788004309634, lng: 114.20867167235077});
   const [originToStationDuration , setOriginToStationDuration] = useState(null);
@@ -163,7 +166,7 @@ const HomePage = () => {
           if (status === google.maps.DirectionsStatus.OK) {
             let durationInMin = Math.ceil(result.routes[0].legs[0].duration.value/60)
             console.log("duration is",durationInMin)
-            resolve({duration: durationInMin, directionsResponse: result });
+            resolve({duration: durationInMin, walkDirectionsResponse: result });
           } else {
             console.error(`error fetching directions: ${status}`);
             reject(`Error fetching directions: ${status}`);
@@ -173,17 +176,17 @@ const HomePage = () => {
     };
   const calculateWalkingRouteFromBusStop = (busEndCoord) => {
       return new Promise((resolve, reject) => {
-        let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
+        let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
         const directionsService = new google.maps.DirectionsService();
         directionsService.route({
-          origin: busEndCoord, // user's current location
+          origin: busEndCoord, 
           destination: destinationValue, // coordinates of the bus stop
           travelMode: google.maps.TravelMode.WALKING,
         }, (result, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
             let durationInMin = Math.ceil(result.routes[0].legs[0].duration.value/60)
             console.log("duration is",durationInMin)
-            resolve({duration: durationInMin, directionsResponse: result });
+            resolve({duration: durationInMin, walkDirectionsResponse: result });
           } else {
             console.error(`error fetching directions: ${status}`);
             reject(`Error fetching directions: ${status}`);
@@ -195,7 +198,7 @@ const HomePage = () => {
 
   const showBusRoute =(busStart, busEnd) =>{
       
-      setDirectionsResponse(null);
+      setWalkDirectionsResponse(null);
       calculateWalkingRouteToBusStop(busStart);
       calculateWalkingRouteFromBusStop(busEnd);
     }
@@ -205,19 +208,26 @@ const HomePage = () => {
   },[originToStationDuration ,stationToDestDuration]
   )
 
+  const onSelectBusRoute = (selectedBusRoute) => {
+    // Update state to render bus directions on the map
+    setWalkDirectionsResponse(null)
+    setDirectionsResponseFromOriginToStation(selectedBusRoute.directionsResponseFromOriginToStation);
+    setDirectionsResponseFromStationToDest(selectedBusRoute.directionsResponseFromStationToDest);
+  };
+
   const renderBusDirectionsResponse = () =>{
-    if (!directionsResponseToBusStop) return null;
-    if (!directionsResponseFromBusStop) return null;
+    if (!directionsResponseFromOriginToStation) return null;
+    if (!directionsResponseFromStationToDest) return null;
     return <>
             <DirectionsRenderer
-                directions={directionsResponseToBusStop}
+                directions={directionsResponseFromOriginToStation}
                 options={{
                     // options for the renderer, like polyline color
                     polylineOptions: { strokeColor: '#ff2527' },
                 }}
             />
             <DirectionsRenderer
-                directions={directionsResponseFromBusStop}
+                directions={directionsResponseFromStationToDest}
                 options={{
                     // different options for this renderer, like a different polyline color
                     polylineOptions: { strokeColor: '#4285F4' },
@@ -228,17 +238,18 @@ const HomePage = () => {
 
 
   const clearRoute= () => {
-          setDirectionsResponse(null);
-          setDirectionsResponseFromBusStop(null);
-          setDirectionsResponseToBusStop(null);
+          setWalkDirectionsResponse(null);
+          setDirectionsResponseFromStationToDest(null);
+          setDirectionsResponseFromOriginToStation(null);
           setDistance('');
-          setDuration('');
+          setWalkDistance('');
           originInputRef.current.value = '';
           destinationInputRef.current.value = '';
           setOriginCoord([]);
           setOriginName('');
           setDestinationCoord([]); // Reset the destinationCoord value
           setDestinationName('');
+          setAfterSearch(false)
           
         }
   
@@ -318,6 +329,7 @@ const HomePage = () => {
         timeForTotalBusTrip: null,
         departureTime:null,
         arrivalTime:null,
+        upcomingDepartures:[],
         status:"",
         directionsResponseFromOriginToStation: null,
         directionsResponseFromStationToDest: null
@@ -325,7 +337,7 @@ const HomePage = () => {
   ]);
 
   async function handleSearch(){
-    calculateRoute() 
+    calculateRouteByWalking() 
     // calculateWalkingRouteToBusStop({ lat: 22.415880, lng: 114.210859 })
 
     // Define startBuilding and endBuilding
@@ -337,7 +349,7 @@ const HomePage = () => {
 
     const startBuildingAlias = pairPlaceAlias(startBuilding)
     const endBuildingAlias = pairPlaceAlias(endBuilding)
-    
+    const tempBusList = [];
     
     // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
     const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHHC' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: {lat: 22.418020, lng: 114.209896}}
@@ -349,43 +361,51 @@ const HomePage = () => {
       try {
         const walkingRouteToBusStop = await calculateWalkingRouteToBusStop(bus.startStationLocation);
         const timeFromOriginToStation = walkingRouteToBusStop.duration;
-        const directionsResponseFromOriginToStation = walkingRouteToBusStop.directionsResponse
-        const walkingRouteFromBusStop = await calculateWalkingRouteToBusStop(bus.endStationLocation);
+        const directionsResponseFromOriginToStation = walkingRouteToBusStop.walkDirectionsResponse
+        const walkingRouteFromBusStop = await calculateWalkingRouteFromBusStop(bus.endStationLocation);
         const timeFromDepartureToDest = walkingRouteFromBusStop.duration
-        const directionsResponseFromStationToDest = walkingRouteFromBusStop.directionsResponse
+        const directionsResponseFromStationToDest = walkingRouteFromBusStop.walkDirectionsResponse
         const busDetails = calculateTripDurationByBus(bus.busRoute, bus.startStation, bus.endStation, timeFromOriginToStation, timeFromDepartureToDest)
-        setBusList(prevBusList => [
-          ...prevBusList,
-          {
-            route: bus.busRoute,
-            startStation: bus.startStation,
-            endStation: bus.endStation,
-            timeFromOriginToStation,
-            timeFromDepartureToDest,
-            timeForTotalBusTrip: busDetails.totalTripTime,
-            departureTime: busDetails.departureTime,
-            arrivalTime: busDetails.arrivalTime,
-            status: busDetails.status,
-            directionsResponseFromOriginToStation,
-            directionsResponseFromStationToDest,
-          }
-        ])
-        console.log(busList)
+       
+        
+
+        tempBusList.push({
+          route: bus.busRoute,
+          startStation: bus.startStation,
+          endStation: bus.endStation,
+          timeFromOriginToStation,
+          timeFromDepartureToDest,
+          timeForTotalBusTrip: busDetails.totalTripTime,
+          departureTime: busDetails.departureTime,
+          arrivalTime: busDetails.arrivalTime,
+          upcomingDepartures: busDetails.upcomingDepartures,
+          status: busDetails.status,
+          directionsResponseFromOriginToStation,
+          directionsResponseFromStationToDest,
+        })
 
       } catch (error) {
         console.error(error);
       }
     }
     // Sort the tempBusList by timeForTotalBusTrip in ascending order
-    tempBusList.sort((a, b) => a.timeForTotalBusTrip - b.timeForTotalBusTrip);
+    if (tempBusList.length > 1) {
+        tempBusList.sort((a, b) => a.timeForTotalBusTrip - b.timeForTotalBusTrip);
+    }
 
-    // Now set the busList with the sorted array
+    // Update the busList state with sorted/temporary array
     setBusList(tempBusList);
 
     // For debugging
     console.log(tempBusList);
-    
+    setAfterSearch(true);
+    setTravalType("walk")
+    setShowInfoPage(true);
   }
+
+  useEffect(()=>{
+    console.log("busList : ",busList)
+  }, [busList])
 
   // Function to calculate the distance from the origin to each toilet
   function getNearestToilet(origin) {
@@ -703,9 +723,9 @@ const HomePage = () => {
                 </IconButton>
 
           </Box>
-          <Box display="flex" justifyContent="space-between" mt={2} alignItems="center">
+          {/* <Box display="flex" justifyContent="space-between" mt={2} alignItems="center">
             <Typography variant="body2">Distance: {distance}</Typography>
-            <Typography variant="body2">Duration: {duration}</Typography>
+            <Typography variant="body2">Duration: {walkDuration}</Typography>
             <IconButton size="small" onClick={() => {
               map.panTo(center);
               map.setZoom(15.59);
@@ -713,20 +733,32 @@ const HomePage = () => {
               <FaLocationArrow />
             </IconButton>
             
-          </Box>
+          </Box> */}
 
 
-          <Box display="flex" justifyContent="space-between" mt={1} alignItems="center" height={"20px"}>
-              <IconButton style={{borderRadius: "8px ", backgroundColor: "#fab0b0"}}>
-                        <FaPersonWalking size={10}/>
-                        Walk
+        
+          <Box position="relative"
+            style={{
+              maxHeight: afterSearch ? '36px' : '0',  
+              transition: 'all 0.1s ease-out', // Adjust timing and easing as needed
+              opacity: afterSearch ? 1 : 0,
+              // paddingBottom: showOriginSearch ? '15px' : '0',
+              paddingTop: afterSearch ? '8px' : '0 '
+            }}>
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#8ebfe8" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px"}} onClick={()=>{setTravalType("walk") 
+                                              setShowInfoPage(true)}}>
+                                      <FaPersonWalking size={20} style={{marginRight:"5px"}}/>
+                                      {walkDuration} mins 
               </IconButton>
-              <IconButton style={{borderRadius: "8px ", backgroundColor: "#fab0b0"}}>
-                        <FaBusSimple size={10}/>
-                        Bus
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#8ebfe8" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> {setTravalType("bus")
+              setShowInfoPage(true)
+              }}>
+                                      <FaBusSimple size={20} style={{marginRight:"5px"}}/>
+                                      {busList && busList.length > 0 ? `${busList[0].timeForTotalBusTrip} mins` : ""  }
               </IconButton>
-                    
           </Box>
+       
+        
 
 
         </Box>
@@ -754,7 +786,7 @@ const HomePage = () => {
           }
           {renderToiletMarkers()}
 
-          {renderDirectionsResponse()}    
+          {renderWalkDirectionsResponse()}    
 
           {renderBusDirectionsResponse()}
 
@@ -769,10 +801,11 @@ const HomePage = () => {
       
         </GoogleMap>
         <InfoPage 
-            show={showInfoPage} 
-            originCoord= {originCoord}
-            destinationCoord = {destinationCoord}
-          />
+            show={showInfoPage}
+            travelType={travelType}
+            busList={busList}
+            onSelectBusRoute={onSelectBusRoute}
+        />
         
       </Box>
 
