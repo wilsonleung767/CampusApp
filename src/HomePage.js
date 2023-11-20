@@ -17,7 +17,7 @@ import { FaBusSimple } from "react-icons/fa6";
 import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
 import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 
-import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
+import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTRIPDurationByBus.mjs";
 
 const HomePage = () => {
   
@@ -106,8 +106,8 @@ const HomePage = () => {
   // when user input string in input field, we should parse the string into coordinatate and calroute—
   async function calculateRoute() {
     // Convert array [lat, lng] to google.maps.LatLng object
-    setDirectionsResponseFromBusStop(null);
-    setDirectionsResponseToBusStop(null);
+    setDirectionResponseFromStationToDest(null);
+    setDirectionResponseFromOriginToStation(null);
     let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
     let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
   
@@ -141,8 +141,8 @@ const HomePage = () => {
   }
   
 
-  const [directionsResponseToBusStop, setDirectionsResponseToBusStop] = useState(null);
-  const [directionsResponseFromBusStop, setDirectionsResponseFromBusStop] = useState(null);
+  const [directionsResponseFromOriginToStation, setDirectionResponseFromOriginToStation] = useState(null);
+  const [directionsResponseFromStationToDest, setDirectionResponseFromStationToDest] = useState(null);
   // const [busStart, setBusStart] = useState({ lat: 22.415917172642065, lng: 114.211104527007 });
   // const [busEnd, setBusEnd] = useState({lat: 22.419788004309634, lng: 114.20867167235077});
   const [originToStationDuration , setOriginToStationDuration] = useState(null);
@@ -193,11 +193,11 @@ const HomePage = () => {
     };
 
 
-  const showBusRoute =(busStart, busEnd) =>{
-      
+
+  const onSelectBusRoute =(selectedBusRoute) =>{
       setDirectionsResponse(null);
-      calculateWalkingRouteToBusStop(busStart);
-      calculateWalkingRouteFromBusStop(busEnd);
+      setDirectionResponseFromOriginToStation(selectedBusRoute.directionsResponseFromOriginToStation);
+      setDirectionResponseFromStationToDest(selectedBusRoute.directionsResponseFromStationToDest);
     }
  
   useEffect(()=>{
@@ -206,18 +206,18 @@ const HomePage = () => {
   )
 
   const renderBusDirectionsResponse = () =>{
-    if (!directionsResponseToBusStop) return null;
-    if (!directionsResponseFromBusStop) return null;
+    if (!directionsResponseFromOriginToStation) return null;
+    if (!directionsResponseFromStationToDest) return null;
     return <>
             <DirectionsRenderer
-                directions={directionsResponseToBusStop}
+                directions={directionsResponseFromOriginToStation}
                 options={{
                     // options for the renderer, like polyline color
                     polylineOptions: { strokeColor: '#ff2527' },
                 }}
             />
             <DirectionsRenderer
-                directions={directionsResponseFromBusStop}
+                directions={directionsResponseFromStationToDest}
                 options={{
                     // different options for this renderer, like a different polyline color
                     polylineOptions: { strokeColor: '#4285F4' },
@@ -229,8 +229,8 @@ const HomePage = () => {
 
   const clearRoute= () => {
           setDirectionsResponse(null);
-          setDirectionsResponseFromBusStop(null);
-          setDirectionsResponseToBusStop(null);
+          setDirectionResponseFromStationToDest(null);
+          setDirectionResponseFromOriginToStation(null);
           setDistance('');
           setDuration('');
           originInputRef.current.value = '';
