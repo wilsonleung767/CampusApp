@@ -26,7 +26,8 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
 
     // Parse the input time for comparison
 
-    let inputWeekday = getCurrentWeekdayInHongKong();
+    // let inputWeekday = getCurrentWeekdayInHongKong();
+    let inputWeekday = "Thu"
     console.log(inputWeekday);
 
 
@@ -40,14 +41,17 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
         // Check if the route operates at the given time and day
         if (operatesOnTeachingDay && operatesOnWeekday ) {
             for (let startStation of startStations) {
-                if (stops.includes(startStation)) {
-                    let startIndex = stops.indexOf(startStation);
+                let startIndex = stops.findIndex(station => station.includes(startStation));
+                if (startIndex !== -1) {
                     for (let endStation of endStations) {
-                        if (stops.includes(endStation) && stops.indexOf(endStation) > startIndex) {
+                        let endIndex = stops.findIndex(station => station.includes(endStation));
+                        if (endIndex !== -1 && endIndex > startIndex) {
+                            let passedStations = stops.slice(startIndex, endIndex + 1);
                             res.push({
                                 busRoute: route,
                                 startStation: startStation,
-                                endStation: endStation
+                                endStation: endStation,
+                                passedStations: passedStations
                             });
                             break; // Found a valid route, no need to check other end stations
                         }
@@ -64,5 +68,19 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
 // export default searchBusRoute;
 
 
-console.log(getBusRoute("YIAP", "ULIB", "TD"))
+console.log(getBusRoute("MTR", "SHHC", "TD"))
 
+
+
+// [
+//     { busRoute: '2', startStation: 'MTRP', endStation: 'UADM' },
+//     { busRoute: '3', startStation: 'YIAP', endStation: 'SCIC' },
+//     { busRoute: '4', startStation: 'YIAP', endStation: 'UADM' },
+//     { busRoute: '5', startStation: 'CCTEA', endStation: 'SHAWHALL' },
+//     { busRoute: '1A', startStation: 'MTR', endStation: 'UADM' },
+//     { busRoute: '1B', startStation: 'MTR', endStation: 'SHAWHALL' },
+//     { busRoute: '2#', startStation: 'MTRP', endStation: 'SHAWHALL' },
+//     { busRoute: 'N', startStation: 'MTR', endStation: 'SHAWHALL' },
+//     { busRoute: 'N#', startStation: 'MTR', endStation: 'SHAWHALL' },
+//     { busRoute: '5#', startStation: 'CCTEA', endStation: 'SHAWHALL' }
+//   ]

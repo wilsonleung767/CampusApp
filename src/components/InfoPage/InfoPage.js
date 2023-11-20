@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import "./InfoPage.css";
 import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon} from "@mui/material";
+import { FaPersonWalking } from "react-icons/fa6";
+import { FaBusSimple } from "react-icons/fa6";
+import { MdKeyboardArrowRight } from "react-icons/md";
 
-function InfoPage({ show, originCoord, destinationCoord }) {
+function InfoPage({ show, travelType, busList, onSelectBusRoute }) {
     const [isDragging, setIsDragging] = useState(false);
     const [lastTouchY, setLastTouchY] = useState(0);
     const [infoPageHeight, setInfoPageHeight] = useState('45dvh'); // Initial height
@@ -38,6 +41,8 @@ function InfoPage({ show, originCoord, destinationCoord }) {
         });
     };
 
+
+    
     return (
         <div 
             className={`info-page ${show ? 'open' : ''}`}
@@ -46,12 +51,31 @@ function InfoPage({ show, originCoord, destinationCoord }) {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
-            {/* Insert other destination details here */}
-            <div className="info-page-handle" />
-                
+
+            {travelType === "bus" && (
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
+                                <div className="info-page-handle" />
+                                <Typography mt={2.4}variant="h6">CU Bus</Typography>
+                    
+                                {busList.map((bus, index) => (
+                                    <Box key={index} className="route-choice" display="flex" justifyContent="space-between" alignItems="center" width="90%" padding={1} onClick={() => onSelectBusRoute(bus)}>
+                                        <Box display="flex" alignItems="center">
+                                            <FaPersonWalking />
+                                            <span style={{fontSize:"15px"}}>{bus.timeFromOriginToStation} min</span> {/* Replace with actual data */}
+                                            <Box ml={2}><MdKeyboardArrowRight /> <FaBusSimple/>{bus.route} </Box>
+                                            <Box ml={2}><MdKeyboardArrowRight /> <FaPersonWalking className="route-choice-icon" /><span>{bus.timeFromDepartureToDest} min</span></Box> {/* Replace with actual data */}
+                                        </Box>
+                                        <Box>
+                                            Duration : {bus.timeForTotalBusTrip} {/* Display total trip time */}
+                                        </Box>
+                                    </Box>
+                                ))}
+                </Box>
+                )
+            }
             
+            </div>
                 
-        </div>
     );
 }
 
