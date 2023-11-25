@@ -136,11 +136,12 @@ const HomePage = () => {
   }
   const renderWalkDirectionsResponse = () =>{
     if (!walkDirectionsResponse) return null;
-    return <DirectionsRenderer
+    
+    return (<DirectionsRenderer
       directions={walkDirectionsResponse}
       options={{
         
-      }}/>
+      }}/>)
   }
   
 
@@ -218,7 +219,7 @@ const HomePage = () => {
   const renderBusDirectionsResponse = () =>{
     if (!directionsResponseFromOriginToStation) return null;
     if (!directionsResponseFromStationToDest) return null;
-    return <>
+    return (<>
             <DirectionsRenderer
                 directions={directionsResponseFromOriginToStation}
                 options={{
@@ -233,7 +234,7 @@ const HomePage = () => {
                     polylineOptions: { strokeColor: '#ff2527' },
                 }}
             />
-            </>
+            </>)
   }
 
 
@@ -465,9 +466,8 @@ const HomePage = () => {
           }
         ]
         
-  
-  
 
+        
   // Function to handle place selection
 
   const [suggestions, setSuggestions] = useState([]);
@@ -546,7 +546,14 @@ const HomePage = () => {
     console.log("selected dest coordinates are", destinationCoord);
   }, [originName, originCoord, destinationName]);
 
-  
+  const handleWalkButtonClick = () => {
+      setTravalType("walk")
+      setShowInfoPage(true)
+  };
+  const handleBusButtonClick = () => {
+    setTravalType("bus")
+    setShowInfoPage(true)
+  };
 
   // Function to render toilet markers
   const toiletMarkers = [
@@ -752,14 +759,11 @@ const HomePage = () => {
               // paddingBottom: showOriginSearch ? '15px' : '0',
               paddingTop: afterSearch ? '8px' : '0 '
             }}>
-              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#8ebfe8" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px"}} onClick={()=>{setTravalType("walk") 
-                                              setShowInfoPage(true)}}>
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#8ebfe8" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px"}} onClick={()=> handleWalkButtonClick() }>
                                       <FaPersonWalking size={20} style={{marginRight:"5px"}}/>
                                       {walkDuration} mins 
               </IconButton>
-              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#8ebfe8" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> {setTravalType("bus")
-              setShowInfoPage(true)
-              }}>
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#8ebfe8" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> handleBusButtonClick()}>
                                       <FaBusSimple size={20} style={{marginRight:"5px"}}/>
                                       {busList && busList.length > 0 ? `${busList[0].timeForTotalBusTrip} mins` : ""  }
               </IconButton>
@@ -793,10 +797,9 @@ const HomePage = () => {
           }
           {renderToiletMarkers()}
 
-          {renderWalkDirectionsResponse()}    
+          {travelType === "walk" ? renderWalkDirectionsResponse() : renderBusDirectionsResponse()}    
 
-          {renderBusDirectionsResponse()}
-
+      
 
           {isInfoWindowVisible && (
             <InfoWindowComponent 
