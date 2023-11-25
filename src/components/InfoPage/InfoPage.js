@@ -5,7 +5,7 @@ import { FaPersonWalking } from "react-icons/fa6";
 import { FaBusSimple } from "react-icons/fa6";
 import { MdKeyboardArrowRight } from "react-icons/md";
 
-function InfoPage({ show, travelType, busList, onSelectBusRoute }) {
+function InfoPage({ show, destinationName,travelType, busList, onSelectBusRoute }) {
     const [isDragging, setIsDragging] = useState(false);
     const [lastTouchY, setLastTouchY] = useState(0);
     const [infoPageHeight, setInfoPageHeight] = useState('45dvh'); // Initial height
@@ -41,7 +41,24 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute }) {
         });
     };
 
+        const extractDestinationParts = (destinationName) => {
+        const regex = /^(.*?)\s*\((.*?)\)$/; // Regular expression to match full name and nickname
+        const matches = destinationName.match(regex);
+        if (matches && matches.length === 3) {
+            return {
+                fullName: matches[1],
+                nickName: matches[2],
+            };
+        } else {
+            // If the regular expression doesn't match, treat the whole name as full name
+            return {
+                fullName: destinationName,
+                nickName: "", // No nickname
+            };
+        }
+    };
 
+    const { fullName, nickName } = extractDestinationParts(destinationName);
     
     return (
         <div 
@@ -51,6 +68,15 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute }) {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
+            {travelType === "walk" && (
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
+                    <div className="info-page-handle" />
+                    <Typography mt={2.4} variant="h6">Walking Directions</Typography>
+                    <Typography variant="body1">Destination: {fullName}</Typography>
+                    <Typography variant="body1">Nickname: {nickName}</Typography>
+                    {/* Add any additional information related to walking directions here */}
+                </Box>
+            )}
 
             {travelType === "bus" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">

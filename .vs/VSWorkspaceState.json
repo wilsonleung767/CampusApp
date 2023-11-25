@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\public",
+    "\\src",
+    "\\src\\components",
+    "\\src\\components\\ChatgptSearch",
+    "\\src\\components\\InfoPage",
+    "\\src\\components\\SearchBarSuggestion",
+    "\\src\\components\\SearchBusRoute",
+    "\\src\\data"
+  ],
+  "SelectedNode": "\\src\\components\\InfoPage\\InfoPage.js",
+  "PreviewInSolutionExplorer": false
+}
