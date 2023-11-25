@@ -12,7 +12,7 @@ import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion
 import { customPlaces } from "./data/Places.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
-import { FaPersonWalking } from "react-icons/fa6";
+import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
 import { FaBusSimple } from "react-icons/fa6";
 import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
 import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
@@ -729,7 +729,7 @@ const HomePage = () => {
                     <span style={{ fontSize: 16, marginRight: 7 }}>
                           Search
                     </span>
-                    <FaRoute size={20}/>
+                    <FaMagnifyingGlass size={20}/>
                 
                 </Button>
                 <IconButton onClick={clearRoute} size="small" >
