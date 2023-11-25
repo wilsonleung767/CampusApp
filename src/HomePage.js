@@ -12,7 +12,7 @@ import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion
 import { customPlaces } from "./data/Places.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
-import { FaPersonWalking } from "react-icons/fa6";
+import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
 import { FaBusSimple } from "react-icons/fa6";
 import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
 import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
@@ -136,11 +136,12 @@ const HomePage = () => {
   }
   const renderWalkDirectionsResponse = () =>{
     if (!walkDirectionsResponse) return null;
-    return <DirectionsRenderer
+    
+    return (<DirectionsRenderer
       directions={walkDirectionsResponse}
       options={{
         
-      }}/>
+      }}/>)
   }
   
 
@@ -218,22 +219,22 @@ const HomePage = () => {
   const renderBusDirectionsResponse = () =>{
     if (!directionsResponseFromOriginToStation) return null;
     if (!directionsResponseFromStationToDest) return null;
-    return <>
+    return (<>
             <DirectionsRenderer
                 directions={directionsResponseFromOriginToStation}
                 options={{
                     // options for the renderer, like polyline color
-                    polylineOptions: { strokeColor: '#ff2527' },
+                    polylineOptions: { strokeColor: '#4285F4' },
                 }}
             />
             <DirectionsRenderer
                 directions={directionsResponseFromStationToDest}
                 options={{
                     // different options for this renderer, like a different polyline color
-                    polylineOptions: { strokeColor: '#4285F4' },
+                    polylineOptions: { strokeColor: '#ff2527' },
                 }}
             />
-            </>
+            </>)
   }
 
 
@@ -326,6 +327,7 @@ const HomePage = () => {
         endStation: "",
         timeFromOriginToStation: null,
         timeFromDepartureToDest: null,
+        busTravelDuration: null,
         timeForTotalBusTrip: null,
         departureTime:null,
         arrivalTime:null,
@@ -346,10 +348,10 @@ const HomePage = () => {
 
     // Use await to ensure the values are set before moving on
     startBuilding = await retrieveNearestBuilding(originCoord);
-    endBuilding = await retrieveNearestBuilding(destinationCoord);
+    // endBuilding = await retrieveNearestBuilding(destinationCoord);
 
     const startBuildingAlias = pairPlaceAlias(startBuilding)
-    const endBuildingAlias = pairPlaceAlias(endBuilding)
+    // const endBuildingAlias = pairPlaceAlias(endBuilding)
     const tempBusList = [];
     
     // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
@@ -368,8 +370,7 @@ const HomePage = () => {
         const directionsResponseFromStationToDest = walkingRouteFromBusStop.walkDirectionsResponse
         const busDetails = calculateTripDurationByBus(bus.busRoute, bus.startStation, bus.endStation, timeFromOriginToStation, timeFromDepartureToDest)
         
-        
-
+      
         tempBusList.push({
           route: bus.busRoute,
           startStation: bus.startStation,
@@ -377,6 +378,7 @@ const HomePage = () => {
           timeFromOriginToStation,
           timeFromDepartureToDest,
           timeForTotalBusTrip: busDetails.totalTripTime,
+          busTravelDuration: busDetails.busTravelDuration,
           departureTime: busDetails.departureTime,
           arrivalTime: busDetails.arrivalTime,
           upcomingDepartures: busDetails.upcomingDepartures,
@@ -464,9 +466,8 @@ const HomePage = () => {
           }
         ]
         
-  
-  
 
+        
   // Function to handle place selection
 
   const [suggestions, setSuggestions] = useState([]);
@@ -545,7 +546,14 @@ const HomePage = () => {
     console.log("selected dest coordinates are", destinationCoord);
   }, [originName, originCoord, destinationName]);
 
-  
+  const handleWalkButtonClick = () => {
+      setTravalType("walk")
+      setShowInfoPage(true)
+  };
+  const handleBusButtonClick = () => {
+    setTravalType("bus")
+    setShowInfoPage(true)
+  };
 
   // Function to render toilet markers
   const toiletMarkers = [
@@ -793,7 +801,7 @@ const HomePage = () => {
                     <span style={{ fontSize: 16, marginRight: 7 }}>
                           Search
                     </span>
-                    <FaRoute size={20}/>
+                    <FaMagnifyingGlass size={20}/>
                 
                 </Button>
                 <IconButton onClick={clearRoute} size="small" >
@@ -823,14 +831,11 @@ const HomePage = () => {
               // paddingBottom: showOriginSearch ? '15px' : '0',
               paddingTop: afterSearch ? '8px' : '0 '
             }}>
-              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#8ebfe8" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px"}} onClick={()=>{setTravalType("walk") 
-                                              setShowInfoPage(true)}}>
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#8ebfe8" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px"}} onClick={()=> handleWalkButtonClick() }>
                                       <FaPersonWalking size={20} style={{marginRight:"5px"}}/>
                                       {walkDuration} mins 
               </IconButton>
-              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#8ebfe8" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> {setTravalType("bus")
-              setShowInfoPage(true)
-              }}>
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#8ebfe8" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> handleBusButtonClick()}>
                                       <FaBusSimple size={20} style={{marginRight:"5px"}}/>
                                       {busList && busList.length > 0 ? `${busList[0].timeForTotalBusTrip} mins` : ""  }
               </IconButton>
@@ -864,10 +869,9 @@ const HomePage = () => {
           }
           {renderToiletMarkers()}
 
-          {renderWalkDirectionsResponse()}    
+          {travelType === "walk" ? renderWalkDirectionsResponse() : renderBusDirectionsResponse()}    
 
-          {renderBusDirectionsResponse()}
-
+      
 
           {isInfoWindowVisible && (
             <InfoWindowComponent 
@@ -884,6 +888,8 @@ const HomePage = () => {
             travelType={travelType}
             busList={busList}
             onSelectBusRoute={onSelectBusRoute}
+            originName={originName}
+            destinationName={destinationName}
         />
         
       </Box>
@@ -891,7 +897,7 @@ const HomePage = () => {
       
 
       {/* Toggle Toilet Layer Button */}
-      <Box 
+      {/* <Box 
         position="absolute" 
         bottom="5%" 
         left="50%" 
@@ -906,7 +912,9 @@ const HomePage = () => {
                                                                     getNearestBuilding(originCoord)}}>
           show nearest building
         </Button>
-      </Box>
+      </Box> */}
+
+
     </Box>
            
     );

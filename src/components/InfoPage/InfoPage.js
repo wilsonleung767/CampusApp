@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./InfoPage.css";
 import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon} from "@mui/material";
 import { FaPersonWalking } from "react-icons/fa6";
 import { FaBusSimple } from "react-icons/fa6";
+import { FaLocationDot } from "react-icons/fa6";
 import { MdKeyboardArrowRight } from "react-icons/md";
 
-function InfoPage({ show, destinationName,travelType, busList, onSelectBusRoute }) {
+
+
+function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, destinationName}) {
     const [isDragging, setIsDragging] = useState(false);
     const [lastTouchY, setLastTouchY] = useState(0);
     const [infoPageHeight, setInfoPageHeight] = useState('45dvh'); // Initial height
@@ -41,7 +44,7 @@ function InfoPage({ show, destinationName,travelType, busList, onSelectBusRoute 
         });
     };
 
-        const extractDestinationParts = (destinationName) => {
+       const extractDestinationParts = (destinationName) => {
         const regex = /^(.*?)\s*\((.*?)\)$/; // Regular expression to match full name and nickname
         const matches = destinationName.match(regex);
         if (matches && matches.length === 3) {
@@ -59,6 +62,39 @@ function InfoPage({ show, destinationName,travelType, busList, onSelectBusRoute 
     };
 
     const { fullName, nickName } = extractDestinationParts(destinationName);
+    
+        const BusInfoSection = ({ bus, index, originName, destinationName }) => {
+        return (
+            <Box
+                style={{
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                    padding: "10px",
+                    marginTop: "10px",
+                }}
+            >
+                <div>
+                    <span>Walk by red line to {bus.startStation} station</span>
+                    <span style={{ float: "right" }}>{bus.timeFromOriginToStation} min</span>
+                </div>
+                <div>
+                    <span>Take bus {bus.route}</span>
+                    <span style={{ float: "right" }}>{bus.busTravelDuration} min</span>
+                </div>
+                <div>
+                    <span>
+                        Get off at {bus.endStation}, walk by blue line to{" "}
+                        <FaLocationDot color="red" /> {destinationName}
+                    </span>
+                    <span style={{ float: "right" }}>{bus.timeFromDepartureToDest} min</span>
+                </div>
+            </Box>
+        );
+    };
+
+    useEffect(()=>{
+        console.log("inside infopage originName",originName , "destinationName",destinationName)}
+    ,[destinationName,originName])
     
     return (
         <div 
@@ -80,25 +116,28 @@ function InfoPage({ show, destinationName,travelType, busList, onSelectBusRoute 
 
             {travelType === "bus" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
-                                <div className="info-page-handle" />
-                                <Typography mt={2.4}variant="h6">CU Bus</Typography>
-                    
-                                {busList.map((bus, index) => (
-                                    <Box key={index} className="route-choice" display="flex" justifyContent="space-between" alignItems="center" width="90%" padding={1} onClick={() => onSelectBusRoute(bus)}>
-                                        <Box display="flex" alignItems="center">
-                                            <FaPersonWalking />
-                                            <span style={{fontSize:"15px"}}>{bus.timeFromOriginToStation} min</span> {/* Replace with actual data */}
-                                            <Box ml={2}><MdKeyboardArrowRight /> <FaBusSimple/>{bus.route} </Box>
-                                            <Box ml={2}><MdKeyboardArrowRight /> <FaPersonWalking className="route-choice-icon" /><span>{bus.timeFromDepartureToDest} min</span></Box> {/* Replace with actual data */}
-                                        </Box>
-                                        <Box>
-                                            Duration : {bus.timeForTotalBusTrip} {/* Display total trip time */}
-                                        </Box>
-                                    </Box>
-                                ))}
+                    <div className="info-page-handle" />
+                    <Typography mt={2.4} variant="h6">CU Bus</Typography>
+
+                    {busList.map((bus, index) => (
+                        <Box width="90%">
+
+                        <Box key={index} className="route-choice"  onClick={() => onSelectBusRoute(bus)}>
+                            <Box display="flex" alignItems="center">
+                                <FaPersonWalking />
+                                <span style={{ fontSize: "15px" }}>{bus.timeFromOriginToStation} min</span> {/* Replace with actual data */}
+                                <Box ml={2}><MdKeyboardArrowRight /> <FaBusSimple/>{bus.route} </Box>
+                                <Box ml={2}><MdKeyboardArrowRight /> <FaPersonWalking className="route-choice-icon" /><span>{bus.timeFromDepartureToDest} min</span></Box> {/* Replace with actual data */}
+                            </Box>
+                            <Box>
+                                Duration: {bus.timeForTotalBusTrip} {/* Display total trip time */}
+                            </Box>
+                        </Box>
+                        <BusInfoSection bus={bus} index={index} originName={originName} destinationName={destinationName} />
+                        </Box>
+                    ))}
                 </Box>
-                )
-            }
+            )}
             
             </div>
                 
