@@ -17,7 +17,7 @@ import { FaBusSimple } from "react-icons/fa6";
 import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
 import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 
-import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTRIPDurationByBus.mjs";
+import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 
 const HomePage = () => {
   
@@ -223,14 +223,14 @@ const HomePage = () => {
                 directions={directionsResponseFromOriginToStation}
                 options={{
                     // options for the renderer, like polyline color
-                    polylineOptions: { strokeColor: '#ff2527' },
+                    polylineOptions: { strokeColor: '#4285F4' },
                 }}
             />
             <DirectionsRenderer
                 directions={directionsResponseFromStationToDest}
                 options={{
                     // different options for this renderer, like a different polyline color
-                    polylineOptions: { strokeColor: '#4285F4' },
+                    polylineOptions: { strokeColor: '#ff2527' },
                 }}
             />
             </>
@@ -326,6 +326,7 @@ const HomePage = () => {
         endStation: "",
         timeFromOriginToStation: null,
         timeFromDepartureToDest: null,
+        busTravelDuration: null,
         timeForTotalBusTrip: null,
         departureTime:null,
         arrivalTime:null,
@@ -346,10 +347,10 @@ const HomePage = () => {
 
     // Use await to ensure the values are set before moving on
     startBuilding = await retrieveNearestBuilding(originCoord);
-    endBuilding = await retrieveNearestBuilding(destinationCoord);
+    // endBuilding = await retrieveNearestBuilding(destinationCoord);
 
     const startBuildingAlias = pairPlaceAlias(startBuilding)
-    const endBuildingAlias = pairPlaceAlias(endBuilding)
+    // const endBuildingAlias = pairPlaceAlias(endBuilding)
     const tempBusList = [];
     
     // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
@@ -368,8 +369,7 @@ const HomePage = () => {
         const directionsResponseFromStationToDest = walkingRouteFromBusStop.walkDirectionsResponse
         const busDetails = calculateTripDurationByBus(bus.busRoute, bus.startStation, bus.endStation, timeFromOriginToStation, timeFromDepartureToDest)
         
-        
-
+      
         tempBusList.push({
           route: bus.busRoute,
           startStation: bus.startStation,
@@ -377,6 +377,7 @@ const HomePage = () => {
           timeFromOriginToStation,
           timeFromDepartureToDest,
           timeForTotalBusTrip: busDetails.totalTripTime,
+          busTravelDuration: busDetails.busTravelDuration,
           departureTime: busDetails.departureTime,
           arrivalTime: busDetails.arrivalTime,
           upcomingDepartures: busDetails.upcomingDepartures,
@@ -811,6 +812,8 @@ const HomePage = () => {
             travelType={travelType}
             busList={busList}
             onSelectBusRoute={onSelectBusRoute}
+            originName={originName}
+            destinationName={destinationName}
         />
         
       </Box>
@@ -818,7 +821,7 @@ const HomePage = () => {
       
 
       {/* Toggle Toilet Layer Button */}
-      <Box 
+      {/* <Box 
         position="absolute" 
         bottom="5%" 
         left="50%" 
@@ -833,7 +836,9 @@ const HomePage = () => {
                                                                     getNearestBuilding(originCoord)}}>
           show nearest building
         </Button>
-      </Box>
+      </Box> */}
+
+
     </Box>
            
     );

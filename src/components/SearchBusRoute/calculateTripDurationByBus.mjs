@@ -28,6 +28,7 @@ export function calculateTripDurationByBus(busRoute, startStation, endStation, t
             busDetails = {
                 busRoute: busRoute,
                 status: "working",
+                busTravelDuration: busTravelDuration,
                 totalTripTime: Math.ceil(totalTripTime),
                 departureTime: departureDateTime,
                 arrivalTime: arrivalTime,
@@ -99,10 +100,11 @@ console.log(calculateTripDurationByBus("1A","MTR", "SHHC", 1,1))
 
 
 // {
-//     busRoute: '1A',
-//     status: 'working',
-//     totalTripTime: 21,
-//     departureTime: 2023-11-17T13:20:00.000Z,
-//     arrivalTime: 2023-11-17T13:28:00.000Z,
-//     upcomingDepartures: [ '13:20:00', '13:40:00', '14:20:00' ]  
-//   }
+//   busRoute: '1A',
+//   status: 'working',
+//   busTravelDuration: 8,
+//   totalTripTime: 21,
+//   departureTime: 2023-11-17T13:20:00.000Z,
+//   arrivalTime: 2023-11-17T13:28:00.000Z,
+//   upcomingDepartures: [ '13:20:00', '13:40:00', '14:20:00' ]
+// }

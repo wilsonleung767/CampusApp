@@ -43,11 +43,15 @@
 }
 
 .route-choice {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1px;   
     margin: 10px 0;
     padding: 5px;
-    width: 90%;
     border: 1px solid #ccc; /* Example border */
     border-radius: 5px; /* Rounded corners */
     background-color: #f8f8f8; /* Light background */ /* Adjust font size */
     color: #333; /* Text color */
+    
 }
