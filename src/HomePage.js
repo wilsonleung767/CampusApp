@@ -1,7 +1,7 @@
 import React, { useMemo,useState, useEffect, useRef , useLayoutEffect} from "react";
 import { GoogleMap, useLoadScript,  MarkerF,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow,Marker} from "@react-google-maps/api";
 // import {Box,Button,ButtonGroup,Flex,HStack,IconButton,Input,SkeletonText,Text} from '@chakra-ui/react'
-import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon} from "@mui/material";
+import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon,} from "@mui/material";
 import LocationPicker from "location-picker";
 import { FaLocationArrow, FaTimes,FaRoute } from 'react-icons/fa'
 import {FaLocationCrosshairs,FaRobot} from 'react-icons/fa6'
@@ -10,6 +10,7 @@ import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
 import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion.js";
 import { customPlaces } from "./data/Places.js";
+import { toiletMarkers,waterFountainMarkers } from "./data/Markers.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
@@ -18,6 +19,7 @@ import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
 import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
+import greyDot from './image/greyDot.png';
 
 const HomePage = () => {
   
@@ -48,7 +50,7 @@ const HomePage = () => {
   const [map, setMap] = useState(/** @type google.maps.Map */ (null))
   const [walkDirectionsResponse, setWalkDirectionsResponse] = useState(null)
   const [distance, setDistance] = useState('')
-  const [walkDuration, setWalkDistance] = useState('')
+  const [walkDuration, setWalkDuration] = useState('')
   const [mapKey, setMapKey] = useState(0); 
   
   // Real time user location tracking 
@@ -128,21 +130,66 @@ const HomePage = () => {
       });
       setWalkDirectionsResponse(results);
       setDistance(results.routes[0].legs[0].distance.text);
-      setWalkDistance(results.routes[0].legs[0].walkDuration);
+      let durationInMin = Math.ceil(results.routes[0].legs[0].duration.value/60)
+      setWalkDuration(durationInMin);
       setShowInfoPage(true);
     } catch (error) {
       console.error("Failed to calculate route", error);
     }
   }
-  const renderWalkDirectionsResponse = () =>{
+  const renderWalkDirectionsResponse = () => {
     if (!walkDirectionsResponse) return null;
-    
-    return (<DirectionsRenderer
-      directions={walkDirectionsResponse}
-      options={{
-        
-      }}/>)
-  }
+
+    return (
+      <>
+        <DirectionsRenderer
+          directions={walkDirectionsResponse}
+          options={{
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: 'White', // Color of the dotted line
+              strokeOpacity: 0, // Make the primary line invisible
+              strokeWeight: 1,
+              icons: [{
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                  strokeOpacity: 1,
+                  strokeWeight: 2, // Weight of the invisible primary line
+                  fillOpacity: 1,
+                  fillColor: "#2c6bf2",
+                  scale: 5, // Size of the circle dot
+                },
+                offset: '0',
+                repeat: '20px' // Distance between each circle dot
+              }],
+            },
+          }}
+        />
+        <Marker // Start marker
+          position={{
+            lat: originCoord[0],
+            lng: originCoord[1],
+          }}
+          icon={{
+            path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+            fillColor: "#bdbdbd",
+            fillOpacity: 1,
+            strokeOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#787878",
+            scale: 7, // Size of the circle dot
+          }}
+          
+        />
+        <Marker // End marker
+          position={{
+            lat: destinationCoord[0],
+            lng: destinationCoord[1],
+          }}
+        />
+      </>
+    );
+  };
   
 
   const [directionsResponseFromOriginToStation, setDirectionsResponseFromOriginToStation] = useState(null);
@@ -211,30 +258,79 @@ const HomePage = () => {
 
   const onSelectBusRoute = (selectedBusRoute) => {
     // Update state to render bus directions on the map
-    setWalkDirectionsResponse(null)
+    setTravalType("bus")
     setDirectionsResponseFromOriginToStation(selectedBusRoute.directionsResponseFromOriginToStation);
     setDirectionsResponseFromStationToDest(selectedBusRoute.directionsResponseFromStationToDest);
   };
 
   const renderBusDirectionsResponse = () =>{
-    if (!directionsResponseFromOriginToStation) return null;
-    if (!directionsResponseFromStationToDest) return null;
-    return (<>
+    if (!directionsResponseFromOriginToStation || !directionsResponseFromStationToDest) return null;
+    const iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+    // Extracting start and end locations
+    const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
+    const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
+
+    const startLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[0].start_location;
+    const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
+    
+    return (
+      <>
             <DirectionsRenderer
                 directions={directionsResponseFromOriginToStation}
                 options={{
-                    // options for the renderer, like polyline color
-                    polylineOptions: { strokeColor: '#4285F4' },
+                    suppressMarkers: true,
+                    polylineOptions: {
+                      strokeColor: 'White', // Color of the dotted line
+                      strokeOpacity: 0, // Make the primary line invisible
+                      strokeWeight: 1,
+                      icons: [{
+                        icon: {
+                          path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                          strokeOpacity: 1,
+                          strokeWeight: 2, // Weight of the invisible primary line
+                          fillOpacity: 1,
+                          fillColor: '#4285F4',
+                          scale: 5, // Size of the circle dot
+                        },
+                        offset: '0',
+                        repeat: '18px' // Distance between each circle dot
+                      }],
+                    },
                 }}
             />
             <DirectionsRenderer
                 directions={directionsResponseFromStationToDest}
                 options={{
                     // different options for this renderer, like a different polyline color
-                    polylineOptions: { strokeColor: '#ff2527' },
+                    suppressMarkers: true,
+                    polylineOptions: {
+                      strokeColor: 'White', // Color of the dotted line
+                      strokeOpacity: 0, // Make the primary line invisible
+                      strokeWeight: 1,
+                      icons: [{
+                        icon: {
+                          path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                          strokeOpacity: 1,
+                          strokeWeight: 2, // Weight of the invisible primary line
+                          fillOpacity: 1,
+                          fillColor: '#ff2527',
+                          scale: 5, // Size of the circle dot
+                        },
+                        offset: '0',
+                        repeat: '18px' // Distance between each circle dot
+                      }],
+                    },
                 }}
             />
-            </>)
+            <Marker
+              position={endLocationFromOriginToStation}
+              icon={{
+                url: '.image/greyDot.png', // Path to your custom icon
+                scaledSize: new google.maps.Size(30, 30),
+              }}
+            />
+      </>
+    )
   }
 
 
@@ -243,7 +339,7 @@ const HomePage = () => {
           setDirectionsResponseFromStationToDest(null);
           setDirectionsResponseFromOriginToStation(null);
           setDistance('');
-          setWalkDistance('');
+          setWalkDuration('');
           originInputRef.current.value = '';
           destinationInputRef.current.value = '';
           setOriginCoord([]);
@@ -343,10 +439,8 @@ const HomePage = () => {
     calculateRouteByWalking() 
     // calculateWalkingRouteToBusStop({ lat: 22.415880, lng: 114.210859 })
 
-    // Define startBuilding and endBuilding
     let startBuilding, endBuilding;
 
-    // Use await to ensure the values are set before moving on
     startBuilding = await retrieveNearestBuilding(originCoord);
     // endBuilding = await retrieveNearestBuilding(destinationCoord);
 
@@ -555,91 +649,6 @@ const HomePage = () => {
     setShowInfoPage(true)
   };
 
-  // Function to render toilet markers
-  const toiletMarkers = [
-      { lat: 22.4162632, lng: 114.210932, name: "Yasumoto International Academic Park" },
-      { lat: 22.4166888, lng: 114.2116889, name: "Wu Ho Man Yuen Building" },
-      { lat: 22.4186158, lng: 114.2112792, name: "University Sports Centre" },
-      { lat: 22.4139236, lng: 114.2084106, name: "Esther Lee Building" },
-      { lat: 22.4155973, lng: 114.2071573, name: "Sino Building" },
-      { lat: 22.4153137, lng: 114.2071823, name: "Chen Kou Bun Building" },
-      { lat: 22.4149687, lng: 114.2074618, name: "Wong Foo Yuan Building" },
-      { lat: 22.4146493, lng: 114.207813, name: "Hui Yeung Shing Building" },
-      { lat: 22.4163689, lng: 114.2118972, name: "An Integrated Teaching Building" },
-      { lat: 22.418139, lng: 114.210221, name: "Chan Chun Ha Hall" },
-      { lat: 22.4121683, lng: 114.2105302, name: "Cheng Yu Tung Building" },
-      { lat: 22.4143177, lng: 114.208199, name: "Chung Chi College Administration Building" },
-      { lat: 22.4150119, lng: 114.2070794, name: "Li Wai Chun Building" },
-      { lat: 22.4170907, lng: 114.2088325, name: "Pommerenke Student Centre" },
-      { lat: 22.4195157, lng: 114.2032903, name: "Fung King Hey Building" },
-      { lat: 22.4183497, lng: 114.2045971, name: "John Fulton Centre" },
-      { lat: 22.4190542, lng: 114.2068805, name: "Lady Shaw Building" },
-      { lat: 22.4223773, lng: 114.2015731, name: "Lecture Theatre, Shaw College" },
-      { lat: 22.4196819, lng: 114.2039352, name: "Lee Shau Kee Building" },
-      { lat: 22.4200222, lng: 114.2027784, name: "Leung Kau Kui Building" },
-      { lat: 22.4193674, lng: 114.2038027, name: "Li Dak Sum Building" },
-      { lat: 22.4192749, lng: 114.2058028, name: "Institute of Chinese Studies" },
-      { lat: 22.4182047, lng: 114.207968, name: "William M.W. Mong Engineering Building" },
-      { lat: 22.419994, lng: 114.2092386, name: "Mong Man Wai Building" },
-      { lat: 22.41966, lng: 114.206315, name: "Pi 'Chiu Building" },
-      { lat: 22.4180999, lng: 114.207275, name: "Ho Sin Hang Engineering Building" },
-      { lat: 22.419224, lng: 114.2088179, name: "Science Centre" },
-      { lat: 22.4201613, lng: 114.2071982, name: "Sir Run Run Shaw Hall" },
-      { lat: 22.4200548, lng: 114.206562, name: "Y. C. Liang Hall" },
-      { lat: 22.4212891, lng: 114.2078891, name: "Cheng Ming Building" },
-      { lat: 22.4210177, lng: 114.206008, name: "Cheung Chuk Shan Amenities Building" },
-      { lat: 22.42172, lng: 114.2080626, name: "Humanities Building" },
-      { lat: 22.4209039, lng: 114.2092957, name: "Staff Student Centre – Leung Hung Kee Building" },
-      { lat: 22.4212377, lng: 114.2044583, name: "T. C. Cheng Building" },
-      { lat: 22.4205059, lng: 114.2045313, name: "Tsang Shiu Tim Building" },
-      { lat: 22.4232018, lng: 114.2016647, name: "Wen Lan Tang" }
-
-
-      // Add more toilet marker data as needed
-    ];
-  const waterFountainMarkers = [
-       { lat: 22.4163689, lng: 114.2118972, name: "An Integrated Teaching Building", description: "G/F, 2/F, 3/F, 4/F" },
-        { lat: 22.4195318, lng: 114.2088414, name: "Basic Medical Sciences Building", description: "G/F, Basic Medical Sciences Building Snack Bar" },
-        { lat: 22.4182766, lng: 114.2052426, name: "Benjamin Franklin Centre", description: "G/F, Benjamin Franklin Centre Coffee Corner, LG/F, Vegetarian Food Shop" },
-        { lat: 22.418139, lng: 114.210221, name: "Chan Chun Ha Hall", description: "1/F, Canteen of S.H. Ho College" },
-        { lat: 22.4121683, lng: 114.2105302, name: "Cheng Yu Tung Building", description: "G/F, 3/F" },
-        { lat: 22.4210177, lng: 114.206008, name: "Cheung Chuk Shan Amenities Building", description: "G/F, United College Student Canteen 1/F, 2/F" },
-        { lat: 22.4214658, lng: 114.208544, name: "Ch'ien Mu Library", description: "G/F, 1/F" },
-        { lat: 22.4166358, lng: 114.2097467, name: "Chung Chi Tang", description: "Chung Chi College Student Canteen" },
-        { lat: 22.4252047, lng: 114.2063931, name: "C.W. Chu College", description: "G/F, Canteen of C.W. Chu College" },
-        { lat: 22.4164706, lng: 114.2087764, name: "Elisabeth Luce Moore Library", description: "G/F, 1/F, 2/F" },
-        { lat: 22.4137118, lng: 114.2084967, name: "Esther Lee Building", description: "1/F" },
-        { lat: 22.4195157, lng: 114.2032903, name: "Fung King Hey Building", description: "Swire Hall" },
-        { lat: 22.4180999, lng: 114.207275, name: "Ho Sin‐Hang Engineering Building", description: "1/F, 9/F, 10/F" },
-        { lat: 22.421691, lng: 114.2080429, name: "Humanities Building", description: "G/F, 2/F" },
-        { lat: 22.4225853, lng: 114.2010125, name: "Kuo Mou Hall", description: "G/F, Shaw College Student Canteen" },
-        { lat: 22.4185554, lng: 114.210764, name: "Kwok Sports Building", description: "1/F" },
-        { lat: 22.4190542, lng: 114.2068805, name: "Lady Shaw Building", description: "G/F" },
-        { lat: 22.4196819, lng: 114.2039352, name: "Lee Shau Kee Building", description: "2/F" },
-        { lat: 22.4193674, lng: 114.2038027, name: "Li Dak Sum Yip Yio Chiu Building / Library Extension", description: "G/F" },
-        { lat: 22.4148942, lng: 114.2086905, name: "Lingnan Stadium", description: "" },
-        { lat: 22.419994, lng: 114.2092386, name: "Mong Man Wai Building", description: "7/F" },
-        { lat: 22.41966, lng: 114.206315, name: "Pi Ch'iu Building", description: "1/F" },
-        { lat: 22.4170907, lng: 114.2088325, name: "Pommerenke Student Centre", description: "G/F, 1/F, 3/F" },
-        { lat: 22.419224, lng: 114.2088179, name: "Science Centre East Block", description: "LG/F" },
-        { lat: 22.4155973, lng: 114.2071573, name: "Sino Building", description: "4/F" },
-        { lat: 22.4210186, lng: 114.2092077, name: "Staff Student Centre ‐ Leung Hung Kee Building", description: "LG/F, New Asia College Student Canteen ,G/F, Yun Chi Hsien ,G/F ,1/F" },
-        { lat: 22.4212377, lng: 114.2044583, name: "T.C. Cheng Building", description: "G/F, 5/F (Inside Department of Social Work)" },
-        { lat: 22.4173176, lng: 114.2064036, name: "Theology Building", description: "G/F" },
-        { lat: 22.419521, lng: 114.2045123, name: "Tin Ka Ping Building", description: "2/F, 4/F" },
-        { lat: 22.4195678, lng: 114.2050682, name: "University Library", description: "LG/F, 1/F, 2/F, 3/F, 4/F" },
-        { lat: 22.4186158, lng: 114.2112792, name: "University Sports Centre", description: "Near main entrance, Near staircase at Sports Field entrance, East side of Sir Philip Haddon‐Cave Sports Field, under the time display board" },
-        { lat: 22.4232018, lng: 114.2016647, name: "Wen Lan Tang", description: "LG4/F, LG3/F" },
-        { lat: 22.4181962, lng: 114.2079927, name: "William M W Mong Engineering Building", description: "4/F" },
-        { lat: 22.4149687, lng: 114.2074618, name: "Wong Foo Yuan Building", description: "2/F" },
-        { lat: 22.420886, lng: 114.2047948, name: "Wu Chung Multimedia Library", description: "G/F, 1/F, 2/F" },
-        { lat: 22.4166888, lng: 114.2116889, name: "Wu Ho Man Yuen Building", description: "2/F, 3/F, 4/F, 5/F, 6/F, 8/F" },
-        { lat: 22.4219816, lng: 114.2026717, name: "Wu Yee Sun College", description: "Lower Floor, House of Sunny Living, Wu Yee Sun College Student Canteen (with Café), LG/F, West Bock" },
-        { lat: 22.4200548, lng: 114.206562, name: "Y.C. Liang Hall", description: "1/F" },
-        { lat: 22.4162632, lng: 114.210932, name: "Yasumoto International Academic Park", description: "G/F, 1/F, 2/F, 3/F, 4/F, 5/F, 6/F" }
-
-      
-    ];
   const touristSpotMarkers = [
       
       
@@ -709,7 +718,7 @@ const HomePage = () => {
           position="absolute" 
           top={12} 
           zIndex={10}
-          p={0.8} 
+          p={0.5} 
           bgcolor="background.paper" 
           boxShadow="3"
           borderRadius={5}
@@ -721,7 +730,7 @@ const HomePage = () => {
               maxHeight: showOriginSearch ? '100px' : '0',  
               transition: 'all 0.3s ease-out', // Adjust timing and easing as needed
               opacity: showOriginSearch ? 1 : 0,
-              paddingBottom: showOriginSearch ? '15px' : '0',
+              paddingBottom: showOriginSearch ? '12px' : '0',
               paddingTop: showOriginSearch ? '6px' : '0 '
             }}
           >
@@ -788,17 +797,16 @@ const HomePage = () => {
                     variant="contained" 
                     color="primary" 
                     size="small" 
-                    
-                    style={{display: "flex", 
-                            alignItems: "center",
-                            justifyContent: "center",
-                            alignContent: "center" 
+                    style={{
+                            dissplay: "relative",
+                            left: "100px",
+                            borderRadius: "8px", 
                           }} 
                     onClick = { NLPSearchToggle ? () => {handleNLPQuery()} :
                                                   () => {handleSearch() 
                                                           // getNearestBuilding(originCoord)
                               }}>
-                    <span style={{ fontSize: 16, marginRight: 7 }}>
+                    <span style={{ fontSize: 14, marginRight: 7 }}>
                           Search
                     </span>
                     <FaMagnifyingGlass size={20}/>
@@ -829,15 +837,17 @@ const HomePage = () => {
               transition: 'all 0.1s ease-out', // Adjust timing and easing as needed
               opacity: afterSearch ? 1 : 0,
               // paddingBottom: showOriginSearch ? '15px' : '0',
-              paddingTop: afterSearch ? '8px' : '0 '
+              paddingTop: afterSearch ? '8px' : '0 ',
+              display: "flex",
+              justifyContent: "center",
             }}>
               <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#8ebfe8" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px"}} onClick={()=> handleWalkButtonClick() }>
-                                      <FaPersonWalking size={20} style={{marginRight:"5px"}}/>
-                                      {walkDuration} mins 
+                                      <FaPersonWalking size={20} style={{marginRight:"1px"}}/>
+                                      {walkDuration} min
               </IconButton>
               <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#8ebfe8" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> handleBusButtonClick()}>
-                                      <FaBusSimple size={20} style={{marginRight:"5px"}}/>
-                                      {busList && busList.length > 0 ? `${busList[0].timeForTotalBusTrip} mins` : ""  }
+                                      <FaBusSimple size={20} style={{marginRight:"4px"}}/>
+                                      {busList && busList.length > 0 ? `${busList[0].timeForTotalBusTrip} min` : ""  }
               </IconButton>
           </Box>
        
@@ -889,12 +899,10 @@ const HomePage = () => {
             busList={busList}
             onSelectBusRoute={onSelectBusRoute}
             originName={originName}
-            destinationName={destinationName}
         />
         
       </Box>
 
-      
 
       {/* Toggle Toilet Layer Button */}
       {/* <Box 
@@ -913,7 +921,7 @@ const HomePage = () => {
           show nearest building
         </Button>
       </Box> */}
-
+    
 
     </Box>
            

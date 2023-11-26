@@ -63,34 +63,83 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
     const { fullName, nickName } = extractDestinationParts(destinationName);
     
-        const BusInfoSection = ({ bus, index, originName, destinationName }) => {
+    const BusInfoSection = ({ bus, index, originName, destinationName }) => {
+        const [waitingTime, setWaitingTime] = useState(0);
+
+        useEffect(() => {
+            const updateWaitingTime = () => {
+                const currentTime = new Date("2023-11-17T13:03:23.813Z");
+                const departureTime = new Date(bus.departureTime);
+                const newWaitingTime = Math.max(0, Math.ceil((departureTime - currentTime) / (1000 * 60)));
+                setWaitingTime(newWaitingTime); // Update waiting time in minutes
+            };
+    
+            // Initial update
+            updateWaitingTime();
+    
+            // Set an interval to update waiting time every minute
+            const intervalId = setInterval(updateWaitingTime, 60000); // 60,000 milliseconds = 1 minute
+    
+            // Clean up interval on component unmount
+            return () => clearInterval(intervalId);
+        }, [bus.departureTime]);
+        
         return (
-            <Box
-                style={{
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                    padding: "10px",
-                    marginTop: "10px",
-                }}
-            >
-                <div>
-                    <span>Walk by red line to {bus.startStation} station</span>
-                    <span style={{ float: "right" }}>{bus.timeFromOriginToStation} min</span>
-                </div>
-                <div>
-                    <span>Take bus {bus.route}</span>
-                    <span style={{ float: "right" }}>{bus.busTravelDuration} min</span>
-                </div>
-                <div>
-                    <span>
-                        Get off at {bus.endStation}, walk by blue line to{" "}
-                        <FaLocationDot color="red" /> {destinationName}
-                    </span>
-                    <span style={{ float: "right" }}>{bus.timeFromDepartureToDest} min</span>
-                </div>
-            </Box>
-        );
-    };
+        <Box
+            style={{
+                border: "1px solid #ddd",
+                borderRadius: "8px",
+                padding: "10px",
+                marginTop: "15px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                backgroundColor: "white",
+            }}
+        >
+                <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">
+                    <Typography variant="body1">
+                        <FaPersonWalking style={{ marginRight: "5px" }} />
+                        Walk to <FaLocationDot color="blue" /> {bus.startStation} station
+                    </Typography>
+                    <Typography variant="body1" style={{ fontWeight: "bold" }}>
+                        {bus.timeFromOriginToStation} min
+                    </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">
+                    
+                    <Box style={{display:"flex", alignItems:"center"}}>
+                    <Typography variant="body1">
+                        Take
+                    </Typography> <FaBusSimple style={{ marginLeft:"5px", marginRight: "3px" }} />
+                        <Box style={{ backgroundColor: "red", padding: "0 5px", borderRadius: "4px" }}>
+                            <Typography variant="body1" style={{ color: "white", textAlign: "center" }}>
+                                {bus.route}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Typography variant="body1" style={{ fontWeight: "bold", color: "#4caf50" }}>
+                        Coming in {waitingTime} min
+                    </Typography>
+                </Box>
+                <Typography variant="body1" marginLeft="20px" marginBottom="10px">
+                    More Buses at
+                    {bus.upcomingDepartures.slice(1).map((time, index) => (
+                        <Box key={index} component="span" mx="8px" bgcolor="#f0f0f0" px="5px" borderRadius="4px">
+                            {time.slice(0, 5)}
+                        </Box>
+                    ))}
+                </Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="body1">
+                        <FaPersonWalking style={{ marginRight: "5px" }} />
+                        Walk to <FaLocationDot color="red" /> {destinationName}
+                    </Typography>
+                    <Typography variant="body1" style={{ fontWeight: "bold" }}>
+                        {bus.timeFromDepartureToDest} min
+                    </Typography>
+                </Box>
+        </Box>
+            );
+        };
 
     useEffect(()=>{
         console.log("inside infopage originName",originName , "destinationName",destinationName)}
@@ -120,20 +169,43 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     <Typography mt={2.4} variant="h6">CU Bus</Typography>
 
                     {busList.map((bus, index) => (
-                        <Box width="90%">
+                        <Box width="93%">
 
-                        <Box key={index} className="route-choice"  onClick={() => onSelectBusRoute(bus)}>
-                            <Box display="flex" alignItems="center">
-                                <FaPersonWalking />
-                                <span style={{ fontSize: "15px" }}>{bus.timeFromOriginToStation} min</span> {/* Replace with actual data */}
-                                <Box ml={2}><MdKeyboardArrowRight /> <FaBusSimple/>{bus.route} </Box>
-                                <Box ml={2}><MdKeyboardArrowRight /> <FaPersonWalking className="route-choice-icon" /><span>{bus.timeFromDepartureToDest} min</span></Box> {/* Replace with actual data */}
-                            </Box>
-                            <Box>
-                                Duration: {bus.timeForTotalBusTrip} {/* Display total trip time */}
-                            </Box>
-                        </Box>
-                        <BusInfoSection bus={bus} index={index} originName={originName} destinationName={destinationName} />
+                            <Box key={index} className="route-choice"  onClick={() => onSelectBusRoute(bus)}>
+                                            {/* Walking to Station */}
+                                <Box display="flex" alignItems="center">
+                                                <FaPersonWalking style={{ marginRight: "3px" }} />
+                                                <Typography variant="body1">{bus.timeFromOriginToStation}</Typography>
+                                </Box>
+                                            
+                                            {/* Arrow Icon */}
+                                            <MdKeyboardArrowRight/>
+
+                                            {/* Bus Route */}
+                                            <Box display="flex" alignItems="center">
+                                                <FaBusSimple style={{ marginRight: "3px" }} />
+                                                <Box bgcolor="red" px={0.5} borderRadius="4px">
+                                                    <Typography variant="body1" color="white">
+                                                        {bus.route}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+
+                                            {/* Arrow Icon */}
+                                            <MdKeyboardArrowRight />
+
+                                            {/* Walking from Station */}
+                                            <Box display="flex" alignItems="center">
+                                                <FaPersonWalking style={{ marginRight: "5px" }} />
+                                                <Typography variant="body1">{bus.timeFromDepartureToDest}</Typography>
+                                            </Box>
+
+                                            {/* Total Duration */}
+                                            <Box ml={2}>
+                                                <Typography variant="body1" fontWeight="bold">Duration: {bus.timeForTotalBusTrip} min</Typography>
+                                            </Box>
+                                        </Box>
+                            <BusInfoSection bus={bus} index={index} originName={originName} destinationName={destinationName} />
                         </Box>
                     ))}
                 </Box>
