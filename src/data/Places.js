@@ -6,6 +6,7 @@ export const customPlaces = [
     { "Pommerenke Student Centre (po can , PSC)": {lat: 22.4170907	, lng: 114.2088325}},
     { "University Library (ULIB)": {lat: 22.419572823075928 , lng: 114.20506416623314}},
     { "Nearest Toilet":{} },
+    { "Nearest Water Fountain":{} }
   ];
 
   

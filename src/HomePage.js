@@ -10,7 +10,7 @@ import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
 import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion.js";
 import { customPlaces } from "./data/Places.js";
-import { toiletMarkers,waterFountainMarkers } from "./data/Markers.js";
+import { toiletMarkers,waterFountainMarkers} from "./data/Markers.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
@@ -20,7 +20,7 @@ import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 import greyDot from './image/greyDot.png';
-import toliet from './image/toliet.png';
+import toilet from './image/toilet.png';
 import waterFountain from './image/waterFountain.png';
 const HomePage = () => {
   
@@ -34,6 +34,7 @@ const HomePage = () => {
   const [NLPQuery, setNLPQuery] = useState("");
 
   const [showToiletLayer, setShowToiletLayer] = useState(false);
+  const [showwaterFountainLayer, setShowwaterFountainLayer] = useState(false);
   const center = useMemo(() => ({ lat: 22.418426709637526, lng: 114.20771628364456 }), []);
   const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY
   
@@ -552,7 +553,7 @@ const HomePage = () => {
     });
   };
 
-/*  function getNearestWaterFountain(origin) {
+  function getNearestwaterFountain(origin) {
     const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
     const service = new google.maps.DistanceMatrixService();
     const destinations = waterFountainMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
@@ -571,19 +572,19 @@ const HomePage = () => {
           } else {
             let distances = response.rows[0].elements;
             let minimumDistance = Number.MAX_VALUE;
-            let nearestWaterFountainIndex = -1;
+            let nearestwaterFountainIndex = -1;
 
             distances.forEach((distance, index) => {
               if (distance.distance.value < minimumDistance) {
                 minimumDistance = distance.distance.value;
-                nearestWaterFountainIndex = index;
+                nearestwaterFountainIndex = index;
               }
             });
 
-            if (nearestWaterFountainIndex !== -1) {
-              let nearestWaterFountain = waterFountainMarkers[nearestWaterFountainIndex];
-              console.log('Nearest Water Fountain:', nearestWaterFountain);
-              resolve(nearestWaterFountain); // Resolve the promise with the nearest water fountain
+            if (nearestwaterFountainIndex !== -1) {
+              let nearestwaterFountain = waterFountainMarkers[nearestwaterFountainIndex];
+              console.log('Nearest Water Fountain:', nearestwaterFountain);
+              resolve(nearestwaterFountain); // Resolve the promise with the nearest water fountain
             } else {
               reject('No water fountain found.'); // Reject if no water fountain are found
             }
@@ -591,7 +592,7 @@ const HomePage = () => {
         }
       );
     });
-  };*/
+  };
 
 
   const mapOptions = [
@@ -650,9 +651,41 @@ const HomePage = () => {
         console.error('An error occurred while finding the nearest toilet:', error);
       }
 
-    }
-    else {
+    }else {
             setShowToiletLayer(false);
+            let coord;
+            const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
+            if (placeObj) {
+              coord = placeObj[inputString];
+            }
+
+            if (!coord) return; // Handle non-existent place
+
+            if (isOrigin) {
+              setOriginName(inputString);
+              setOriginCoord([coord.lat, coord.lng]);
+            } else {
+              setDestinationName(inputString);
+              setDestinationCoord([coord.lat, coord.lng]);
+            }        
+    }
+    if (inputString.toLowerCase() === 'nearest water fountain') {
+        setShowwaterFountainLayer(true);
+        // Determine the origin coordinates based on the current origin or user's location
+        const originCoords = isOrigin ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
+        try {
+          const nearestwaterFountain = await getNearestwaterFountain(originCoords);
+
+          setDestinationName(nearestwaterFountain.name);
+          setDestinationCoord([nearestwaterFountain.lat, nearestwaterFountain.lng]);
+          // Add marker for the nearest water fountain
+          console.log(`Nearest water fountain set to: ${nearestwaterFountain.name}`);
+      } catch (error) {
+        console.error('An error occurred while finding the nearest water fountain:', error);
+      }
+
+    }else {
+            setShowwaterFountainLayer(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
             if (placeObj) {
@@ -705,13 +738,13 @@ const HomePage = () => {
             title={marker.name}
             onClick={() => handleMarkerClick(marker)}
             icon={{
-                url: toliet, 
+                url: toilet, 
                 scaledSize: new google.maps.Size(20, 20), 
                 }}/>
         ));
     };
-  /*  const renderWaterFountainMarkers = () => {
-      if (!showWaterFountainLayer) return null;
+    const renderwaterFountainMarkers = () => {
+      if (!showwaterFountainLayer) return null;
       
       return waterFountainMarkers.map((marker, index) => (
         <MarkerF
@@ -722,9 +755,10 @@ const HomePage = () => {
             icon={{
                 url: waterFountain, 
                 scaledSize: new google.maps.Size(20, 20), 
-                }}/>
+                }}
+            />
         ));
-    };*/
+    };
 
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
