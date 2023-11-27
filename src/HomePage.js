@@ -20,8 +20,7 @@ import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 import greyDot from './image/greyDot.png';
-import toliet from './image/toliet.png';
-import waterFountain from './image/waterFountain.png';
+
 const HomePage = () => {
   
   // Search Bar
@@ -86,7 +85,7 @@ const HomePage = () => {
       const geocoder = new google.maps.Geocoder();
       
       // Use the Geocoder to find the address
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      geocoder.geocode({ location: { lat, lng }  , language: 'en'}, (results, status) => {
         if (status === "OK") {
           if (results[0]) {
               console.log("Address:", results[0].formatted_address);
@@ -192,6 +191,75 @@ const HomePage = () => {
     );
   };
   
+  const renderBusDirectionsResponse = () =>{
+    if (!directionsResponseFromOriginToStation || !directionsResponseFromStationToDest) return null;
+    const iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+    // Extracting start and end locations
+    const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
+    const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
+
+    const startLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[0].start_location;
+    const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
+
+    return (
+      <>
+            <DirectionsRenderer
+                directions={directionsResponseFromOriginToStation}
+                options={{
+                    suppressMarkers: true,
+                    polylineOptions: {
+                      strokeColor: 'White', // Color of the dotted line
+                      strokeOpacity: 0, // Make the primary line invisible
+                      strokeWeight: 1,
+                      icons: [{
+                        icon: {
+                          path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                          strokeOpacity: 1,
+                          strokeWeight: 2, // Weight of the invisible primary line
+                          fillOpacity: 1,
+                          fillColor: '#4285F4',
+                          scale: 5, // Size of the circle dot
+                        },
+                        offset: '0',
+                        repeat: '18px' // Distance between each circle dot
+                      }],
+                    },
+                }}
+            />
+            <DirectionsRenderer
+                directions={directionsResponseFromStationToDest}
+                options={{
+                    suppressMarkers: true,
+                    polylineOptions: {
+                      strokeColor: 'White', // Color of the dotted line
+                      strokeOpacity: 0, // Make the primary line invisible
+                      strokeWeight: 1,
+                      icons: [{
+                        icon: {
+                          path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                          strokeOpacity: 1,
+                          strokeWeight: 2, // Weight of the invisible primary line
+                          fillOpacity: 1,
+                          fillColor: '#ff2527',
+                          scale: 5, // Size of the circle dot
+                        },
+                        offset: '0',
+                        repeat: '18px' // Distance between each circle dot
+                      }],
+                    },
+                }}
+            />
+            <Marker
+              position={endLocationFromOriginToStation}
+              icon={{
+                url: '.image/greyDot.png', // Path to your custom icon
+                scaledSize: new google.maps.Size(30, 30),
+              }}
+              />
+      
+        </>
+      )
+  }
 
   const [directionsResponseFromOriginToStation, setDirectionsResponseFromOriginToStation] = useState(null);
   const [directionsResponseFromStationToDest, setDirectionsResponseFromStationToDest] = useState(null);
@@ -264,75 +332,7 @@ const HomePage = () => {
     setDirectionsResponseFromStationToDest(selectedBusRoute.directionsResponseFromStationToDest);
   };
 
-  const renderBusDirectionsResponse = () =>{
-    if (!directionsResponseFromOriginToStation || !directionsResponseFromStationToDest) return null;
-    const iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
-    // Extracting start and end locations
-    const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
-    const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
-
-    const startLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[0].start_location;
-    const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
-    
-    return (
-      <>
-            <DirectionsRenderer
-                directions={directionsResponseFromOriginToStation}
-                options={{
-                    suppressMarkers: true,
-                    polylineOptions: {
-                      strokeColor: 'White', // Color of the dotted line
-                      strokeOpacity: 0, // Make the primary line invisible
-                      strokeWeight: 1,
-                      icons: [{
-                        icon: {
-                          path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-                          strokeOpacity: 1,
-                          strokeWeight: 2, // Weight of the invisible primary line
-                          fillOpacity: 1,
-                          fillColor: '#4285F4',
-                          scale: 5, // Size of the circle dot
-                        },
-                        offset: '0',
-                        repeat: '18px' // Distance between each circle dot
-                      }],
-                    },
-                }}
-            />
-            <DirectionsRenderer
-                directions={directionsResponseFromStationToDest}
-                options={{
-                    // different options for this renderer, like a different polyline color
-                    suppressMarkers: true,
-                    polylineOptions: {
-                      strokeColor: 'White', // Color of the dotted line
-                      strokeOpacity: 0, // Make the primary line invisible
-                      strokeWeight: 1,
-                      icons: [{
-                        icon: {
-                          path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-                          strokeOpacity: 1,
-                          strokeWeight: 2, // Weight of the invisible primary line
-                          fillOpacity: 1,
-                          fillColor: '#ff2527',
-                          scale: 5, // Size of the circle dot
-                        },
-                        offset: '0',
-                        repeat: '18px' // Distance between each circle dot
-                      }],
-                    },
-                }}
-            />
-            <Marker
-              position={endLocationFromOriginToStation}
-              icon={{
-                url: '.image/greyDot.png', // Path to your custom icon
-                scaledSize: new google.maps.Size(30, 30),
-              }}
-            />
-      </>
-    )
-  }
+  
 
 
   const clearRoute= () => {
@@ -349,6 +349,7 @@ const HomePage = () => {
           setDestinationName('');
           setAfterSearch(false)
           setShowInfoPage(false)
+          setShowToiletLayer(false)
         }
   
   const handleShowInfoPage= () => {
@@ -510,95 +511,109 @@ const HomePage = () => {
     console.log("busList : ",busList)
   }, [busList])
 
+  
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    // Haversine formula to calculate the great-circle distance
+    const R = 6371e3; // metres
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+  
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  
+    return R * c; // in meters
+  }
+
   // Function to calculate the distance from the origin to each toilet
   function getNearestToilet(origin) {
     const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
+    const maxDistance = 2000; // 2 km radius
+    let nearbyToilets = toiletMarkers.filter(marker => {
+      const distance = calculateDistance(origin[0], origin[1], marker.lat, marker.lng);
+      return distance < maxDistance;
+    });
+
+    // If there are too many nearby toilets, consider batching
+    const batchSize = 10;
+    let batchResults = [];
+
     const service = new google.maps.DistanceMatrixService();
-    const destinations = toiletMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
-    // Return a new Promise
+
     return new Promise((resolve, reject) => {
-      service.getDistanceMatrix(
-        {
+      if (nearbyToilets.length > batchSize) {
+        // Split into batches and make API calls
+        for (let i = 0; i < nearbyToilets.length; i += batchSize) {
+          let batch = nearbyToilets.slice(i, i + batchSize);
+          let destinations = batch.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
+
+          service.getDistanceMatrix({
+            origins: [originLatLng],
+            destinations: destinations,
+            travelMode: 'WALKING',
+          }, (response, status) => {
+            if (status === 'OK') {
+              batchResults.push(...response.rows[0].elements);
+              if (batchResults.length === nearbyToilets.length) {
+                // All batches processed
+                processResults(batchResults, nearbyToilets, resolve, reject);
+              }
+            } else {
+              reject('Error with Distance Matrix API: ' + status);
+            }
+          });
+        }
+      } else {
+        // Only one batch required
+        let destinations = nearbyToilets.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
+        
+        service.getDistanceMatrix({
           origins: [originLatLng],
           destinations: destinations,
-          travelMode: 'WALKING', // or 'DRIVING'
-        },
-        (response, status) => {
-          if (status !== 'OK') {
-            console.log('Error was: ' + status);
-            reject(status); // Reject the promise if there's an error
+          travelMode: 'WALKING',
+        }, (response, status) => {
+          if (status === 'OK') {
+            processResults(response.rows[0].elements, nearbyToilets, resolve, reject);
           } else {
-            let distances = response.rows[0].elements;
-            let minimumDistance = Number.MAX_VALUE;
-            let nearestToiletIndex = -1;
-
-            distances.forEach((distance, index) => {
-              if (distance.distance.value < minimumDistance) {
-                minimumDistance = distance.distance.value;
-                nearestToiletIndex = index;
-              }
-            });
-
-            if (nearestToiletIndex !== -1) {
-              let nearestToilet = toiletMarkers[nearestToiletIndex];
-              console.log('Nearest Toilet:', nearestToilet);
-              resolve(nearestToilet); // Resolve the promise with the nearest toilet
-            } else {
-              reject('No toilets found.'); // Reject if no toilets are found
-            }
+            reject('Error with Distance Matrix API: ' + status);
           }
-        }
-      );
+        });
+      }
     });
-  };
+}
 
-/*  function getNearestWaterFountain(origin) {
-    const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
-    const service = new google.maps.DistanceMatrixService();
-    const destinations = waterFountainMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
-    // Return a new Promise
-    return new Promise((resolve, reject) => {
-      service.getDistanceMatrix(
-        {
-          origins: [originLatLng],
-          destinations: destinations,
-          travelMode: 'WALKING', // or 'DRIVING'
-        },
-        (response, status) => {
-          if (status !== 'OK') {
-            console.log('Error was: ' + status);
-            reject(status); // Reject the promise if there's an error
-          } else {
-            let distances = response.rows[0].elements;
-            let minimumDistance = Number.MAX_VALUE;
-            let nearestWaterFountainIndex = -1;
+function processResults(results, toilets, resolve, reject) {
+  let minimumDistance = Number.MAX_VALUE;
+  let nearestToilet = null;
 
-            distances.forEach((distance, index) => {
-              if (distance.distance.value < minimumDistance) {
-                minimumDistance = distance.distance.value;
-                nearestWaterFountainIndex = index;
-              }
-            });
+  results.forEach((result, index) => {
+    if (result.distance.value < minimumDistance) {
+      minimumDistance = result.distance.value;
+      nearestToilet = toilets[index];
+    }
+  });
 
-            if (nearestWaterFountainIndex !== -1) {
-              let nearestWaterFountain = waterFountainMarkers[nearestWaterFountainIndex];
-              console.log('Nearest Water Fountain:', nearestWaterFountain);
-              resolve(nearestWaterFountain); // Resolve the promise with the nearest water fountain
-            } else {
-              reject('No water fountain found.'); // Reject if no water fountain are found
-            }
-          }
-        }
-      );
-    });
-  };*/
+  if (nearestToilet) {
+    resolve(nearestToilet);
+  } else {
+    reject('No toilets found within range.');
+  }
+}
 
 
-  const mapOptions = [
-          {
+
+  const mapOptions = {
+            zoomControl: false,
+            mapTypeControl: false,
+            scaleControl: false,
             streetViewControl: false,
-          }
-        ]
+            rotateControl: false,
+            fullscreenControl: false
+          };
+        
         
 
         
@@ -650,8 +665,7 @@ const HomePage = () => {
         console.error('An error occurred while finding the nearest toilet:', error);
       }
 
-    }
-    else {
+    } else {
             setShowToiletLayer(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
@@ -704,27 +718,15 @@ const HomePage = () => {
             position={{ lat: marker.lat, lng: marker.lng }}
             title={marker.name}
             onClick={() => handleMarkerClick(marker)}
-            icon={{
-                url: toliet, 
-                scaledSize: new google.maps.Size(20, 20), 
-                }}/>
+            // icon={{
+            //   // strokeColor: "transparent",
+            //   path: './image/toliet.png',
+            //   // fillOpacity: 1,
+            // }}
+            />
         ));
     };
-  /*  const renderWaterFountainMarkers = () => {
-      if (!showWaterFountainLayer) return null;
-      
-      return waterFountainMarkers.map((marker, index) => (
-        <MarkerF
-            key={index}
-            position={{ lat: marker.lat, lng: marker.lng }}
-            title={marker.name}
-            onClick={() => handleMarkerClick(marker)}
-            icon={{
-                url: waterFountain, 
-                scaledSize: new google.maps.Size(20, 20), 
-                }}/>
-        ));
-    };*/
+
 
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
@@ -900,11 +902,11 @@ const HomePage = () => {
               display: "flex",
               justifyContent: "center",
             }}>
-              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#8ebfe8" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px"}} onClick={()=> handleWalkButtonClick() }>
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "walk" ? "#98cefa" : "#c7c7c7" ,color:"black", height: "29px" , fontSize:"16px", marginRight:"15px"}} onClick={()=> handleWalkButtonClick() }>
                                       <FaPersonWalking size={20} style={{marginRight:"1px"}}/>
                                       {walkDuration} min
               </IconButton>
-              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#8ebfe8" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> handleBusButtonClick()}>
+              <IconButton style={{borderRadius: "20px ", backgroundColor: travelType === "bus" ? "#98cefa" : "#c7c7c7",color:"black", height: "29px" , fontSize:"16px" , textAlign:"center"}}  onClick={()=> handleBusButtonClick()}>
                                       <FaBusSimple size={20} style={{marginRight:"4px"}}/>
                                       {busList && busList.length > 0 ? `${busList[0].timeForTotalBusTrip} min` : ""  }
               </IconButton>
@@ -934,6 +936,10 @@ const HomePage = () => {
                     onLocationUpdate={setCurrentUserLocation}
                     isLoaded={isLoaded}
                     map={map}
+                    customLocation={{
+                      latitude: 22.419498460232973,
+                      longitude: 114.207202570846
+                  }}
                 />)
           }
           {renderToiletMarkers()}
