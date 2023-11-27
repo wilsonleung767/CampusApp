@@ -5,9 +5,14 @@ export const customPlaces = [
     { "Cheng Yu Tung Building" : {lat: 22.4121683	, lng: 114.2105302}},
     { "Pommerenke Student Centre (PSC)": {lat: 22.4170907	, lng: 114.2088325}},
     { "University Library (ULIB)": {lat: 22.419572823075928 , lng: 114.20506416623314}},
+    { "S.H. Ho College (SHHC)": {lat: 22.4183378, lng:114.2101635}},
+    { "University MTR Station (MTR)": {lat:22.4137998 , lng:114.2094932}},
+    { "Sir Run Run Shaw Hall (SHAWHALL)": { lat: 22.4198826971, lng: 114.206907327 }},
+    
     { "Nearest Toilet":{} },
-  ];
 
+    { "Nearest Water Fountain":{} }
+  ];
   
 export const stationLocation = [
   { "AREA39|DOWNST": { lat: 22.42753, lng: 114.204374 }},

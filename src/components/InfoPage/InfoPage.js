@@ -5,7 +5,7 @@ import { FaPersonWalking } from "react-icons/fa6";
 import { FaBusSimple } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdKeyboardArrowRight } from "react-icons/md";
-
+import { getFullPlaceName } from '../PairPlaceAlias.mjs';
 
 
 function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, destinationName}) {
@@ -44,27 +44,29 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
         });
     };
 
-       const extractDestinationParts = (destinationName) => {
-        const regex = /^(.*?)\s*\((.*?)\)$/; // Regular expression to match full name and nickname
-        const matches = destinationName.match(regex);
-        if (matches && matches.length === 3) {
-            return {
-                fullName: matches[1],
-                nickName: matches[2],
-            };
-        } else {
-            // If the regular expression doesn't match, treat the whole name as full name
-            return {
-                fullName: destinationName,
-                nickName: "", // No nickname
-            };
-        }
-    };
+    // const extractDestinationParts = (name) => {
+    //     const regex = /^(.*?)\s*\((.*?)\)$/; // Regular expression to match full name and nickname
+    //     const matches = destinationName.match(regex);
+    //     if (matches && matches.length === 3) {
+    //         return {
+    //             fullName: matches[1],
+    //             nickName: matches[2],
+    //         };
+    //     } else {
+    //         // If the regular expression doesn't match, treat the whole name as full name
+    //         return {
+    //             fullName: ,
+    //             nickName: "", // No nickname
+    //         };
+    //     }
+    // };
 
-    const { fullName, nickName } = extractDestinationParts(destinationName);
+    // const { fullName, nickName } = extractDestinationParts(destinationName);
     
     const BusInfoSection = ({ bus, index, originName, destinationName }) => {
         const [waitingTime, setWaitingTime] = useState(0);
+        const startStationFullName = getFullPlaceName(bus.startStation)
+        const endStationFullName = getFullPlaceName(bus.endStation)
 
         useEffect(() => {
             const updateWaitingTime = () => {
@@ -96,18 +98,24 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             }}
         >
                 <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">
+                    <Box>
                     <Typography variant="body1">
                         <FaPersonWalking style={{ marginRight: "5px" }} />
-                        Walk to <FaLocationDot color="blue" /> {bus.startStation} station
+                        Walk to <FaLocationDot color="#2636c6" /> 
+                        <span style={{marginLeft:"2px", color:"#2636c6" , fontWeight:"bold"}}>
+                        {startStationFullName}
+                        </span>
                     </Typography>
+                    </Box>
                     <Typography variant="body1" style={{ fontWeight: "bold" }}>
                         {bus.timeFromOriginToStation} min
                     </Typography>
+                    
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">
                     
                     <Box style={{display:"flex", alignItems:"center"}}>
-                    <Typography variant="body1">
+                    <Typography variant="body1" >
                         Take
                     </Typography> <FaBusSimple style={{ marginLeft:"5px", marginRight: "3px" }} />
                         <Box style={{ backgroundColor: "red", padding: "0 5px", borderRadius: "4px" }}>
@@ -120,7 +128,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                         Coming in {waitingTime} min
                     </Typography>
                 </Box>
-                <Typography variant="body1" marginLeft="20px" marginBottom="10px">
+                <Typography variant="body1" fontSize="14px" marginLeft="20px" marginBottom="10px">
                     More Buses at
                     {bus.upcomingDepartures.slice(1).map((time, index) => (
                         <Box key={index} component="span" mx="8px" bgcolor="#f0f0f0" px="5px" borderRadius="4px">
@@ -128,10 +136,21 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                         </Box>
                     ))}
                 </Typography>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Box display="flex" mb={1}  alignItems="center">
                     <Typography variant="body1">
                         <FaPersonWalking style={{ marginRight: "5px" }} />
-                        Walk to <FaLocationDot color="red" /> {destinationName}
+                        Get off at <FaLocationDot color="#2636c6" /> 
+                    </Typography>
+                    <Typography ml={0.3} fontWeight={"bold"}color={"#2636c6" }>
+                        {endStationFullName}
+                    </Typography>
+                </Box>
+                <Box display="flex"justifyContent="space-between" alignItems="center">
+                    <Typography variant="body1">
+                        <FaPersonWalking style={{ marginRight: "5px" }} />
+                        Walk to <FaLocationDot color="red" /> <span style={{ color:"red" , fontWeight:"bold"}}>
+                        {destinationName}
+                        </span>
                     </Typography>
                     <Typography variant="body1" style={{ fontWeight: "bold" }}>
                         {bus.timeFromDepartureToDest} min
@@ -140,10 +159,16 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
         </Box>
             );
         };
-
+    
+    const [selectedBusIndex, setSelectedBusIndex] = useState(0);
+    const handleSelectBus = (index) => {
+            setSelectedBusIndex(index);
+          };
+    
     useEffect(()=>{
         console.log("inside infopage originName",originName , "destinationName",destinationName)}
     ,[destinationName,originName])
+
     
     return (
         <div 
@@ -154,27 +179,39 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             onTouchEnd={handleTouchEnd}
         >
             {travelType === "walk" && (
-                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="92%">
                     <div className="info-page-handle" />
-                    <Typography mt={2.4} variant="h6">Walking Directions</Typography>
-                    <Typography variant="body1">Destination: {fullName}</Typography>
-                    <Typography variant="body1">Nickname: {nickName}</Typography>
-                    {/* Add any additional information related to walking directions here */}
+                    <Typography textAlign={"center"}mt={2.4} variant="h6">Walking Directions from Yasumoto International Academic Park (YIAP) to University Library (ULIB)</Typography>
+                    <ol>
+                        <li><strong>Start at YIAP</strong></li>
+                        <li><strong>Take the YIA Elevator</strong></li>
+                        <li><strong>Exit at Chung Chi College Staff Quarters Block S</strong></li>
+                        <li><strong>Proceed Straight</strong></li>
+                        <li><strong>Pass Through Chung Chi College</strong></li>
+                        <li><strong>Walk Through Nursery Path</strong></li>
+                        <li><strong>Reach William M W Mong Engineering Building (ERB)</strong></li>
+                        <li><strong>Take WMWMEB Lift to 9th Floor</strong></li>
+                        <li><strong>Exit ERB and Turn Right</strong></li>
+                        <li><strong>Ascend the Stairs</strong></li>
+                        <li><strong>Pass by Lady Shaw Building</strong></li>
+                        <li><strong>Arrive at ULIB</strong></li>
+                    </ol>
                 </Box>
             )}
 
             {travelType === "bus" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
                     <div className="info-page-handle" />
-                    <Typography mt={2.4} variant="h6">CU Bus</Typography>
+                    <Typography mt={3} variant="h6">CU Bus</Typography>
 
                     {busList.map((bus, index) => (
                         <Box width="93%">
 
-                            <Box key={index} className="route-choice"  onClick={() => onSelectBusRoute(bus)}>
+                            <Box key={index} className="route-choice"  onClick={() => {onSelectBusRoute(bus) 
+                                                                                        handleSelectBus(index)}}>
                                             {/* Walking to Station */}
                                 <Box display="flex" alignItems="center">
-                                                <FaPersonWalking style={{ marginRight: "3px" }} />
+                                                <FaPersonWalking style={{ marginLeft:"5px", marginRight: "3px" }} />
                                                 <Typography variant="body1">{bus.timeFromOriginToStation}</Typography>
                                 </Box>
                                             
@@ -196,7 +233,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
                                             {/* Walking from Station */}
                                             <Box display="flex" alignItems="center">
-                                                <FaPersonWalking style={{ marginRight: "5px" }} />
+                                                <FaPersonWalking style={{ }} />
                                                 <Typography variant="body1">{bus.timeFromDepartureToDest}</Typography>
                                             </Box>
 
@@ -205,7 +242,9 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                                                 <Typography variant="body1" fontWeight="bold">Duration: {bus.timeForTotalBusTrip} min</Typography>
                                             </Box>
                                         </Box>
-                            <BusInfoSection bus={bus} index={index} originName={originName} destinationName={destinationName} />
+                                        {selectedBusIndex === index && (
+                                        <BusInfoSection bus={bus} index={index} originName={originName} destinationName={destinationName} />
+                                        )}
                         </Box>
                     ))}
                 </Box>

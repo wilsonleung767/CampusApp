@@ -4,7 +4,7 @@ export const busDetails = {
         'interval': [20, 40],
         'teachingDay': ['TD', 'NT'],
         'weekday': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        'station': ['MTR', 'SPORTC', 'UADM', 'SHHC', 'JCPH', 'MTR']
+        'station': ['MTR', 'SPORTC','SHAWHALL','UADM','SHHC', 'JCPH', 'MTR']
     },
     "1B": {
         'time': ['08:00', '18:00'],

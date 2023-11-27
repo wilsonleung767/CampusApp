@@ -9,8 +9,8 @@ import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
 import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
 import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion.js";
-import { customPlaces } from "./data/Places.js";
-import { toiletMarkers,waterFountainMarkers } from "./data/Markers.js";
+import { customPlaces } from "./data/Places.mjs";
+import { toiletMarkers,waterFountainMarkers} from "./data/Markers.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
@@ -20,7 +20,11 @@ import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 import greyDot from './image/greyDot.png';
-
+import toiletImg from './image/toilet.png';
+import toiletImgHighlighted from './image/toiletHighlighted.png';
+import waterFountainImg from './image/waterFountain.png';
+import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png';
+import busStopImg from './image/busStop.png';
 const HomePage = () => {
   
   // Search Bar
@@ -33,6 +37,7 @@ const HomePage = () => {
   const [NLPQuery, setNLPQuery] = useState("");
 
   const [showToiletLayer, setShowToiletLayer] = useState(false);
+  const [showWaterFountainLayer, setShowWaterFountainLayer] = useState(false);
   const center = useMemo(() => ({ lat: 22.418426709637526, lng: 114.20771628364456 }), []);
   const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY
   
@@ -193,7 +198,6 @@ const HomePage = () => {
   
   const renderBusDirectionsResponse = () =>{
     if (!directionsResponseFromOriginToStation || !directionsResponseFromStationToDest) return null;
-    const iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
     // Extracting start and end locations
     const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
     const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
@@ -250,12 +254,34 @@ const HomePage = () => {
                 }}
             />
             <Marker
+              position={startLocationFromOriginToStation}
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                fillColor: "#f2f2f2",
+                fillOpacity: 1,
+                strokeOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#787878",
+                scale: 8, // Size of the circle dot
+              }}
+            />
+            <Marker
               position={endLocationFromOriginToStation}
               icon={{
-                url: '.image/greyDot.png', // Path to your custom icon
-                scaledSize: new google.maps.Size(30, 30),
+                url: busStopImg, 
+                scaledSize: new google.maps.Size(25,40),
               }}
-              />
+            />
+            <Marker
+              position={startLocationFromStationToDest}
+              icon={{
+                url: busStopImg, 
+                scaledSize: new google.maps.Size(25,40),
+              }}
+            />
+            <Marker
+              position={endLocationFromStationToDest}
+            />
       
         </>
       )
@@ -350,6 +376,7 @@ const HomePage = () => {
           setAfterSearch(false)
           setShowInfoPage(false)
           setShowToiletLayer(false)
+          setShowWaterFountainLayer(false)
         }
   
   const handleShowInfoPage= () => {
@@ -451,7 +478,7 @@ const HomePage = () => {
     const tempBusList = [];
     
     // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
-    const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHHC' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: {lat: 22.418020, lng: 114.209896}, passedStations: [ 'MTR', 'SPORTC', 'UADM', 'SHHC' ]}
+    const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHAWHALL' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]}
   ]
   
 
@@ -513,160 +540,133 @@ const HomePage = () => {
 
   
   function calculateDistance(lat1, lon1, lat2, lon2) {
-    // Haversine formula to calculate the great-circle distance
-    const R = 6371e3; // metres
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
-  
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  
-    return R * c; // in meters
+    // Euclidean distance calculation
+    return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2));
   }
 
-  // Function to calculate the distance from the origin to each toilet
-  function getNearestToilet(origin) {
-    const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
-    const maxDistance = 2000; // 2 km radius
-    let nearbyToilets = toiletMarkers.filter(marker => {
-      const distance = calculateDistance(origin[0], origin[1], marker.lat, marker.lng);
-      return distance < maxDistance;
-    });
-
-    // If there are too many nearby toilets, consider batching
-    const batchSize = 10;
-    let batchResults = [];
-
-    const service = new google.maps.DistanceMatrixService();
-
-    return new Promise((resolve, reject) => {
-      if (nearbyToilets.length > batchSize) {
-        // Split into batches and make API calls
-        for (let i = 0; i < nearbyToilets.length; i += batchSize) {
-          let batch = nearbyToilets.slice(i, i + batchSize);
-          let destinations = batch.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
-
-          service.getDistanceMatrix({
-            origins: [originLatLng],
-            destinations: destinations,
-            travelMode: 'WALKING',
-          }, (response, status) => {
-            if (status === 'OK') {
-              batchResults.push(...response.rows[0].elements);
-              if (batchResults.length === nearbyToilets.length) {
-                // All batches processed
-                processResults(batchResults, nearbyToilets, resolve, reject);
-              }
-            } else {
-              reject('Error with Distance Matrix API: ' + status);
-            }
-          });
-        }
-      } else {
-        // Only one batch required
-        let destinations = nearbyToilets.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
-        
-        service.getDistanceMatrix({
-          origins: [originLatLng],
-          destinations: destinations,
-          travelMode: 'WALKING',
-        }, (response, status) => {
-          if (status === 'OK') {
-            processResults(response.rows[0].elements, nearbyToilets, resolve, reject);
-          } else {
-            reject('Error with Distance Matrix API: ' + status);
-          }
-        });
-      }
-    });
+// Function to find the five nearest toilets
+  function  findFiveNearestToilet(origin) {
+    if (origin.length > 1){}
+    return toiletMarkers.map(facility => ({
+        ...facility,
+        distance: calculateDistance(origin[0], origin[1], facility.lat, facility.lng)
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 5);
 }
 
-function processResults(results, toilets, resolve, reject) {
-  let minimumDistance = Number.MAX_VALUE;
-  let nearestToilet = null;
+  function  findFiveNearestWaterFountain(origin) {
+    return waterFountainMarkers.map(facility => ({
+        ...facility,
+        distance: calculateDistance(origin[0], origin[1], facility.lat, facility.lng)
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 5);
+}
+function getNearestToilet(originCoord) {
+  const nearestToilets = findFiveNearestToilet(originCoord);
+  return nearestToilets[0]
+}
+function getNearestWaterFountain(originCoord) {
+  const nearestWaterFountain = findFiveNearestWaterFountain(originCoord);
+  return nearestWaterFountain[0]
+}
 
-  results.forEach((result, index) => {
-    if (result.distance.value < minimumDistance) {
-      minimumDistance = result.distance.value;
-      nearestToilet = toilets[index];
+
+const mapOptions = {
+  styles: [
+    {
+        featureType: "poi", // Points of Interest
+        elementType: "labels",
+        stylers: [{ visibility: "off" }]
+    },
+    {
+        featureType: "transit",
+        elementType: "labels",
+        stylers: [{ visibility: "off" }]
     }
-  });
-
-  if (nearestToilet) {
-    resolve(nearestToilet);
-  } else {
-    reject('No toilets found within range.');
-  }
-}
-
-
-
-  const mapOptions = {
-            zoomControl: false,
-            mapTypeControl: false,
-            scaleControl: false,
-            streetViewControl: false,
-            rotateControl: false,
-            fullscreenControl: false
-          };
-        
-        
-
-        
-  // Function to handle place selection
-
+    // You can add more features to hide other elements like roads, parks, etc.
+],
+  zoomControl: false,
+  mapTypeControl: false,
+  scaleControl: false,
+  streetViewControl: false,
+  rotateControl: false,
+  fullscreenControl: false
+  };
+          
+          
+          
+          
+          // Function to handle place selection
+          
   const [suggestions, setSuggestions] = useState([]);
   const [activeInput, setActiveInput] = useState(""); // "" or "origin" or "destination"
-
+          
   const handleInputChange = (value) => {
-    if (activeInput ==="origin") {
-      setOriginName(value);
-    } else {
-      setDestinationName(value);
-    }
-
+            if (activeInput ==="origin") {
+              setOriginName(value);
+            } else {
+              setDestinationName(value);
+            }
+            
     if (value === '') {
       setSuggestions([]);
     } else {
       const filteredSuggestions = customPlaces
-        .map(placeObj => Object.keys(placeObj)[0])
-        .filter(placeName => placeName.toLowerCase().includes(value.toLowerCase()))
-        .slice(0, 5);
-  
+      .map(placeObj => Object.keys(placeObj)[0])
+      .filter(placeName => placeName.toLowerCase().includes(value.toLowerCase()))
+      .slice(0, 5);
+      
       setSuggestions(filteredSuggestions);
     }
   };
-
+  
   const handleNLPQuery = () => {  
     // const NLPResult = getNLPResult(NLPQuery)
     // selectPlace(NLPResult, "destination")
   };
   
   
-  const selectPlace = async (inputString, isOrigin) => {
+  const [nearestToiletMarker, setNearestToiletMarker] = useState(null);
+  const [nearestWaterFountainMarker, setNearestWaterFountainMarker] = useState(null);
+  const selectPlace = (inputString, isOrigin, showOriginSearch) => {
     console.log("Place selected: ", inputString);
     // If 'Nearest Toilet' is selected, calculate the nearest toilet
     if (inputString.toLowerCase() === 'nearest toilet') {
-        setShowToiletLayer(true);
-        // Determine the origin coordinates based on the current origin or user's location
-        const originCoords = isOrigin ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
-        try {
-          const nearestToilet = await getNearestToilet(originCoords);
-
-          setDestinationName(nearestToilet.name);
-          setDestinationCoord([nearestToilet.lat, nearestToilet.lng]);
-          // Add marker for the nearest toilet
-          console.log(`Nearest toilet set to: ${nearestToilet.name}`);
+      setShowToiletLayer(true);
+      // Determine the origin coordinates based on the current origin or user's location
+      const originCoords = showOriginSearch ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
+      try {
+        const nearestToilet = getNearestToilet(originCoords);
+        
+        setDestinationName(nearestToilet.name);
+        setDestinationCoord([nearestToilet.lat, nearestToilet.lng]);
+        setNearestToiletMarker(nearestToilet);
+        // Add marker for the nearest toilet
+        console.log(`Nearest toilet set to: ${nearestToilet.name}`);
       } catch (error) {
         console.error('An error occurred while finding the nearest toilet:', error);
       }
+    } 
+    else if (inputString.toLowerCase() === 'nearest water fountain'){
+      setShowWaterFountainLayer(true);
+      const originCoords = showOriginSearch ? originCoord : currentUserLocation; 
+      try {
+        const nearestWaterFountain = getNearestWaterFountain(originCoords);
 
-    } else {
+        setDestinationName(nearestWaterFountain.name);
+        setDestinationCoord([nearestWaterFountain.lat, nearestWaterFountain.lng]);
+        setNearestWaterFountainMarker(nearestWaterFountain);
+        console.log(`Nearest water fountain set to: ${nearestWaterFountain.name}`);
+    } catch (error) {
+      console.error('An error occurred while finding the nearest water fountain:', error);
+      
+      }
+    } 
+    else {
             setShowToiletLayer(false);
+            setShowWaterFountainLayer(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
             if (placeObj) {
@@ -718,15 +718,28 @@ function processResults(results, toilets, resolve, reject) {
             position={{ lat: marker.lat, lng: marker.lng }}
             title={marker.name}
             onClick={() => handleMarkerClick(marker)}
-            // icon={{
-            //   // strokeColor: "transparent",
-            //   path: './image/toliet.png',
-            //   // fillOpacity: 1,
-            // }}
+            icon={{
+              url: nearestToiletMarker && marker.name === nearestToiletMarker.name ? toiletImgHighlighted : toiletImg , 
+              scaledSize: new google.maps.Size(30,30 ), 
+              }}
             />
         ));
     };
-
+    const renderWaterFountainMarkers = () => {
+      if (!showWaterFountainLayer) return null;
+      return waterFountainMarkers.map((marker, index) => (
+        <MarkerF
+            key={index}
+            position={{ lat: marker.lat, lng: marker.lng }}
+            title={marker.name}
+            onClick={() => handleMarkerClick(marker)}
+            icon={{
+                url: nearestWaterFountainMarker && marker.name === nearestWaterFountainMarker.name ? waterFoundationImgHighlighted : waterFountainImg, 
+                scaledSize: new google.maps.Size(30, 30), 
+                }}
+        />
+      ));
+    };
 
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
@@ -813,7 +826,7 @@ function processResults(results, toilets, resolve, reject) {
                 ),
               }}
             />
-            {activeInput === "origin" && <RenderSuggestions suggestions={suggestions} activeInput={activeInput} selectPlace={selectPlace}/>}
+            {activeInput === "origin" && <RenderSuggestions suggestions={suggestions} activeInput={activeInput} showOriginSearch={showOriginSearch} selectPlace={selectPlace}/>}
           </Box>
 
           <Box  position="relative" alignItems="center" mb={1} >
@@ -849,7 +862,7 @@ function processResults(results, toilets, resolve, reject) {
                 ),
               }}
             />
-            {activeInput === "destination" && <RenderSuggestions suggestions={suggestions} activeInput={activeInput} selectPlace={selectPlace}/>}
+            {activeInput === "destination" && <RenderSuggestions suggestions={suggestions} activeInput={activeInput}  showOriginSearch={showOriginSearch} selectPlace={selectPlace}/>}
           </Box>
          
 
@@ -943,6 +956,7 @@ function processResults(results, toilets, resolve, reject) {
                 />)
           }
           {renderToiletMarkers()}
+          {renderWaterFountainMarkers()}
 
           {travelType === "walk" ? renderWalkDirectionsResponse() : renderBusDirectionsResponse()}    
 

@@ -68,7 +68,7 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
 // export default searchBusRoute;
 
 
-console.log(getBusRoute("MTR", "SHHC", "TD"))
+console.log(getBusRoute("MTR", "ULIB", "TD"))
 
 
 
