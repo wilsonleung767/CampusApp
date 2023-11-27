@@ -8,8 +8,9 @@
     "\\src\\components\\InfoPage",
     "\\src\\components\\SearchBarSuggestion",
     "\\src\\components\\SearchBusRoute",
-    "\\src\\data"
+    "\\src\\data",
+    "\\src\\image"
   ],
-  "SelectedNode": "\\src\\components\\InfoPage\\InfoPage.js",
+  "SelectedNode": "\\src\\HomePage.js",
   "PreviewInSolutionExplorer": false
 }

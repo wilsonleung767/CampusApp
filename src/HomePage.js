@@ -20,7 +20,8 @@ import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 import greyDot from './image/greyDot.png';
-
+import toliet from './image/toliet.png';
+import waterFountain from './image/waterFountain.png';
 const HomePage = () => {
   
   // Search Bar
@@ -514,7 +515,6 @@ const HomePage = () => {
     const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
     const service = new google.maps.DistanceMatrixService();
     const destinations = toiletMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
-
     // Return a new Promise
     return new Promise((resolve, reject) => {
       service.getDistanceMatrix(
@@ -552,6 +552,46 @@ const HomePage = () => {
     });
   };
 
+/*  function getNearestWaterFountain(origin) {
+    const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
+    const service = new google.maps.DistanceMatrixService();
+    const destinations = waterFountainMarkers.map(marker => new google.maps.LatLng(marker.lat, marker.lng));
+    // Return a new Promise
+    return new Promise((resolve, reject) => {
+      service.getDistanceMatrix(
+        {
+          origins: [originLatLng],
+          destinations: destinations,
+          travelMode: 'WALKING', // or 'DRIVING'
+        },
+        (response, status) => {
+          if (status !== 'OK') {
+            console.log('Error was: ' + status);
+            reject(status); // Reject the promise if there's an error
+          } else {
+            let distances = response.rows[0].elements;
+            let minimumDistance = Number.MAX_VALUE;
+            let nearestWaterFountainIndex = -1;
+
+            distances.forEach((distance, index) => {
+              if (distance.distance.value < minimumDistance) {
+                minimumDistance = distance.distance.value;
+                nearestWaterFountainIndex = index;
+              }
+            });
+
+            if (nearestWaterFountainIndex !== -1) {
+              let nearestWaterFountain = waterFountainMarkers[nearestWaterFountainIndex];
+              console.log('Nearest Water Fountain:', nearestWaterFountain);
+              resolve(nearestWaterFountain); // Resolve the promise with the nearest water fountain
+            } else {
+              reject('No water fountain found.'); // Reject if no water fountain are found
+            }
+          }
+        }
+      );
+    });
+  };*/
 
 
   const mapOptions = [
@@ -610,7 +650,8 @@ const HomePage = () => {
         console.error('An error occurred while finding the nearest toilet:', error);
       }
 
-    } else {
+    }
+    else {
             setShowToiletLayer(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
@@ -662,10 +703,28 @@ const HomePage = () => {
             key={index}
             position={{ lat: marker.lat, lng: marker.lng }}
             title={marker.name}
-            onClick={() => handleMarkerClick(marker)}/>
+            onClick={() => handleMarkerClick(marker)}
+            icon={{
+                url: toliet, 
+                scaledSize: new google.maps.Size(20, 20), 
+                }}/>
         ));
     };
-
+  /*  const renderWaterFountainMarkers = () => {
+      if (!showWaterFountainLayer) return null;
+      
+      return waterFountainMarkers.map((marker, index) => (
+        <MarkerF
+            key={index}
+            position={{ lat: marker.lat, lng: marker.lng }}
+            title={marker.name}
+            onClick={() => handleMarkerClick(marker)}
+            icon={{
+                url: waterFountain, 
+                scaledSize: new google.maps.Size(20, 20), 
+                }}/>
+        ));
+    };*/
 
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
