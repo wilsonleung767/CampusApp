@@ -24,22 +24,18 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
     let startStations = buildingStationPair[startBuilding];
     let endStations = buildingStationPair[endBuilding];
 
-    // Parse the input time for comparison
-
-    // let inputWeekday = getCurrentWeekdayInHongKong();
-    let inputWeekday = "Thu"
+    let inputWeekday = "Thu"; // Assuming this is a placeholder for the current weekday
     console.log(inputWeekday);
 
-
-    // Find a route considering the direction, time, and day
     for (let route in busDetails) {
+        console.log("route:", route);
         let routeDetails = busDetails[route];
         let stops = routeDetails.station;
         let operatesOnTeachingDay = routeDetails.teachingDay.includes(isTeachingDay ? 'TD' : 'NT');
         let operatesOnWeekday = routeDetails.weekday.includes(inputWeekday);
 
-        // Check if the route operates at the given time and day
-        if (operatesOnTeachingDay && operatesOnWeekday ) {
+        if (operatesOnTeachingDay && operatesOnWeekday) {
+            let foundRoute = false;
             for (let startStation of startStations) {
                 let startIndex = stops.findIndex(station => station.includes(startStation));
                 if (startIndex !== -1) {
@@ -53,16 +49,17 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
                                 endStation: endStation,
                                 passedStations: passedStations
                             });
+                            foundRoute = true;
                             break; // Found a valid route, no need to check other end stations
                         }
                     }
+                    if (foundRoute) break; // Break out of startStation loop if a route is found
                 }
             }
         }
     }
 
-    return res; // Return the list of routes with their start and end stations
-    // e.g. { busRoute: '2#', startStation: 'MTRP', endStation: 'SHAWHALL' }
+    return res;
 }
 
 // export default searchBusRoute;

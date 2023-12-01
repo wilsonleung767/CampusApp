@@ -44,25 +44,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
         });
     };
 
-    // const extractDestinationParts = (name) => {
-    //     const regex = /^(.*?)\s*\((.*?)\)$/; // Regular expression to match full name and nickname
-    //     const matches = destinationName.match(regex);
-    //     if (matches && matches.length === 3) {
-    //         return {
-    //             fullName: matches[1],
-    //             nickName: matches[2],
-    //         };
-    //     } else {
-    //         // If the regular expression doesn't match, treat the whole name as full name
-    //         return {
-    //             fullName: ,
-    //             nickName: "", // No nickname
-    //         };
-    //     }
-    // };
 
-    // const { fullName, nickName } = extractDestinationParts(destinationName);
-    
     const BusInfoSection = ({ bus, index, originName, destinationName }) => {
         const [waitingTime, setWaitingTime] = useState(0);
         const startStationFullName = getFullPlaceName(bus.startStation)
@@ -86,6 +68,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             return () => clearInterval(intervalId);
         }, [bus.departureTime]);
         
+
         return (
         <Box
             style={{
@@ -101,8 +84,8 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     <Box>
                     <Typography variant="body1">
                         <FaPersonWalking style={{ marginRight: "5px" }} />
-                        Walk to <FaLocationDot color="#2636c6" /> 
-                        <span style={{marginLeft:"2px", color:"#2636c6" , fontWeight:"bold"}}>
+                        Walk to <FaLocationDot color="#9b17f1" /> 
+                        <span style={{marginLeft:"2px", color:"#9b17f1" , fontWeight:"bold"}}>
                         {startStationFullName}
                         </span>
                     </Typography>
@@ -112,13 +95,14 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     </Typography>
                     
                 </Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">
-                    
+
+                <Box backgroundColor={"#f7f7f7"} borderRadius={"5px"} padding={0.5}marginBottom="10px">
+                <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">                    
                     <Box style={{display:"flex", alignItems:"center"}}>
                     <Typography variant="body1" >
                         Take
                     </Typography> <FaBusSimple style={{ marginLeft:"5px", marginRight: "3px" }} />
-                        <Box style={{ backgroundColor: "red", padding: "0 5px", borderRadius: "4px" }}>
+                        <Box style={{ backgroundColor: "#9b17f1", padding: "0 5px", borderRadius: "4px" }}>
                             <Typography variant="body1" style={{ color: "white", textAlign: "center" }}>
                                 {bus.route}
                             </Typography>
@@ -128,7 +112,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                         Coming in {waitingTime} min
                     </Typography>
                 </Box>
-                <Typography variant="body1" fontSize="14px" marginLeft="20px" marginBottom="10px">
+                <Typography variant="body1" fontSize="14px" marginLeft="20px" >
                     More Buses at
                     {bus.upcomingDepartures.slice(1).map((time, index) => (
                         <Box key={index} component="span" mx="8px" bgcolor="#f0f0f0" px="5px" borderRadius="4px">
@@ -136,15 +120,19 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                         </Box>
                     ))}
                 </Typography>
+                </Box>
+
+
                 <Box display="flex" mb={1}  alignItems="center">
                     <Typography variant="body1">
                         <FaPersonWalking style={{ marginRight: "5px" }} />
-                        Get off at <FaLocationDot color="#2636c6" /> 
+                        Get off at <FaLocationDot color="#9b17f1" /> 
                     </Typography>
-                    <Typography ml={0.3} fontWeight={"bold"}color={"#2636c6" }>
+                    <Typography ml={0.3} fontWeight={"bold"}color={"#9b17f1" }>
                         {endStationFullName}
                     </Typography>
                 </Box>
+                
                 <Box display="flex"justifyContent="space-between" alignItems="center">
                     <Typography variant="body1">
                         <FaPersonWalking style={{ marginRight: "5px" }} />
@@ -178,6 +166,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
+            <>
             {travelType === "walk" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="92%">
                     <div className="info-page-handle" />
@@ -221,7 +210,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                                             {/* Bus Route */}
                                             <Box display="flex" alignItems="center">
                                                 <FaBusSimple style={{ marginRight: "3px" }} />
-                                                <Box bgcolor="red" px={0.5} borderRadius="4px">
+                                                <Box bgcolor="#9b17f1" px={0.5} borderRadius="4px">
                                                     <Typography variant="body1" color="white">
                                                         {bus.route}
                                                     </Typography>
@@ -249,6 +238,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     ))}
                 </Box>
             )}
+            </>
             
             </div>
                 

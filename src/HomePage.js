@@ -1,5 +1,5 @@
 import React, { useMemo,useState, useEffect, useRef , useLayoutEffect} from "react";
-import { GoogleMap, useLoadScript,  MarkerF,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow,Marker} from "@react-google-maps/api";
+import { GoogleMap, useLoadScript,  MarkerF,Polyline,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow,Marker} from "@react-google-maps/api";
 // import {Box,Button,ButtonGroup,Flex,HStack,IconButton,Input,SkeletonText,Text} from '@chakra-ui/react'
 import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon,} from "@mui/material";
 import LocationPicker from "location-picker";
@@ -17,6 +17,7 @@ import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
 import { FaBusSimple } from "react-icons/fa6";
 import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
 import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
+import { busPolyline } from "./data/CustomRoute.mjs";
 
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 import greyDot from './image/greyDot.png';
@@ -25,6 +26,9 @@ import toiletImgHighlighted from './image/toiletHighlighted.png';
 import waterFountainImg from './image/waterFountain.png';
 import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png';
 import busStopImg from './image/busStop.png';
+import { busDetails } from "./data/busDetails.mjs";
+import { stationLocation } from "./data/Places.mjs";
+
 const HomePage = () => {
   
   // Search Bar
@@ -36,8 +40,10 @@ const HomePage = () => {
   const [NLPSearchToggle, setNLPSearchToggleToggle] = useState(false);
   const [NLPQuery, setNLPQuery] = useState("");
 
-  const [showToiletLayer, setShowToiletLayer] = useState(false);
-  const [showWaterFountainLayer, setShowWaterFountainLayer] = useState(false);
+  const [showToiletMarkers, setShowToiletMarkers] = useState(false);
+  const [showWaterFountainMarkers, setShowWaterFountainMarkers] = useState(false);
+  const [busRouteMarkers, setBusRouteMarkers] = useState([]);
+
   const center = useMemo(() => ({ lat: 22.418426709637526, lng: 114.20771628364456 }), []);
   const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY
   
@@ -65,6 +71,9 @@ const HomePage = () => {
   // Custom Info page (Pop up)
   const [showInfoPage, setShowInfoPage] = useState(false);
   
+  // Polyline
+  const [selectedBusPolyline, setSelectedBusPolyline] = useState(null);
+
   // Load GOOGLE MAP API
   const [ libraries ] = useState(['places']);
   const { isLoaded } = useLoadScript({
@@ -177,7 +186,7 @@ const HomePage = () => {
           }}
           icon={{
             path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-            fillColor: "#bdbdbd",
+            fillColor: "#f2f2f2",
             fillOpacity: 1,
             strokeOpacity: 1,
             strokeWeight: 2,
@@ -195,7 +204,103 @@ const HomePage = () => {
       </>
     );
   };
-  
+
+  // const renderFirstBusDirectionsResponse = () => {
+  //   if(busList.length === 0) return null;
+  //   setDirectionsResponseFromOriginToStation(busList[0].directionsResponseFromOriginToStation)
+  //   setDirectionsResponseFromStationToDest(busList[0].directionsResponseFromStationToDest)
+  //   // Extracting start and end locations
+  //   const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
+  //   const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
+
+  //   const startLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[0].start_location;
+  //   const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
+
+  //   return (
+  //     <>
+  //           <DirectionsRenderer
+  //               directions={directionsResponseFromOriginToStation}
+  //               options={{
+  //                   suppressMarkers: true,
+  //                   polylineOptions: {
+  //                     strokeColor: 'White', // Color of the dotted line
+  //                     strokeOpacity: 0, // Make the primary line invisible
+  //                     strokeWeight: 1,
+  //                     icons: [{
+  //                       icon: {
+  //                         path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+  //                         strokeOpacity: 1,
+  //                         strokeWeight: 2, // Weight of the invisible primary line
+  //                         fillOpacity: 1,
+  //                         fillColor: '#4285F4',
+  //                         scale: 5, // Size of the circle dot
+  //                       },
+  //                       offset: '0',
+  //                       repeat: '18px' // Distance between each circle dot
+  //                     }],
+  //                   },
+  //               }}
+  //           />
+  //           <DirectionsRenderer
+  //               directions={directionsResponseFromStationToDest}
+  //               options={{
+  //                   suppressMarkers: true,
+  //                   polylineOptions: {
+  //                     strokeColor: 'White', // Color of the dotted line
+  //                     strokeOpacity: 0, // Make the primary line invisible
+  //                     strokeWeight: 1,
+  //                     icons: [{
+  //                       icon: {
+  //                         path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+  //                         strokeOpacity: 1,
+  //                         strokeWeight: 2, // Weight of the invisible primary line
+  //                         fillOpacity: 1,
+  //                         fillColor: '#ff2527',
+  //                         scale: 5, // Size of the circle dot
+  //                       },
+  //                       offset: '0',
+  //                       repeat: '18px' // Distance between each circle dot
+  //                     }],
+  //                   },
+  //               }}
+  //           />
+  //           <Marker
+  //             position={startLocationFromOriginToStation}
+  //             icon={{
+  //               path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+  //               fillColor: "#f2f2f2",
+  //               fillOpacity: 1,
+  //               strokeOpacity: 1,
+  //               strokeWeight: 2,
+  //               strokeColor: "#787878",
+  //               scale: 8, // Size of the circle dot
+  //             }}
+  //           />
+  //           <Marker
+  //             position={endLocationFromOriginToStation}
+  //             icon={{
+  //               url: busStopImg, 
+  //               scaledSize: new google.maps.Size(25,40),
+  //             }}
+  //           />
+  //           <Marker
+  //             position={startLocationFromStationToDest}
+  //             icon={{
+  //               url: busStopImg, 
+  //               scaledSize: new google.maps.Size(25,40),
+  //             }}
+  //           />
+  //           <Marker
+  //             position={endLocationFromStationToDest}
+  //           />
+      
+  //       </>
+  //     )
+
+  // }
+
+
+
   const renderBusDirectionsResponse = () =>{
     if (!directionsResponseFromOriginToStation || !directionsResponseFromStationToDest) return null;
     // Extracting start and end locations
@@ -206,8 +311,26 @@ const HomePage = () => {
     const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
 
     return (
-      <>
-            <DirectionsRenderer
+      <>      
+          {selectedBusPolyline && (
+            <Polyline
+              path={selectedBusPolyline}
+              options={{
+              strokeColor: "#9b17f1",
+              strokeOpacity: 0.8,
+              strokeWeight: 5,
+              fillColor: "#9b17f1",
+              fillOpacity: 0.35,
+              clickable: false,
+              draggable: false,
+              editable: false,
+              visible: true,
+              radius: 30000,
+              zIndex: 1
+            }}
+          />)
+          }
+          <DirectionsRenderer
                 directions={directionsResponseFromOriginToStation}
                 options={{
                     suppressMarkers: true,
@@ -354,8 +477,11 @@ const HomePage = () => {
   const onSelectBusRoute = (selectedBusRoute) => {
     // Update state to render bus directions on the map
     setTravalType("bus")
+    setSelectedBusPolyline(selectedBusRoute.polyline);
     setDirectionsResponseFromOriginToStation(selectedBusRoute.directionsResponseFromOriginToStation);
     setDirectionsResponseFromStationToDest(selectedBusRoute.directionsResponseFromStationToDest);
+    const markers = getStationCoordinatesForRoute(selectedBusRoute.route);
+    setBusRouteMarkers(markers);
   };
 
   
@@ -375,8 +501,10 @@ const HomePage = () => {
           setDestinationName('');
           setAfterSearch(false)
           setShowInfoPage(false)
-          setShowToiletLayer(false)
-          setShowWaterFountainLayer(false)
+          setShowToiletMarkers(false)
+          setShowWaterFountainMarkers(false)
+          setSelectedBusPolyline(null)
+          setBusRouteMarkers([])
         }
   
   const handleShowInfoPage= () => {
@@ -458,6 +586,7 @@ const HomePage = () => {
         arrivalTime:null,
         upcomingDepartures:[],
         status:"",
+        polyline: [],
         directionsResponseFromOriginToStation: null,
         directionsResponseFromStationToDest: null
     }
@@ -478,7 +607,8 @@ const HomePage = () => {
     const tempBusList = [];
     
     // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
-    const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHAWHALL' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]}
+    const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHAWHALL' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]},
+    { busRoute: '2', startStation: 'MTRP', endStation: 'UADM', startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]}
   ]
   
 
@@ -508,7 +638,8 @@ const HomePage = () => {
           status: busDetails.status,
           directionsResponseFromOriginToStation,
           directionsResponseFromStationToDest,
-          passedStations: bus.passedStations
+          passedStations: bus.passedStations,
+          polyline: busPolyline[bus.busRoute]
         })
 
       } catch (error) {
@@ -634,7 +765,7 @@ const mapOptions = {
     console.log("Place selected: ", inputString);
     // If 'Nearest Toilet' is selected, calculate the nearest toilet
     if (inputString.toLowerCase() === 'nearest toilet') {
-      setShowToiletLayer(true);
+      setShowToiletMarkers(true);
       // Determine the origin coordinates based on the current origin or user's location
       const originCoords = showOriginSearch ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
       try {
@@ -650,7 +781,7 @@ const mapOptions = {
       }
     } 
     else if (inputString.toLowerCase() === 'nearest water fountain'){
-      setShowWaterFountainLayer(true);
+      setShowWaterFountainMarkers(true);
       const originCoords = showOriginSearch ? originCoord : currentUserLocation; 
       try {
         const nearestWaterFountain = getNearestWaterFountain(originCoords);
@@ -665,8 +796,8 @@ const mapOptions = {
       }
     } 
     else {
-            setShowToiletLayer(false);
-            setShowWaterFountainLayer(false);
+            setShowToiletMarkers(false);
+            setShowWaterFountainMarkers(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
             if (placeObj) {
@@ -702,6 +833,13 @@ const mapOptions = {
   const handleBusButtonClick = () => {
     setTravalType("bus")
     setShowInfoPage(true)
+    if(busList.length > 0) {
+      setDirectionsResponseFromOriginToStation(busList[0].directionsResponseFromOriginToStation);
+      setDirectionsResponseFromStationToDest(busList[0].directionsResponseFromStationToDest);
+      setSelectedBusPolyline(busList[0].polyline);
+      const markers= getStationCoordinatesForRoute(busList[0].route);
+      setBusRouteMarkers(markers);
+    }
   };
 
   const touristSpotMarkers = [
@@ -710,7 +848,7 @@ const mapOptions = {
     ];
 
   const renderToiletMarkers = () => {
-      if (!showToiletLayer) return null;
+      if (!showToiletMarkers) return null;
       
       return toiletMarkers.map((marker, index) => (
         <MarkerF
@@ -726,7 +864,7 @@ const mapOptions = {
         ));
     };
     const renderWaterFountainMarkers = () => {
-      if (!showWaterFountainLayer) return null;
+      if (!showWaterFountainMarkers) return null;
       return waterFountainMarkers.map((marker, index) => (
         <MarkerF
             key={index}
@@ -740,7 +878,35 @@ const mapOptions = {
         />
       ));
     };
+  
+  const getStationCoordinatesForRoute = (busRoute) => {
+    const routeStations = busDetails[busRoute].station;
+    const stationCoordinates = [];
+  
+    routeStations.forEach(stationName => {
+      const stationObj = stationLocation.find(obj => obj.hasOwnProperty(stationName));
+      if (stationObj) {
+        const { lat, lng } = stationObj[stationName];
+        stationCoordinates.push({ name: stationName, lat, lng });
+      }
+    });
+  
+    return stationCoordinates;
+  };
 
+  const renderBusStationMarkers = () => {
+    
+    return busRouteMarkers.map((marker, index) => (
+      <MarkerF
+        key={index}
+        position={{ lat: marker.lat, lng: marker.lng }}
+        title={marker.name}
+        onClick={() => handleMarkerClick(marker)} 
+      />
+    ))
+  
+  }
+  
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
         setIsInfoWindowVisible(true);
@@ -872,8 +1038,8 @@ const mapOptions = {
                     color="primary" 
                     size="small" 
                     style={{
-                            dissplay: "relative",
-                            left: "100px",
+                            display: "relative",
+                            left: "34%",
                             borderRadius: "8px", 
                           }} 
                     onClick = { NLPSearchToggle ? () => {handleNLPQuery()} :
@@ -957,6 +1123,7 @@ const mapOptions = {
           }
           {renderToiletMarkers()}
           {renderWaterFountainMarkers()}
+          {travelType === "bus" ?renderBusStationMarkers() : null}
 
           {travelType === "walk" ? renderWalkDirectionsResponse() : renderBusDirectionsResponse()}    
 
@@ -969,7 +1136,8 @@ const mapOptions = {
                 destinationCoord
                 />
           )}
-      
+
+          
         </GoogleMap>
         <InfoPage 
             show={showInfoPage}
@@ -989,7 +1157,7 @@ const mapOptions = {
         bottom="5%" 
         left="50%" 
         transform="translateX(-50%)">
-        <Button variant="contained" color="primary" onClick={() => setShowToiletLayer(!showToiletLayer)}>
+        <Button variant="contained" color="primary" onClick={() => setShowToiletMarkers(!showToiletMarkers)}>
           Toggle Toilet Layer
         </Button>
         <Button variant="contained" color="primary" onClick={() => showBusRoute({ lat: 22.415917172642065, lng: 114.211104527007 }, {lat: 22.419788004309634, lng: 114.20867167235077} )}>

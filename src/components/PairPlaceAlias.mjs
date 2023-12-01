@@ -14,9 +14,9 @@ export function pairPlaceAlias(buildingFullName) {
 }
 
 // Example usage
-let buildingFullName = "University Library (ULIB)";
-let result = pairPlaceAlias(buildingFullName);
-console.log(result);
+// let buildingFullName = "University Library (ULIB)";
+// let result = pairPlaceAlias(buildingFullName);
+// console.log(result);
 
 
 export function getFullPlaceName(alias) {
@@ -35,4 +35,4 @@ export function getFullPlaceName(alias) {
     return null;
   }
 
-  console.log(getFullPlaceName("SHAWHALL"))
+  // console.log(getFullPlaceName("SHAWHALL"))
