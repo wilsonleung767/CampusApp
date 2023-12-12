@@ -2,8 +2,6 @@
 // - least time for the whole trip ( walk + take bus time + walk)
 // - earliest arrival
 
-
-
 // Works fine
 import { timeTable } from "../../data/timeTable.mjs";
 import { calculateBusDuration } from "./calculateBusDuration.mjs";

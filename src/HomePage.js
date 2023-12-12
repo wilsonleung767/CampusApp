@@ -205,102 +205,6 @@ const HomePage = () => {
     );
   };
 
-  // const renderFirstBusDirectionsResponse = () => {
-  //   if(busList.length === 0) return null;
-  //   setDirectionsResponseFromOriginToStation(busList[0].directionsResponseFromOriginToStation)
-  //   setDirectionsResponseFromStationToDest(busList[0].directionsResponseFromStationToDest)
-  //   // Extracting start and end locations
-  //   const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
-  //   const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
-
-  //   const startLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[0].start_location;
-  //   const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
-
-  //   return (
-  //     <>
-  //           <DirectionsRenderer
-  //               directions={directionsResponseFromOriginToStation}
-  //               options={{
-  //                   suppressMarkers: true,
-  //                   polylineOptions: {
-  //                     strokeColor: 'White', // Color of the dotted line
-  //                     strokeOpacity: 0, // Make the primary line invisible
-  //                     strokeWeight: 1,
-  //                     icons: [{
-  //                       icon: {
-  //                         path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-  //                         strokeOpacity: 1,
-  //                         strokeWeight: 2, // Weight of the invisible primary line
-  //                         fillOpacity: 1,
-  //                         fillColor: '#4285F4',
-  //                         scale: 5, // Size of the circle dot
-  //                       },
-  //                       offset: '0',
-  //                       repeat: '18px' // Distance between each circle dot
-  //                     }],
-  //                   },
-  //               }}
-  //           />
-  //           <DirectionsRenderer
-  //               directions={directionsResponseFromStationToDest}
-  //               options={{
-  //                   suppressMarkers: true,
-  //                   polylineOptions: {
-  //                     strokeColor: 'White', // Color of the dotted line
-  //                     strokeOpacity: 0, // Make the primary line invisible
-  //                     strokeWeight: 1,
-  //                     icons: [{
-  //                       icon: {
-  //                         path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-  //                         strokeOpacity: 1,
-  //                         strokeWeight: 2, // Weight of the invisible primary line
-  //                         fillOpacity: 1,
-  //                         fillColor: '#ff2527',
-  //                         scale: 5, // Size of the circle dot
-  //                       },
-  //                       offset: '0',
-  //                       repeat: '18px' // Distance between each circle dot
-  //                     }],
-  //                   },
-  //               }}
-  //           />
-  //           <Marker
-  //             position={startLocationFromOriginToStation}
-  //             icon={{
-  //               path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-  //               fillColor: "#f2f2f2",
-  //               fillOpacity: 1,
-  //               strokeOpacity: 1,
-  //               strokeWeight: 2,
-  //               strokeColor: "#787878",
-  //               scale: 8, // Size of the circle dot
-  //             }}
-  //           />
-  //           <Marker
-  //             position={endLocationFromOriginToStation}
-  //             icon={{
-  //               url: busStopImg, 
-  //               scaledSize: new google.maps.Size(25,40),
-  //             }}
-  //           />
-  //           <Marker
-  //             position={startLocationFromStationToDest}
-  //             icon={{
-  //               url: busStopImg, 
-  //               scaledSize: new google.maps.Size(25,40),
-  //             }}
-  //           />
-  //           <Marker
-  //             position={endLocationFromStationToDest}
-  //           />
-      
-  //       </>
-  //     )
-
-  // }
-
-
-
   const renderBusDirectionsResponse = () =>{
     if (!directionsResponseFromOriginToStation || !directionsResponseFromStationToDest) return null;
     // Extracting start and end locations
@@ -525,53 +429,7 @@ const HomePage = () => {
     }
 }
 
-  function getNearestBuilding(origin){
-    const originLatLng = new google.maps.LatLng(origin[0], origin[1]);
-    const service = new google.maps.DistanceMatrixService();
-    const destinations = customPlaces.map(place => {  
-      const location = Object.values(place)[0];
-      if (location.lat && location.lng && !isNaN(location.lat) && !isNaN(location.lng)) {
-          return new google.maps.LatLng(location.lat, location.lng);
-      } else {
-          return null; // or handle this case appropriately
-      }
-    }).filter(location => location !== null);
-    // Return a new Promise
-    return new Promise((resolve, reject) => {
-      service.getDistanceMatrix(
-        {
-          origins: [originLatLng],
-          destinations: destinations,
-          travelMode: 'WALKING', // or 'DRIVING'
-        },
-        (response, status) => {
-          if (status !== 'OK') {
-            console.log('Error was: ' + status);
-            reject(status); // Reject the promise if there's an error
-          } else {
-            let distances = response.rows[0].elements;
-            let minimumDistance = Number.MAX_VALUE;
-            let nearestBuildingIndex = -1;
-
-            distances.forEach((distance, index) => {
-              if (distance.distance.value < minimumDistance) {
-                  minimumDistance = distance.distance.value;
-                  nearestBuildingIndex = index;
-              }
-            });
-            
-            if (nearestBuildingIndex !== -1) {
-                let nearestBuildingName = Object.keys(customPlaces[nearestBuildingIndex])[0];
-                console.log('Nearest Building:', nearestBuildingName);
-                resolve(nearestBuildingName); // Resolve the promise with the nearest building name
-            } else {
-                reject('No buildings found.'); // Reject if no buildings are found
-            }
-          }
-        }
-      );
-    });
-  }
+  
   
   const [busList, setBusList] = useState([
     {
@@ -670,9 +528,9 @@ const HomePage = () => {
   }, [busList])
 
   
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-    // Euclidean distance calculation
-    return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2));
+  // Euclidean distance calculation
+  function calculateEuclideanDistance(lat1, lng1, lat2, lng2) {
+    return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
   }
 
 // Function to find the five nearest toilets
@@ -680,16 +538,16 @@ const HomePage = () => {
     if (origin.length > 1){}
     return toiletMarkers.map(facility => ({
         ...facility,
-        distance: calculateDistance(origin[0], origin[1], facility.lat, facility.lng)
+        distance: calculateEuclideanDistance(origin[0], origin[1], facility.lat, facility.lng)
     }))
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 5);
 }
 
-  function  findFiveNearestWaterFountain(origin) {
+  function findFiveNearestWaterFountain(origin) {
     return waterFountainMarkers.map(facility => ({
         ...facility,
-        distance: calculateDistance(origin[0], origin[1], facility.lat, facility.lng)
+        distance: calculateEuclideanDistance(origin[0], origin[1], facility.lat, facility.lng)
     }))
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 5);
@@ -703,6 +561,22 @@ function getNearestWaterFountain(originCoord) {
   return nearestWaterFountain[0]
 }
 
+function getNearestBuilding(originCoord){
+  return customPlaces.map(placeObj => {
+    const placeName = Object.keys(placeObj)[0]
+    const { lat, lng } = placeObj[placeName];
+
+        return {
+            name: placeName,
+            lat,
+            lng,
+            distance: calculateEuclideanDistance(originCoord[0], originCoord[1], lat, lng)
+        };
+    })
+    .sort((a, b) => a.distance - b.distance)
+    [0].name;
+  
+}
 
 const mapOptions = {
   styles: [
