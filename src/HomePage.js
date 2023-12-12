@@ -21,6 +21,7 @@ import { busPolyline } from "./data/CustomRoute.mjs";
 
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 import greyDot from './image/greyDot.png';
+import busStopGrey from './image/busStopGrey.png';
 import toiletImg from './image/toilet.png';
 import toiletImgHighlighted from './image/toiletHighlighted.png';
 import waterFountainImg from './image/waterFountain.png';
@@ -43,6 +44,9 @@ const HomePage = () => {
   const [showToiletMarkers, setShowToiletMarkers] = useState(false);
   const [showWaterFountainMarkers, setShowWaterFountainMarkers] = useState(false);
   const [busRouteMarkers, setBusRouteMarkers] = useState([]);
+  const [startStationName, setStartStationName] = useState('');
+  const [endStationName, setEndStationName] = useState(''); 
+  const [selectedBusRoute, setSelectedBusRoute] = useState(null);
 
   const center = useMemo(() => ({ lat: 22.418426709637526, lng: 114.20771628364456 }), []);
   const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY
@@ -125,8 +129,8 @@ const HomePage = () => {
   // when user input string in input field, we should parse the string into coordinatate and calroute—
   async function calculateRouteByWalking() {
     // Convert array [lat, lng] to google.maps.LatLng object
-    setDirectionsResponseFromStationToDest(null);
-    setDirectionsResponseFromOriginToStation(null);
+    // setDirectionsResponseFromStationToDest(null);
+    // setDirectionsResponseFromOriginToStation(null);
     let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
     let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
   
@@ -205,133 +209,39 @@ const HomePage = () => {
     );
   };
 
-  // const renderFirstBusDirectionsResponse = () => {
-  //   if(busList.length === 0) return null;
-  //   setDirectionsResponseFromOriginToStation(busList[0].directionsResponseFromOriginToStation)
-  //   setDirectionsResponseFromStationToDest(busList[0].directionsResponseFromStationToDest)
-  //   // Extracting start and end locations
-  //   const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
-  //   const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
-
-  //   const startLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[0].start_location;
-  //   const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
-
-  //   return (
-  //     <>
-  //           <DirectionsRenderer
-  //               directions={directionsResponseFromOriginToStation}
-  //               options={{
-  //                   suppressMarkers: true,
-  //                   polylineOptions: {
-  //                     strokeColor: 'White', // Color of the dotted line
-  //                     strokeOpacity: 0, // Make the primary line invisible
-  //                     strokeWeight: 1,
-  //                     icons: [{
-  //                       icon: {
-  //                         path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-  //                         strokeOpacity: 1,
-  //                         strokeWeight: 2, // Weight of the invisible primary line
-  //                         fillOpacity: 1,
-  //                         fillColor: '#4285F4',
-  //                         scale: 5, // Size of the circle dot
-  //                       },
-  //                       offset: '0',
-  //                       repeat: '18px' // Distance between each circle dot
-  //                     }],
-  //                   },
-  //               }}
-  //           />
-  //           <DirectionsRenderer
-  //               directions={directionsResponseFromStationToDest}
-  //               options={{
-  //                   suppressMarkers: true,
-  //                   polylineOptions: {
-  //                     strokeColor: 'White', // Color of the dotted line
-  //                     strokeOpacity: 0, // Make the primary line invisible
-  //                     strokeWeight: 1,
-  //                     icons: [{
-  //                       icon: {
-  //                         path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-  //                         strokeOpacity: 1,
-  //                         strokeWeight: 2, // Weight of the invisible primary line
-  //                         fillOpacity: 1,
-  //                         fillColor: '#ff2527',
-  //                         scale: 5, // Size of the circle dot
-  //                       },
-  //                       offset: '0',
-  //                       repeat: '18px' // Distance between each circle dot
-  //                     }],
-  //                   },
-  //               }}
-  //           />
-  //           <Marker
-  //             position={startLocationFromOriginToStation}
-  //             icon={{
-  //               path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-  //               fillColor: "#f2f2f2",
-  //               fillOpacity: 1,
-  //               strokeOpacity: 1,
-  //               strokeWeight: 2,
-  //               strokeColor: "#787878",
-  //               scale: 8, // Size of the circle dot
-  //             }}
-  //           />
-  //           <Marker
-  //             position={endLocationFromOriginToStation}
-  //             icon={{
-  //               url: busStopImg, 
-  //               scaledSize: new google.maps.Size(25,40),
-  //             }}
-  //           />
-  //           <Marker
-  //             position={startLocationFromStationToDest}
-  //             icon={{
-  //               url: busStopImg, 
-  //               scaledSize: new google.maps.Size(25,40),
-  //             }}
-  //           />
-  //           <Marker
-  //             position={endLocationFromStationToDest}
-  //           />
-      
-  //       </>
-  //     )
-
-  // }
-
-
-
   const renderBusDirectionsResponse = () =>{
-    if (!directionsResponseFromOriginToStation || !directionsResponseFromStationToDest) return null;
+    if (!selectedBusRoute) return null;
     // Extracting start and end locations
-    const startLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
-    const endLocationFromOriginToStation = directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
+    const startLocationFromOriginToStation = selectedBusRoute.directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
+    // const endLocationFromOriginToStation = selectedBusRoute.directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
 
-    const startLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[0].start_location;
-    const endLocationFromStationToDest = directionsResponseFromStationToDest.routes[0].legs[directionsResponseFromStationToDest.routes[0].legs.length - 1].end_location;
+    // const startLocationFromStationToDest = selectedBusRoute.directionsResponseFromStationToDest.routes[0].legs[0].start_location;
+    // const endLocationFromStationToDest = selectedBusRoute.end
+    
+    const stationMarkers = createBusStationMarkers(selectedBusRoute.route, selectedBusRoute.startStation, selectedBusRoute.endStation);
 
     return (
       <>      
-          {selectedBusPolyline && (
-            <Polyline
-              path={selectedBusPolyline}
+          {selectedBusRoute.polyline &&
+          <Polyline
+              path={selectedBusRoute.polyline}
               options={{
               strokeColor: "#9b17f1",
-              strokeOpacity: 0.8,
+              strokeOpacity: 0.5,
               strokeWeight: 5,
               fillColor: "#9b17f1",
-              fillOpacity: 0.35,
+              fillOpacity: 0.2,
               clickable: false,
               draggable: false,
               editable: false,
               visible: true,
               radius: 30000,
-              zIndex: 1
+              
             }}
-          />)
-          }
+          />
+            }
           <DirectionsRenderer
-                directions={directionsResponseFromOriginToStation}
+                directions={selectedBusRoute.directionsResponseFromOriginToStation}
                 options={{
                     suppressMarkers: true,
                     polylineOptions: {
@@ -354,7 +264,7 @@ const HomePage = () => {
                 }}
             />
             <DirectionsRenderer
-                directions={directionsResponseFromStationToDest}
+                directions={selectedBusRoute.directionsResponseFromStationToDest}
                 options={{
                     suppressMarkers: true,
                     polylineOptions: {
@@ -377,7 +287,7 @@ const HomePage = () => {
                 }}
             />
             <Marker
-              position={startLocationFromOriginToStation}
+              position={{lat:originCoord[0], lng:originCoord[1]}}
               icon={{
                 path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
                 fillColor: "#f2f2f2",
@@ -389,29 +299,16 @@ const HomePage = () => {
               }}
             />
             <Marker
-              position={endLocationFromOriginToStation}
-              icon={{
-                url: busStopImg, 
-                scaledSize: new google.maps.Size(25,40),
-              }}
-            />
-            <Marker
-              position={startLocationFromStationToDest}
-              icon={{
-                url: busStopImg, 
-                scaledSize: new google.maps.Size(25,40),
-              }}
-            />
-            <Marker
-              position={endLocationFromStationToDest}
-            />
+                position={{lat:destinationCoord[0], lng:destinationCoord[1]}}
+              />
       
+            {stationMarkers}
         </>
       )
   }
 
-  const [directionsResponseFromOriginToStation, setDirectionsResponseFromOriginToStation] = useState(null);
-  const [directionsResponseFromStationToDest, setDirectionsResponseFromStationToDest] = useState(null);
+  // const [directionsResponseFromOriginToStation, setDirectionsResponseFromOriginToStation] = useState(null);
+  // const [directionsResponseFromStationToDest, setDirectionsResponseFromStationToDest] = useState(null);
   // const [busStart, setBusStart] = useState({ lat: 22.415917172642065, lng: 114.211104527007 });
   // const [busEnd, setBusEnd] = useState({lat: 22.419788004309634, lng: 114.20867167235077});
   const [originToStationDuration , setOriginToStationDuration] = useState(null);
@@ -477,20 +374,19 @@ const HomePage = () => {
   const onSelectBusRoute = (selectedBusRoute) => {
     // Update state to render bus directions on the map
     setTravalType("bus")
-    setSelectedBusPolyline(selectedBusRoute.polyline);
-    setDirectionsResponseFromOriginToStation(selectedBusRoute.directionsResponseFromOriginToStation);
-    setDirectionsResponseFromStationToDest(selectedBusRoute.directionsResponseFromStationToDest);
-    const markers = getStationCoordinatesForRoute(selectedBusRoute.route);
-    setBusRouteMarkers(markers);
+    // setDirectionsResponseFromOriginToStation(selectedBusRoute.directionsResponseFromOriginToStation);
+    // setDirectionsResponseFromStationToDest(selectedBusRoute.directionsResponseFromStationToDest);
+    setSelectedBusRoute(selectedBusRoute)
   };
 
   
-
+  useEffect(()=>{console.log("Current selectedBusroute is ", selectedBusRoute)
+                  }, [selectedBusRoute])
 
   const clearRoute= () => {
           setWalkDirectionsResponse(null);
-          setDirectionsResponseFromStationToDest(null);
-          setDirectionsResponseFromOriginToStation(null);
+          // setDirectionsResponseFromStationToDest(null);
+          // setDirectionsResponseFromOriginToStation(null);
           setDistance('');
           setWalkDuration('');
           originInputRef.current.value = '';
@@ -505,6 +401,7 @@ const HomePage = () => {
           setShowWaterFountainMarkers(false)
           setSelectedBusPolyline(null)
           setBusRouteMarkers([])
+          setSelectedBusRoute(null)
         }
   
   const handleShowInfoPage= () => {
@@ -607,11 +504,10 @@ const HomePage = () => {
     const tempBusList = [];
     
     // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
-    const busRouteList = [ { busRoute: '1A', startStation: 'MTR', endStation: 'SHAWHALL' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]},
-    { busRoute: '2', startStation: 'MTRP', endStation: 'UADM', startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]}
+    const busRouteList = [ 
+    { busRoute: '2', startStation: 'MTRP', endStation: 'UADM', startStationLocation:{lat: 22.413901, lng: 114.209770 } , endStationLocation: { lat: 22.418799, lng: 114.205340  }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]},
+    { busRoute: '1A', startStation: 'MTR', endStation: 'SHAWHALL' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]}
   ]
-  
-
   
     for (let bus of busRouteList){
       try {
@@ -636,8 +532,8 @@ const HomePage = () => {
           arrivalTime: busDetails.arrivalTime,
           upcomingDepartures: busDetails.upcomingDepartures,
           status: busDetails.status,
-          directionsResponseFromOriginToStation,
-          directionsResponseFromStationToDest,
+          directionsResponseFromOriginToStation:directionsResponseFromOriginToStation,
+          directionsResponseFromStationToDest:directionsResponseFromStationToDest,
           passedStations: bus.passedStations,
           polyline: busPolyline[bus.busRoute]
         })
@@ -833,13 +729,13 @@ const mapOptions = {
   const handleBusButtonClick = () => {
     setTravalType("bus")
     setShowInfoPage(true)
-    if(busList.length > 0) {
-      setDirectionsResponseFromOriginToStation(busList[0].directionsResponseFromOriginToStation);
-      setDirectionsResponseFromStationToDest(busList[0].directionsResponseFromStationToDest);
-      setSelectedBusPolyline(busList[0].polyline);
-      const markers= getStationCoordinatesForRoute(busList[0].route);
-      setBusRouteMarkers(markers);
-    }
+    // if(busList.length > 0) {
+      // setDirectionsResponseFromOriginToStation(busList[0].directionsResponseFromOriginToStation);
+      // setDirectionsResponseFromStationToDest(busList[0].directionsResponseFromStationToDest);
+      // setSelectedBusPolyline(busList[0].polyline);
+      // const markers= getStationCoordinatesForRoute(busList[0].route);
+      // setBusRouteMarkers(markers);
+    // }
   };
 
   const touristSpotMarkers = [
@@ -894,18 +790,30 @@ const mapOptions = {
     return stationCoordinates;
   };
 
-  const renderBusStationMarkers = () => {
-    
-    return busRouteMarkers.map((marker, index) => (
-      <MarkerF
-        key={index}
-        position={{ lat: marker.lat, lng: marker.lng }}
-        title={marker.name}
-        onClick={() => handleMarkerClick(marker)} 
-      />
-    ))
+  const createBusStationMarkers = (busRoute, startStation, endStation) => {
+    const busStationInfo = getStationCoordinatesForRoute(busRoute);
+    return busStationInfo.map((marker, index) => {
+      let iconUrl = (marker.name.trim().toLowerCase() === startStation.trim().toLowerCase() || 
+               marker.name.trim().toLowerCase() === endStation.trim().toLowerCase()) ? 
+               busStopImg : busStopGrey;
+
+      console.log("inside createBusStationMarkers marker.name is", marker.name , "startStation is", startStation, "endStation is", endStation)
+      return (
+        <MarkerF
+          key={marker.name + index}
+          position={{ lat: marker.lat, lng: marker.lng }}
+          title={marker.name}
+          onClick={() => handleMarkerClick(marker)}
+          icon={{
+            url: iconUrl,
+            scaledSize: new google.maps.Size(30, 40) // Adjust size as needed
+          }}
+        />
+      );
+    });
+  };
+
   
-  }
   
   function handleMarkerClick(marker) {
         setSelectedMarker(marker);
@@ -1057,19 +965,7 @@ const mapOptions = {
                 </IconButton>
 
           </Box>
-          {/* <Box display="flex" justifyContent="space-between" mt={2} alignItems="center">
-            <Typography variant="body2">Distance: {distance}</Typography>
-            <Typography variant="body2">Duration: {walkDuration}</Typography>
-            <IconButton size="small" onClick={() => {
-              map.panTo(center);
-              map.setZoom(15.59);
-            }}>
-              <FaLocationArrow />
-            </IconButton>
-            
-          </Box> */}
-
-
+ 
         
           <Box position="relative"
             style={{
@@ -1123,7 +1019,7 @@ const mapOptions = {
           }
           {renderToiletMarkers()}
           {renderWaterFountainMarkers()}
-          {travelType === "bus" ?renderBusStationMarkers() : null}
+          {/* {travelType === "bus" ?renderBusStationMarkers() : null} */}
 
           {travelType === "walk" ? renderWalkDirectionsResponse() : renderBusDirectionsResponse()}    
 
