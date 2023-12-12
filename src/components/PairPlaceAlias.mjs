@@ -1,22 +1,25 @@
 import { buildingStationPair } from "../data/buildingStationPair.mjs";
 import { customPlaces,stationLocation } from "../data/Places.mjs";
 export function pairPlaceAlias(buildingFullName) {
-    for (let alias in buildingStationPair) {
-        if (buildingFullName.includes(alias)) {
-            console.log(`Found alias from pairPlaceAlias function: ${alias}`);
-            return alias;
-        }
-    }
+  for (let alias in buildingStationPair) {
+      // Create a regular expression to match the alias with word boundaries
+      let regex = new RegExp(`\\b${alias}\\b`, 'i');
 
-    // If no alias is found in the buildingFullName
-    console.log('No alias found for', buildingFullName);
-    return null;
+      if (regex.test(buildingFullName)) {
+          console.log(`Found alias from pairPlaceAlias function: ${alias}`);
+          return alias;
+      }
+  }
+
+  // If no alias is found in the buildingFullName
+  console.log('No alias found for', buildingFullName);
+  return null;
 }
 
 // Example usage
-// let buildingFullName = "University Library (ULIB)";
-// let result = pairPlaceAlias(buildingFullName);
-// console.log(result);
+let buildingFullName = "Benjamin Franklin Centre Coffee Corner (COFFEE CON,BFCCC)";
+let result = pairPlaceAlias(buildingFullName);
+console.log(result);
 
 
 export function getFullPlaceName(alias) {

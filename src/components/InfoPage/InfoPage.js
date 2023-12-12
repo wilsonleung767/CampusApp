@@ -52,7 +52,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
         useEffect(() => {
             const updateWaitingTime = () => {
-                const currentTime = new Date("2023-11-17T13:03:23.813Z");
+                const currentTime = new Date("2023-11-17T13:09:23.813Z");
                 const departureTime = new Date(bus.departureTime);
                 const newWaitingTime = Math.max(0, Math.ceil((departureTime - currentTime) / (1000 * 60)));
                 setWaitingTime(newWaitingTime); // Update waiting time in minutes
@@ -75,15 +75,16 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                 border: "1px solid #ddd",
                 borderRadius: "8px",
                 padding: "10px",
-                marginTop: "15px",
+                marginTop: "0", // Remove the top margin to connect with the above section
                 boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                 backgroundColor: "white",
+                marginBottom: "20px",
             }}
         >
                 <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">
                     <Box>
                     <Typography variant="body1">
-                        <FaPersonWalking style={{ marginRight: "5px" }} />
+                        <FaPersonWalking color='#2c6bf2' style={{ marginRight: "5px" }} />
                         Walk to <FaLocationDot color="#9b17f1" /> 
                         <span style={{marginLeft:"2px", color:"#9b17f1" , fontWeight:"bold"}}>
                         {startStationFullName}
@@ -96,7 +97,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     
                 </Box>
 
-                <Box backgroundColor={"#f7f7f7"} borderRadius={"5px"} padding={0.5}marginBottom="10px">
+                <Box backgroundColor={"#f0dcfa"} borderRadius={"5px"} padding={0.5}marginBottom="10px">
                 <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">                    
                     <Box style={{display:"flex", alignItems:"center"}}>
                     <Typography variant="body1" >
@@ -108,14 +109,14 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                             </Typography>
                         </Box>
                     </Box>
-                    <Typography variant="body1" style={{ fontWeight: "bold", color: "#4caf50" }}>
+                    <Typography variant="body1" style={{ fontWeight: "bold", color: "#48c210" }}>
                         Coming in {waitingTime} min
                     </Typography>
                 </Box>
                 <Typography variant="body1" fontSize="14px" marginLeft="20px" >
                     More Buses at
                     {bus.upcomingDepartures.slice(1).map((time, index) => (
-                        <Box key={index} component="span" mx="8px" bgcolor="#f0f0f0" px="5px" borderRadius="4px">
+                        <Box key={index} component="span" mx="8px" bgcolor="#f9f7fa" px="5px" borderRadius="4px">
                             {time.slice(0, 5)}
                         </Box>
                     ))}
@@ -125,7 +126,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
                 <Box display="flex" mb={1}  alignItems="center">
                     <Typography variant="body1">
-                        <FaPersonWalking style={{ marginRight: "5px" }} />
+                        <FaPersonWalking color="red" style={{ marginRight: "5px" }} />
                         Get off at <FaLocationDot color="#9b17f1" /> 
                     </Typography>
                     <Typography ml={0.3} fontWeight={"bold"}color={"#9b17f1" }>
@@ -135,7 +136,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                 
                 <Box display="flex"justifyContent="space-between" alignItems="center">
                     <Typography variant="body1">
-                        <FaPersonWalking style={{ marginRight: "5px" }} />
+                        <FaPersonWalking color="red" style={{ marginRight: "5px" }} />
                         Walk to <FaLocationDot color="red" /> <span style={{ color:"red" , fontWeight:"bold"}}>
                         {destinationName}
                         </span>
