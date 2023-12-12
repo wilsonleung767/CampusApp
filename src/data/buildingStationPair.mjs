@@ -156,7 +156,7 @@ export const buildingStationPair = {
     "TS": ["YIAP", "MTRP", "MTR", "TS"],
     "TWML": ["SHAWC", "TWML"],
     "UADM": ["UADM"],
-    "UC": ["UC", "UC"],
+    "UC": ["UCSR","UC"],
     "UC TT": ["UC", "UC TT"],
     "UCA": ["UC", "UCA"],
     "UCASR": ["UC", "UCASR"],

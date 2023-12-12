@@ -1,6 +1,6 @@
 import { buildingStationPair } from "../../data/buildingStationPair.mjs";
 import { busDetails } from "../../data/busDetails.mjs";
-
+import { stationLocation } from "../../data/Places.mjs";
 
 const referenceDate = new Date();
 referenceDate.setFullYear(2000, 0, 1);
@@ -12,6 +12,8 @@ function getCurrentTimeInHongKong() {
     return currentTimeUTC;
 }
 
+
+
 // Updated function to get the current weekday in Hong Kong
 function getCurrentWeekdayInHongKong() {
     const currentTimeInHongKong = getCurrentTimeInHongKong();
@@ -19,12 +21,38 @@ function getCurrentWeekdayInHongKong() {
     return weekdays[currentTimeInHongKong.getUTCDay()];
 }
 
+function isCurrentTimeWithinOperation(timeRange) {
+    const customTime = new Date("2023-11-17T10:09:23.813Z");
+
+    const currentHour = customTime.getHours();
+    const currentMinute = customTime.getMinutes();
+
+    const startTimeString = timeRange[0];
+    const endTimeString = timeRange[1];
+
+    const [startHour, startMinute] = startTimeString.split(':').map(Number);
+    const [endHour, endMinute] = endTimeString.split(':').map(Number);
+
+    // Create start and end times for comparison
+    const startTime = new Date(customTime);
+    startTime.setHours(startHour, startMinute, 0, 0); // Reset seconds and milliseconds to zero
+
+    const endTime = new Date(customTime);
+    endTime.setHours(endHour, endMinute, 0, 0); // Reset seconds and milliseconds to zero
+
+    // Current time for comparison
+    const currentTime = new Date(customTime);
+    currentTime.setHours(currentHour, currentMinute, 0, 0); // Reset seconds and milliseconds to zero
+
+    // Comparison
+    return currentTime >= startTime && currentTime <= endTime;
+}
+
 export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
     let res = [];
     let startStations = buildingStationPair[startBuilding];
     let endStations = buildingStationPair[endBuilding];
-
-    let inputWeekday = "Thu"; // Assuming this is a placeholder for the current weekday
+    let inputWeekday = getCurrentWeekdayInHongKong() // Assuming this is a placeholder for the current weekday
     console.log(inputWeekday);
 
     for (let route in busDetails) {
@@ -34,7 +62,7 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
         let operatesOnTeachingDay = routeDetails.teachingDay.includes(isTeachingDay ? 'TD' : 'NT');
         let operatesOnWeekday = routeDetails.weekday.includes(inputWeekday);
 
-        if (operatesOnTeachingDay && operatesOnWeekday) {
+        if (operatesOnTeachingDay && operatesOnWeekday && isCurrentTimeWithinOperation(routeDetails.time)) {
             let foundRoute = false;
             for (let startStation of startStations) {
                 let startIndex = stops.findIndex(station => station.includes(startStation));
@@ -43,10 +71,14 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
                         let endIndex = stops.findIndex(station => station.includes(endStation));
                         if (endIndex !== -1 && endIndex > startIndex) {
                             let passedStations = stops.slice(startIndex, endIndex + 1);
+                            let startStationLocation = getStationCoordinates(startStation, stationLocation);
+                            let endStationLocation = getStationCoordinates(endStation, stationLocation);
                             res.push({
                                 busRoute: route,
                                 startStation: startStation,
                                 endStation: endStation,
+                                startStationLocation: startStationLocation,
+                                endStationLocation: endStationLocation,
                                 passedStations: passedStations
                             });
                             foundRoute = true;
@@ -62,12 +94,32 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
     return res;
 }
 
+function getStationCoordinates(stationName, stationLocationArray) {
+    // First, try to find an exact match
+    let stationObj = stationLocationArray.find(obj => obj.hasOwnProperty(stationName));
+    if (stationObj) {
+        return stationObj[stationName];
+    } else {
+        // If no exact match, find a station that starts with the stationName
+        for (let obj of stationLocationArray) {
+            let key = Object.keys(obj)[0];
+            if (key.startsWith(stationName + "|")) {
+                return obj[key];
+            }
+        }
+    }
+    return null;
+}
+
 // export default searchBusRoute;
 
 
-console.log(getBusRoute("MTR", "ULIB", "TD"))
+console.log(getBusRoute("YIAP", "ULIB", "TD"))
 
 
+// let timeRange = ['07:30', '18:40']; // Example time range
+// let isWithinOperation = isCurrentTimeWithinOperation(timeRange);
+// console.log(isWithinOperation);
 
 // [
 //     { busRoute: '2', startStation: 'MTRP', endStation: 'UADM' },

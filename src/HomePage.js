@@ -29,6 +29,7 @@ import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png'
 import busStopImg from './image/busStop.png';
 import { busDetails } from "./data/busDetails.mjs";
 import { stationLocation } from "./data/Places.mjs";
+import { getFullPlaceName } from "./components/PairPlaceAlias.mjs";
 
 const HomePage = () => {
   
@@ -412,9 +413,10 @@ const HomePage = () => {
   const [startBuilding,setStartBuilding] = useState("");
   const [endBuilding,setEndBuilding] = useState("");
 
+  
   async function retrieveNearestBuilding(origin) {
     try {
-        let startNearestBuilding = await getNearestBuilding(origin);
+        let startNearestBuilding = getNearestBuilding(origin);
         console.log("Nearest building is: " + startNearestBuilding);
         return startNearestBuilding; // This will be a string
     } catch (error) {
@@ -454,14 +456,14 @@ const HomePage = () => {
     // endBuilding = await retrieveNearestBuilding(destinationCoord);
 
     const startBuildingAlias = pairPlaceAlias(startBuilding)
-    // const endBuildingAlias = pairPlaceAlias(endBuilding)
+    const endBuildingAlias = pairPlaceAlias(destinationName)
     const tempBusList = [];
     
-    // const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
-    const busRouteList = [ 
-    { busRoute: '2', startStation: 'MTRP', endStation: 'UADM', startStationLocation:{lat: 22.413901, lng: 114.209770 } , endStationLocation: { lat: 22.418799, lng: 114.205340  }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]},
-    { busRoute: '1A', startStation: 'MTR', endStation: 'SHAWHALL' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]}
-  ]
+    const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
+  //   const busRouteList = [ 
+  //   { busRoute: '2', startStation: 'MTRP', endStation: 'UADM', startStationLocation:{lat: 22.413901, lng: 114.209770 } , endStationLocation: { lat: 22.418799, lng: 114.205340  }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]},
+  //   { busRoute: '1A', startStation: 'MTR', endStation: 'SHAWHALL' , startStationLocation:{lat: 22.414523, lng: 114.210223 } , endStationLocation: { lat: 22.4198826971, lng: 114.206907327 }, passedStations: [ 'MTR', 'SPORTC', 'SHAWHALL' ]}
+  // ]
   
     for (let bus of busRouteList){
       try {
@@ -768,15 +770,16 @@ const mapOptions = {
                busStopImg : busStopGrey;
 
       console.log("inside createBusStationMarkers marker.name is", marker.name , "startStation is", startStation, "endStation is", endStation)
+      const makerFullname = getFullPlaceName(marker.name)
       return (
         <MarkerF
           key={marker.name + index}
           position={{ lat: marker.lat, lng: marker.lng }}
-          title={marker.name}
+          title={makerFullname}
           onClick={() => handleMarkerClick(marker)}
           icon={{
             url: iconUrl,
-            scaledSize: new google.maps.Size(30, 40) // Adjust size as needed
+            scaledSize: new google.maps.Size(28, 40) // Adjust size as needed
           }}
         />
       );

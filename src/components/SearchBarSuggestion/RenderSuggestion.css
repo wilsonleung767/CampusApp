@@ -19,6 +19,9 @@
     transition: background-color 0.2s;
   }
   
+  .suggestion-item:last-child {
+    border-bottom: none;
+  }
   .suggestion-item:hover {
     background-color: #cecccc;
   }
