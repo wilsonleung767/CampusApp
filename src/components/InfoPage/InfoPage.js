@@ -194,7 +194,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     <Typography mt={3} variant="h6">CU Bus</Typography>
 
                     {busList.map((bus, index) => (
-                        <Box width="93%">
+                        <Box key={index} width="93%">
 
                             <Box key={index} className="route-choice"  onClick={() => {onSelectBusRoute(bus) 
                                                                                         handleSelectBus(index)}}>
