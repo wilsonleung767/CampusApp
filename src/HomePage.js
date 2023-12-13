@@ -131,8 +131,6 @@ const HomePage = () => {
   // when user input string in input field, we should parse the string into coordinatate and calroute—
   async function calculateRouteByWalking() {
     // Convert array [lat, lng] to google.maps.LatLng object
-    // setDirectionsResponseFromStationToDest(null);
-    // setDirectionsResponseFromOriginToStation(null);
     let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
     let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
   
@@ -152,11 +150,12 @@ const HomePage = () => {
       setDistance(results.routes[0].legs[0].distance.text);
       let durationInMin = Math.ceil(results.routes[0].legs[0].duration.value/60)
       setWalkDuration(durationInMin);
-      setShowInfoPage(true);
+      // setShowInfoPage(true);
     } catch (error) {
       console.error("Failed to calculate route", error);
     }
   }
+
   const renderWalkDirectionsResponse = () => {
     if (!walkDirectionsResponse) return null;
 
@@ -171,80 +170,74 @@ const HomePage = () => {
     const shortcut = shortCutPair.find(pair => 
       pair.origin === originName && pair.destination === destinationName);
     
-      if (shortcut) {
-        // Render custom polyline for shortcut
-        return (
-          <>
+      return (
+        <>
+          {shortcut && (
             <Polyline
               path={shortcut.polyline}
               options={{
-                strokeColor: "#2c6bf2", // Customize as needed
-                strokeOpacity: 1,
-                strokeWeight: 5,
+                strokeColor: 'White', // Color of the dotted line
+                strokeOpacity: 0, // Make the primary line invisible
+                strokeWeight: 1,
+                icons: [{
+                  icon: {
+                    path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                    strokeOpacity: 1,
+                    strokeWeight: 2, // Weight of the invisible primary line
+                    fillOpacity: 1,
+                    fillColor: "#9b17f1",
+                    scale: 5, // Size of the circle dot
+                  },
+                  offset: '0',
+                  repeat: '20px' // Distance between each circle dot
+                }],
               }}
             />
-            {/* <Marker // Start marker
-              position={{lat: originCoord[0],
-                        lng: originCoord[1],}}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: "#f2f2f2",
-                fillOpacity: 1,
-                strokeOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: "#787878",
-                scale: 7,
-              }}
-            />
-            <Marker // End marker
-              position={shortcut.polyline[shortcut.polyline.length - 1]}
-            /> */}
-          </>
-        );
-      }
-
-    return (
-      <>
-        <DirectionsRenderer
-          directions={walkDirectionsResponse}
-          options={{
-            suppressMarkers: true,
-            polylineOptions: {
-              strokeColor: 'White', // Color of the dotted line
-              strokeOpacity: 0, // Make the primary line invisible
-              strokeWeight: 1,
-              icons: [{
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-                  strokeOpacity: 1,
-                  strokeWeight: 2, // Weight of the invisible primary line
-                  fillOpacity: 1,
-                  fillColor: "#2c6bf2",
-                  scale: 5, // Size of the circle dot
+          )}
+  
+          {!walkDirectionsResponse && !shortcut && <p>No walking directions available.</p>}
+  
+          {walkDirectionsResponse && (
+            <DirectionsRenderer
+              directions={walkDirectionsResponse}
+              options={{
+                suppressMarkers: true,
+                polylineOptions: {
+                  strokeColor: 'White', // Color of the dotted line
+                  strokeOpacity: 0, // Make the primary line invisible
+                  strokeWeight: 1,
+                  icons: [{
+                    icon: {
+                      path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+                      strokeOpacity: 1,
+                      strokeWeight: 2, // Weight of the invisible primary line
+                      fillOpacity: 1,
+                      fillColor: "#2c6bf2",
+                      scale: 5, // Size of the circle dot
+                    },
+                    offset: '0',
+                    repeat: '20px' // Distance between each circle dot
+                  }],
                 },
-                offset: '0',
-                repeat: '20px' // Distance between each circle dot
-              }],
-            },
-          }}
-        />
-        <Marker // Start marker
-          position={{
-            lat: originCoord[0],
-            lng: originCoord[1],
-          }}
-          icon={{
-            path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
-            fillColor: "#f2f2f2",
-            fillOpacity: 1,
-            strokeOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: "#787878",
-            scale: 7, // Size of the circle dot
-          }}
-          
-        />
-        {!isDestinationSpecialMarker && ( // Conditionally render end marker
+              }}
+            />
+          )}
+          <Marker // Start marker
+            position={{
+              lat: originCoord[0],
+              lng: originCoord[1],
+            }}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE, // Use a circle symbol
+              fillColor: "#f2f2f2",
+              fillOpacity: 1,
+              strokeOpacity: 1,
+              strokeWeight: 2,
+              strokeColor: "#787878",
+              scale: 7, // Size of the circle dot
+            }}          
+          />
+          {!isDestinationSpecialMarker && ( // Conditionally render end marker
                 <Marker // End marker
                     position={{
                         lat: destinationCoord[0],
@@ -253,19 +246,15 @@ const HomePage = () => {
                     // ... Marker properties ...
                 />
             )}
-      </>
-    );
+        </>
+      );
   };
 
   const renderBusDirectionsResponse = () =>{
     if (!selectedBusRoute) return null;
     // Extracting start and end locations
     const startLocationFromOriginToStation = selectedBusRoute.directionsResponseFromOriginToStation.routes[0].legs[0].start_location;
-    // const endLocationFromOriginToStation = selectedBusRoute.directionsResponseFromOriginToStation.routes[0].legs[directionsResponseFromOriginToStation.routes[0].legs.length - 1].end_location;
-
-    // const startLocationFromStationToDest = selectedBusRoute.directionsResponseFromStationToDest.routes[0].legs[0].start_location;
-    // const endLocationFromStationToDest = selectedBusRoute.end
-    
+   
     const stationMarkers = createBusStationMarkers(selectedBusRoute.route, selectedBusRoute.startStation, selectedBusRoute.endStation);
 
     return (
@@ -450,6 +439,7 @@ const HomePage = () => {
           setSelectedBusPolyline(null)
           setBusRouteMarkers([])
           setSelectedBusRoute(null)
+          setBusList([])
         }
   
   const handleShowInfoPage= () => {
@@ -506,9 +496,10 @@ const HomePage = () => {
     
     const startBuildingAlias = pairPlaceAlias(startBuilding)
     const endBuildingAlias = pairPlaceAlias(destinationName)
-    // Check if either building does not have an alias. If so, proceed with walking directions only.
+    // Check if either building does not have an alias. If so, proceed with walking directions only. To marker
     if (!startBuildingAlias || !endBuildingAlias) {
       setTravalType("walk");
+      setAfterSearch(true);
       setShowInfoPage(true);
       return; // Skip the bus route calculations
   }
@@ -532,7 +523,7 @@ const HomePage = () => {
         // Adjusting time by subtracting 8 hours (28800000 milliseconds)
         const departureTimeAdjusted = new Date(busDetails.departureTime.getTime() - 28800000);
         const arrivalTimeAdjusted = new Date(busDetails.arrivalTime.getTime() - 28800000);
-      
+      console.log("departureTimeAdjusted is ", departureTimeAdjusted)
         tempBusList.push({
           route: bus.busRoute,
           startStation: bus.startStation,
@@ -862,19 +853,19 @@ const mapOptions = {
                   <h4 style={{ margin: '0 0 10px 0' }}>{marker.name}</h4>
                   {/* Conditionally render the description if it exists */}
                   {marker.description && <p style={{ margin: '0 0 10px 0' }}>{marker.description}</p>}
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                  <div style={{ marginTop:"20px" ,display: 'flex', justifyContent: 'center', gap: '10px' }}>
                       <button onClick={() => {
                           setOriginCoord([marker.lat, marker.lng]);
                           setOriginName(marker.name);
                           onClose();
-                      }} style={{ padding: '5px 10px', borderRadius: '5px' }}>
+                      }} style={{ width: "50%", backgroundColor:"#98cefa", padding: '2px', borderRadius: '18px' }}>
                           Choose as Origin
                       </button>
                       <button onClick={() => {
                           setDestinationCoord([marker.lat, marker.lng]);
                           setDestinationName(marker.name);
                           onClose();
-                      }} style={{ padding: '5px 10px', borderRadius: '5px' }}>
+                      }} style={{ width: "50%" ,backgroundColor:"#98cefa", padding: '2px', borderRadius: '18px' }}>
                           Choose as Destination
                       </button>
                   </div>

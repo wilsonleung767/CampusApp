@@ -20,8 +20,8 @@ function getCurrentWeekdayInHongKong() {
 }
 
 function isCurrentTimeWithinOperation(timeRange) {
-    // const customTime = new Date("2023-11-17T10:09:23.813Z");
-    const customTime = getCurrentTimeInHongKong();
+    const customTime = new Date("2023-12-13T05:09:23.813Z");
+    // const customTime = getCurrentTimeInHongKong();
 
     const currentHour = customTime.getHours();
     const currentMinute = customTime.getMinutes();

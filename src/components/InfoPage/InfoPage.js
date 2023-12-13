@@ -64,8 +64,8 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
         useEffect(() => {
             const updateWaitingTime = () => {
-                // const currentTime = new Date("2023-11-17T13:09:23.813Z");
-                const currentTime = getCurrentTimeInHongKong();
+                const currentTime = new Date("2023-12-13T05:09:23.813Z");
+                // const currentTime = getCurrentTimeInHongKong();
                 console.log("currentTime in businfosection is", currentTime);
                 const departureTime = bus.departureTime;
                 console.log("busdeparturetime in businfosection is", bus.departureTime)

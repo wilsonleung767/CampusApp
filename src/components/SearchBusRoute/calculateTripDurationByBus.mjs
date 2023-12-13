@@ -9,14 +9,14 @@ import { calculateBusDuration } from "./calculateBusDuration.mjs";
 
 export function calculateTripDurationByBus(busRoute, startStation, endStation, timeOfOriginToStation, timeOfDepartureToDest) {
     let busDetails = null;
-    let currentTime = getCurrentTimeInHongKong();
-    // const currentTime = new Date("2023-11-17T13:09:23.813Z")
+    // let currentTime = getCurrentTimeInHongKong();
+    const currentTime = new Date("2023-12-13T13:09:23.813Z")
     const upcomingDepartures = findNextDepartureTime(busRoute, startStation, currentTime);
 
     if (upcomingDepartures.length > 0) {
         const nextDeparture = upcomingDepartures[0]; // Nearest bus
         const departureDateTime = parseTimeToUTC(nextDeparture, currentTime);
-        console.log("departureDateTime is ", departureDateTime)
+        console.log(">>>>>>>>>> departureDateTime is ", departureDateTime)
         const waitBusTime = (departureDateTime - currentTime) / 60000; // Waiting time in minutes
         const busTravelDuration = calculateBusDuration(busRoute, startStation, endStation);
 
@@ -91,7 +91,7 @@ function getCurrentTimeInHongKong() {
 
 // console.log("Current time in Hong Kong:", currentTime.toISOString());
 // console.log(findNextDepartureTime("1A", "MTR", currentTime));
-// console.log(calculateTripDurationByBus("3","YIAP", "SCIC", 1,4))
+console.log(calculateTripDurationByBus("3","YIAP", "SCIC", 1,4))
 
 
 // {
