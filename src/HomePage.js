@@ -29,7 +29,7 @@ import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png'
 import busStopImg from './image/busStop.png';
 import { busDetails } from "./data/busDetails.mjs";
 import { stationLocation} from "./data/Places.mjs";
-import { getFullPlaceName } from "./components/PairPlaceAlias.mjs";
+import { getFullPlaceName , getFullPlaceNameWithAlias} from "./components/PairPlaceAlias.mjs";
 import { shortCutPair } from "./data/CustomRoute.mjs";
 
 const HomePage = () => {
@@ -344,10 +344,7 @@ const HomePage = () => {
       )
   }
 
-  // const [directionsResponseFromOriginToStation, setDirectionsResponseFromOriginToStation] = useState(null);
-  // const [directionsResponseFromStationToDest, setDirectionsResponseFromStationToDest] = useState(null);
-  // const [busStart, setBusStart] = useState({ lat: 22.415917172642065, lng: 114.211104527007 });
-  // const [busEnd, setBusEnd] = useState({lat: 22.419788004309634, lng: 114.20867167235077});
+
   const [originToStationDuration , setOriginToStationDuration] = useState(null);
   const [stationToDestDuration , setDepartureToDestDuration] = useState(null);
     // Calculate the walking route from origin to busStart
@@ -818,12 +815,12 @@ const mapOptions = {
                busStopImg : busStopGrey;
 
       console.log("inside createBusStationMarkers marker.name is", marker.name , "startStation is", startStation, "endStation is", endStation)
-      const makerFullname = getFullPlaceName(marker.name)
+      const markerFullname = getFullPlaceNameWithAlias(marker.name)
       return (
         <MarkerF
-          key={marker.name + index}
+          key={markerFullname + index}
           position={{ lat: marker.lat, lng: marker.lng }}
-          title={makerFullname}
+          title={markerFullname}
           onClick={() => handleMarkerClick(marker)}
           icon={{
             url: iconUrl,
