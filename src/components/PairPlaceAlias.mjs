@@ -54,4 +54,4 @@ export function getFullPlaceName(alias) {
 
 
   // console.log(getFullPlaceName("SCIC"))
-  // console.log(getFullPlaceNameWithAlias("SCIC"))
+  console.log(getFullPlaceNameWithAlias("SCIC"))
