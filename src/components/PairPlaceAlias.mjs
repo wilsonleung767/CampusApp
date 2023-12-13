@@ -17,9 +17,9 @@ export function pairPlaceAlias(buildingFullName) {
 }
 
 // Example usage
-let buildingFullName = "Benjamin Franklin Centre Coffee Corner (COFFEE CON,BFCCC)";
-let result = pairPlaceAlias(buildingFullName);
-console.log(result);
+// let buildingFullName = "Benjamin Franklin Centre Coffee Corner (COFFEE CON,BFCCC)";
+// let result = pairPlaceAlias(buildingFullName);
+// console.log(result);
 
 
 export function getFullPlaceName(alias) {
@@ -38,4 +38,20 @@ export function getFullPlaceName(alias) {
     return null;
   }
 
-  // console.log(getFullPlaceName("SHAWHALL"))
+  export function getFullPlaceNameWithAlias(alias){
+    const places = [
+      ...customPlaces,
+      ...stationLocation
+    ];
+    for (const place of places) {
+      const [name] = Object.keys(place);
+      if (name.toLowerCase().includes(alias.toLowerCase())) {
+        return name;
+      }
+    }
+    return null;
+  }
+
+
+  // console.log(getFullPlaceName("SCIC"))
+  // console.log(getFullPlaceNameWithAlias("SCIC"))

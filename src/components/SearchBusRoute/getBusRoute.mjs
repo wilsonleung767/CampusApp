@@ -2,10 +2,8 @@ import { buildingStationPair } from "../../data/buildingStationPair.mjs";
 import { busDetails } from "../../data/busDetails.mjs";
 import { stationLocation } from "../../data/Places.mjs";
 
-const referenceDate = new Date();
-referenceDate.setFullYear(2000, 0, 1);
 
-function getCurrentTimeInHongKong() {
+export function getCurrentTimeInHongKong() {
     const currentTimeUTC = new Date(); // Current time in UTC
     const offsetInHours = 8; // Hong Kong is UTC+8
     currentTimeUTC.setHours(currentTimeUTC.getUTCHours() + offsetInHours);
@@ -22,7 +20,8 @@ function getCurrentWeekdayInHongKong() {
 }
 
 function isCurrentTimeWithinOperation(timeRange) {
-    const customTime = new Date("2023-11-17T10:09:23.813Z");
+    // const customTime = new Date("2023-11-17T10:09:23.813Z");
+    const customTime = getCurrentTimeInHongKong();
 
     const currentHour = customTime.getHours();
     const currentMinute = customTime.getMinutes();

@@ -6,16 +6,20 @@ import { FaBusSimple } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { getFullPlaceName } from '../PairPlaceAlias.mjs';
-
+import { shortCutPair } from '../../data/CustomRoute.mjs';
+import { getCurrentTimeInHongKong } from '../SearchBusRoute/getBusRoute.mjs';
 
 function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, destinationName}) {
     const [isDragging, setIsDragging] = useState(false);
     const [lastTouchY, setLastTouchY] = useState(0);
     const [infoPageHeight, setInfoPageHeight] = useState('45dvh'); // Initial height
 
-    const handleTouchStart = (e) => {
-        setIsDragging(true);
-        setLastTouchY(e.touches[0].clientY);
+      // Only handle touch events on the drag handle
+      const handleTouchStart = (e) => {
+        if (e.target.classList.contains("info-page-handle-section")) {
+            setIsDragging(true);
+            setLastTouchY(e.touches[0].clientY);
+        }
     };
 
     const handleTouchMove = (e) => {
@@ -44,6 +48,14 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
         });
     };
 
+    const findShortcutDescription = () => {
+        const shortcut = shortCutPair.find(pair =>
+            pair.origin === originName && pair.destination === destinationName);
+
+        return shortcut ? shortcut.description : null;
+    };
+
+    const shortcutDescription = findShortcutDescription();
 
     const BusInfoSection = ({ bus, index, originName, destinationName }) => {
         const [waitingTime, setWaitingTime] = useState(0);
@@ -52,8 +64,11 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
         useEffect(() => {
             const updateWaitingTime = () => {
-                const currentTime = new Date("2023-11-17T13:09:23.813Z");
-                const departureTime = new Date(bus.departureTime);
+                // const currentTime = new Date("2023-11-17T13:09:23.813Z");
+                const currentTime = getCurrentTimeInHongKong();
+                console.log("currentTime in businfosection is", currentTime);
+                const departureTime = bus.departureTime;
+                console.log("busdeparturetime in businfosection is", bus.departureTime)
                 const newWaitingTime = Math.max(0, Math.ceil((departureTime - currentTime) / (1000 * 60)));
                 setWaitingTime(newWaitingTime); // Update waiting time in minutes
             };
@@ -75,7 +90,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                 border: "1px solid #ddd",
                 borderRadius: "8px",
                 padding: "10px",
-                marginTop: "0", // Remove the top margin to connect with the above section
+                marginTop: "0", 
                 boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                 backgroundColor: "white",
                 marginBottom: "20px",
@@ -97,7 +112,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     
                 </Box>
 
-                <Box backgroundColor={"#f0dcfa"} borderRadius={"5px"} padding={0.5}marginBottom="10px">
+                <Box backgroundColor={"#f2d9ff"} borderRadius={"5px"} padding={0.5}marginBottom="10px">
                 <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="10px">                    
                     <Box style={{display:"flex", alignItems:"center"}}>
                     <Typography variant="body1" >
@@ -138,7 +153,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     <Typography variant="body1">
                         <FaPersonWalking color="red" style={{ marginRight: "5px" }} />
                         Walk to <FaLocationDot color="red" /> <span style={{ color:"red" , fontWeight:"bold"}}>
-                        {destinationName}
+                        {getFullPlaceName(destinationName)}
                         </span>
                     </Typography>
                     <Typography variant="body1" style={{ fontWeight: "bold" }}>
@@ -166,39 +181,52 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-        >
+            >
+            <div className="info-page-handle-section">
+                <div className="info-page-handle" />
+            </div>
+
             <>
             {travelType === "walk" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="92%">
-                    <div className="info-page-handle" />
-                    <Typography textAlign={"center"}mt={2.4} variant="h6">Walking Directions from Yasumoto International Academic Park (YIAP) to University Library (ULIB)</Typography>
+                    <Typography textAlign={"center"}mt={3} variant="h6">Walking Directions</Typography>
+                    <Box textAlign={"center"}mt={0.5} variant="h6"> 
+                    <Typography variant="h7" color="#2c6bf2">{originName} </Typography>
+                    <Typography fontSize={18}> to  </Typography>
+                    <Typography variant="h7" color={'red'}>{destinationName}</Typography>
+                    <Typography mt={1}variant="h6" color="#9b17f1">Short Cut Description</Typography>
+                    
+                    </Box>
                     <ol>
-                        <li><strong>Start at YIAP</strong></li>
-                        <li><strong>Take the YIA Elevator</strong></li>
-                        <li><strong>Exit at Chung Chi College Staff Quarters Block S</strong></li>
-                        <li><strong>Proceed Straight</strong></li>
-                        <li><strong>Pass Through Chung Chi College</strong></li>
-                        <li><strong>Walk Through Nursery Path</strong></li>
-                        <li><strong>Reach William M W Mong Engineering Building (ERB)</strong></li>
-                        <li><strong>Take WMWMEB Lift to 9th Floor</strong></li>
-                        <li><strong>Exit ERB and Turn Right</strong></li>
-                        <li><strong>Ascend the Stairs</strong></li>
-                        <li><strong>Pass by Lady Shaw Building</strong></li>
-                        <li><strong>Arrive at ULIB</strong></li>
+                        {shortcutDescription ? (
+                            shortcutDescription.map((step, index) => (
+                                <li key={index}><strong>{step}</strong></li>
+                            ))
+                        ) : (
+                            // Fallback or default description when no shortcut is found
+                            <>
+                                <li><strong></strong></li>
+                            </>
+                        )}
                     </ol>
                 </Box>
             )}
 
             {travelType === "bus" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
-                    <div className="info-page-handle" />
                     <Typography mt={3} variant="h6">CU Bus</Typography>
 
                     {busList.map((bus, index) => (
                         <Box key={index} width="93%">
 
                             <Box key={index} className="route-choice"  onClick={() => {onSelectBusRoute(bus) 
-                                                                                        handleSelectBus(index)}}>
+                                                                                        handleSelectBus(index)}}
+                                                                                        style={{
+                                                                                            backgroundColor: selectedBusIndex === index ? "#f2d9ff" : "white", // Change to desired color for selected item
+                                                                                            // Add other styles as needed
+                                                                                        }}
+                                                                                        
+                                                                                        >
                                             {/* Walking to Station */}
                                 <Box display="flex" alignItems="center">
                                                 <FaPersonWalking style={{ marginLeft:"5px", marginRight: "3px" }} />

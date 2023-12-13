@@ -9,13 +9,14 @@ import { calculateBusDuration } from "./calculateBusDuration.mjs";
 
 export function calculateTripDurationByBus(busRoute, startStation, endStation, timeOfOriginToStation, timeOfDepartureToDest) {
     let busDetails = null;
-    // let currentTime = getCurrentTimeInHongKong();
-    const currentTime = new Date("2023-11-17T13:09:23.813Z")
+    let currentTime = getCurrentTimeInHongKong();
+    // const currentTime = new Date("2023-11-17T13:09:23.813Z")
     const upcomingDepartures = findNextDepartureTime(busRoute, startStation, currentTime);
 
     if (upcomingDepartures.length > 0) {
         const nextDeparture = upcomingDepartures[0]; // Nearest bus
         const departureDateTime = parseTimeToUTC(nextDeparture, currentTime);
+        console.log("departureDateTime is ", departureDateTime)
         const waitBusTime = (departureDateTime - currentTime) / 60000; // Waiting time in minutes
         const busTravelDuration = calculateBusDuration(busRoute, startStation, endStation);
 
@@ -79,19 +80,15 @@ function parseTimeToUTC(timeStr, referenceTime) {
     return date;
 }
 
-// console.log(findNextDepartureTime("1A", "MTR", currentTime, 3));
+
 function getCurrentTimeInHongKong() {
     const currentTimeUTC = new Date(); // Current time in UTC
     const offsetInHours = 8; // Hong Kong is UTC+8
-  
-    // Apply the offset to the UTC time
     currentTimeUTC.setUTCHours(currentTimeUTC.getUTCHours() + offsetInHours);
     return currentTimeUTC;
   }
 
-  // const currentTime = getCurrentTimeInHongKong();
-//   const currentTime = new Date("2023-11-17T13:09:23.813Z")
-//   console.log(parseTimeToUTC("12:29:39",currentTime))
+
 // console.log("Current time in Hong Kong:", currentTime.toISOString());
 // console.log(findNextDepartureTime("1A", "MTR", currentTime));
 console.log(calculateTripDurationByBus("3","YIAP", "SCIC", 1,4))
