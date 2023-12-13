@@ -28,8 +28,9 @@ import waterFountainImg from './image/waterFountain.png';
 import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png';
 import busStopImg from './image/busStop.png';
 import { busDetails } from "./data/busDetails.mjs";
-import { stationLocation } from "./data/Places.mjs";
+import { stationLocation} from "./data/Places.mjs";
 import { getFullPlaceName } from "./components/PairPlaceAlias.mjs";
+import { shortCutPair } from "./data/CustomRoute.mjs";
 
 const HomePage = () => {
   
@@ -157,6 +158,41 @@ const HomePage = () => {
     }
   }
   const renderWalkDirectionsResponse = () => {
+    const shortcut = shortCutPair.find(pair => 
+      pair.origin === originName && pair.destination === destinationName);
+    
+      if (shortcut) {
+        // Render custom polyline for shortcut
+        return (
+          <>
+            <Polyline
+              path={shortcut.polyline}
+              options={{
+                strokeColor: "#2c6bf2", // Customize as needed
+                strokeOpacity: 1,
+                strokeWeight: 5,
+              }}
+            />
+            {/* <Marker // Start marker
+              position={{lat: originCoord[0],
+                        lng: originCoord[1],}}
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: "#f2f2f2",
+                fillOpacity: 1,
+                strokeOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#787878",
+                scale: 7,
+              }}
+            />
+            <Marker // End marker
+              position={shortcut.polyline[shortcut.polyline.length - 1]}
+            /> */}
+          </>
+        );
+      }
+    
     if (!walkDirectionsResponse) return null;
 
     return (
@@ -409,6 +445,11 @@ const HomePage = () => {
 
 
 
+  }
+
+  const originDestionationPair = () => {
+    if (originName === "" || destinationName === "") 
+  
   }
   const [startBuilding,setStartBuilding] = useState("");
   const [endBuilding,setEndBuilding] = useState("");
