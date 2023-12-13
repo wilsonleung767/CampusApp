@@ -91,7 +91,7 @@ function getCurrentTimeInHongKong() {
 
 // console.log("Current time in Hong Kong:", currentTime.toISOString());
 // console.log(findNextDepartureTime("1A", "MTR", currentTime));
-console.log(calculateTripDurationByBus("3","YIAP", "SCIC", 1,4))
+// console.log(calculateTripDurationByBus("3","YIAP", "SCIC", 1,4))
 
 
 // {

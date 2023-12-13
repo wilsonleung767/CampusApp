@@ -158,6 +158,16 @@ const HomePage = () => {
     }
   }
   const renderWalkDirectionsResponse = () => {
+    if (!walkDirectionsResponse) return null;
+
+    // Combine toilet and water fountain markers into a single array for convenience
+    const specialMarkers = [...toiletMarkers, ...waterFountainMarkers];
+
+    // Check if destination coordinates match any special marker coordinates
+    const isDestinationSpecialMarker = specialMarkers.some(marker => 
+        marker.lat === destinationCoord[0] && marker.lng === destinationCoord[1]
+    );
+    
     const shortcut = shortCutPair.find(pair => 
       pair.origin === originName && pair.destination === destinationName);
     
@@ -192,8 +202,6 @@ const HomePage = () => {
           </>
         );
       }
-    
-    if (!walkDirectionsResponse) return null;
 
     return (
       <>
@@ -236,12 +244,15 @@ const HomePage = () => {
           }}
           
         />
-        <Marker // End marker
-          position={{
-            lat: destinationCoord[0],
-            lng: destinationCoord[1],
-          }}
-        />
+        {!isDestinationSpecialMarker && ( // Conditionally render end marker
+                <Marker // End marker
+                    position={{
+                        lat: destinationCoord[0],
+                        lng: destinationCoord[1],
+                    }}
+                    // ... Marker properties ...
+                />
+            )}
       </>
     );
   };
@@ -447,10 +458,6 @@ const HomePage = () => {
 
   }
 
-  const originDestionationPair = () => {
-    if (originName === "" || destinationName === "") 
-  
-  }
   const [startBuilding,setStartBuilding] = useState("");
   const [endBuilding,setEndBuilding] = useState("");
 
@@ -495,9 +502,16 @@ const HomePage = () => {
 
     startBuilding = await retrieveNearestBuilding(originCoord);
     // endBuilding = await retrieveNearestBuilding(destinationCoord);
-
+    
+    
     const startBuildingAlias = pairPlaceAlias(startBuilding)
     const endBuildingAlias = pairPlaceAlias(destinationName)
+    // Check if either building does not have an alias. If so, proceed with walking directions only.
+    if (!startBuildingAlias || !endBuildingAlias) {
+      setTravalType("walk");
+      setShowInfoPage(true);
+      return; // Skip the bus route calculations
+  }
     const tempBusList = [];
     
     const busRouteList = getBusRoute(startBuildingAlias,endBuildingAlias,'TD')
@@ -515,7 +529,9 @@ const HomePage = () => {
         const timeFromDepartureToDest = walkingRouteFromBusStop.duration
         const directionsResponseFromStationToDest = walkingRouteFromBusStop.walkDirectionsResponse
         const busDetails = calculateTripDurationByBus(bus.busRoute, bus.startStation, bus.endStation, timeFromOriginToStation, timeFromDepartureToDest)
-        
+        // Adjusting time by subtracting 8 hours (28800000 milliseconds)
+        const departureTimeAdjusted = new Date(busDetails.departureTime.getTime() - 28800000);
+        const arrivalTimeAdjusted = new Date(busDetails.arrivalTime.getTime() - 28800000);
       
         tempBusList.push({
           route: bus.busRoute,
@@ -525,8 +541,8 @@ const HomePage = () => {
           timeFromDepartureToDest,
           timeForTotalBusTrip: busDetails.totalTripTime,
           busTravelDuration: busDetails.busTravelDuration,
-          departureTime: busDetails.departureTime,
-          arrivalTime: busDetails.arrivalTime,
+          departureTime: departureTimeAdjusted,
+          arrivalTime: arrivalTimeAdjusted,
           upcomingDepartures: busDetails.upcomingDepartures,
           status: busDetails.status,
           directionsResponseFromOriginToStation:directionsResponseFromOriginToStation,
@@ -834,34 +850,38 @@ const mapOptions = {
         setIsInfoWindowVisible(true);
     }
     
-  const InfoWindowComponent = ({ marker, onClose }) => {
+    const InfoWindowComponent = ({ marker, onClose }) => {
       if (!marker) return null;
   
-     return (
+      return (
           <InfoWindow
               position={{ lat: marker.lat, lng: marker.lng }}
               onCloseClick={onClose}
           >
-              <div>
-                  <h4>{marker.name}</h4>
-                  <button onClick={() => {
-                      setOriginCoord([marker.lat, marker.lng]);
-                      setOriginName(marker.name);
-                      onClose();
-                  }}>
-                      Choose as Origin
-                  </button>
-                  <button onClick={() => {
-                      setDestinationCoord([marker.lat, marker.lng]);
-                      setDestinationName(marker.name);
-                      onClose();
-                  }}>
-                      Choose as Destination
-                  </button>
+              <div style={{ textAlign: 'center' }}>
+                  <h4 style={{ margin: '0 0 10px 0' }}>{marker.name}</h4>
+                  {/* Conditionally render the description if it exists */}
+                  {marker.description && <p style={{ margin: '0 0 10px 0' }}>{marker.description}</p>}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                      <button onClick={() => {
+                          setOriginCoord([marker.lat, marker.lng]);
+                          setOriginName(marker.name);
+                          onClose();
+                      }} style={{ padding: '5px 10px', borderRadius: '5px' }}>
+                          Choose as Origin
+                      </button>
+                      <button onClick={() => {
+                          setDestinationCoord([marker.lat, marker.lng]);
+                          setDestinationName(marker.name);
+                          onClose();
+                      }} style={{ padding: '5px 10px', borderRadius: '5px' }}>
+                          Choose as Destination
+                      </button>
+                  </div>
               </div>
           </InfoWindow>
-        );
-      };
+      );
+  };
 
   if (!isLoaded) return <div>Loading...</div>;
 

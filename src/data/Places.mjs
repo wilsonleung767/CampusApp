@@ -1,6 +1,6 @@
 
 export const customPlaces = [
-    { "Yasumoto International Academic Park (YIAP,fsafe)": { lat: 22.4162632, lng: 114.210932 }},
+    { "Yasumoto International Academic Park (YIAP)": { lat: 22.4162632, lng: 114.210932 }},
     { "University Sports Centre" : {lat: 22.4186158 , lng: 114.2112792 } },
     { "Cheng Yu Tung Building" : {lat: 22.4121683	, lng: 114.2105302}},
     { "Pommerenke Student Centre (PSC)": {lat: 22.4170907	, lng: 114.2088325}},
@@ -23,7 +23,7 @@ export const customPlaces = [
   { "Hong Kong Cultural Ground (CAMPCS)": { lat: 22.4186648, lng: 114.2054148 } },
   { "The Beacon (CBEC)": { lat: 22.4194801, lng: 114.2054286 } },
   { "Chung Chi College Administration Building (CCADM)": { lat: 22.4143115, lng: 114.2081648 } },
-  { "Chung Chi Tang Student Canteen (CCCAN)": { lat: 22.4183019, lng: 114.2055878 } },
+  { "Chung Chi Tang Student Canteen (CCCAN)": { lat: 22.416558859057037, lng: 114.2098421542757 } },
   { "Lake Ad Excellentiam (CCCBAB,CCWL)": { lat: 22.4158874, lng: 114.2097931 } },
   { "Chung Chi College Chapel (CCCC)": { lat: 22.4159238, lng: 114.2069989 } },
   { "Chung Chi College Staff Club Clubhouse (CCCSF)": { lat: 22.4159493, lng: 114.2077015 } },
