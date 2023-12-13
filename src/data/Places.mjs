@@ -126,7 +126,7 @@ export const customPlaces = [
   { "Sir Run Run Shaw Hall": { lat: 22.4201613, lng: 114.2071982 } },
   { "S.H. Ho College": { lat: 22.4183378, lng: 114.2101635 } },
   { "Connexion, S.H. Ho College Staff Common Room": { lat: 22.4180897, lng: 114.2102821 } },
-  { "University Science Centre": { lat: 22.419829548079342, lng: 114.20803700579232} },
+  { "University Science Centre (SCIC)": { lat: 22.419829548079342, lng: 114.20803700579232} },
 
   { "Ho Tim Hall (HTH)": { lat: 22.4184966, lng: 114.20996 } },
   { "Lee Quo Wei Hall (LQWH)": { lat: 22.4182823, lng: 114.2098402 } },
