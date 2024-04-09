@@ -131,7 +131,8 @@ const HomePage = () => {
   // when user input string in input field, we should parse the string into coordinatate and calroute—
   async function calculateRouteByWalking() {
     // Convert array [lat, lng] to google.maps.LatLng object
-    let originValue = originCoord.length === 2 ? new google.maps.LatLng(...originCoord) : null;
+    const originCoords = showOriginSearch ? originCoord : currentUserLocation;
+    let originValue = originCoords.length === 2 ? new google.maps.LatLng(...originCoords) : null;
     let destinationValue = destinationCoord.length === 2 ? new google.maps.LatLng(...destinationCoord) : null;
   
     if (!originValue || !destinationValue) {
@@ -482,12 +483,13 @@ const HomePage = () => {
 
   async function handleSearch(){
     try{
+    const originCoords = showOriginSearch ? originCoord : currentUserLocation;
     calculateRouteByWalking() 
     // calculateWalkingRouteToBusStop({ lat: 22.415880, lng: 114.210859 })
 
     let startBuilding, endBuilding;
 
-    startBuilding = await retrieveNearestBuilding(originCoord);
+    startBuilding = await retrieveNearestBuilding(originCoords);
     // endBuilding = await retrieveNearestBuilding(destinationCoord);
     
     
@@ -814,11 +816,12 @@ const mapOptions = {
                marker.name.trim().toLowerCase() === endStation.trim().toLowerCase()) ? 
                busStopImg : busStopGrey;
 
-      console.log("inside createBusStationMarkers marker.name is", marker.name , "startStation is", startStation, "endStation is", endStation)
+      // console.log("inside createBusStationMarkers marker.name is", marker.name , "startStation is", startStation, "endStation is", endStation)
       const markerFullname = getFullPlaceNameWithAlias(marker.name)
+      // console.log("marker fullname is ", markerFullname)
       return (
         <MarkerF
-          key={markerFullname + index}
+          key={marker.name + index}
           position={{ lat: marker.lat, lng: marker.lng }}
           title={markerFullname}
           onClick={() => handleMarkerClick(marker)}

@@ -13,8 +13,6 @@ function findFirstStationOccurrence(route, station) {
     return matchingStation || null; // Returns null if no matching station is found
 }
 
-
-
 // used in calDuartionByBUs function 
 export function calculateBusDuration(route, startStation, endStation) {
     const StartStation = findFirstStationOccurrence(route,startStation)

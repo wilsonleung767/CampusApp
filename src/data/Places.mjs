@@ -119,6 +119,7 @@ export const customPlaces = [
   { "Science Centre": { lat: 22.4196583, lng: 114.2080093 } },
   { "Shaw Lecture Theatre": { lat: 22.4223773, lng: 114.2015731 } },
   { "Canteen of Shaw College": { lat: 22.4224691, lng: 114.2008772 } },
+  { "Shaw College (SHAWC)":{lat:22.422722728822304, lng:114.20163570428889}},
   { "Kuo Mou Hall": { lat: 22.4225172, lng: 114.2010965 } },
   { "Ho Sin Hang Engineering Building": { lat: 22.4180999, lng: 114.207275 } },
   { "S.H. Ho College Café": { lat: 22.4181046, lng: 114.2102281 } },

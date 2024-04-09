@@ -20,13 +20,13 @@ export const busDetails = {
         'weekday': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         'station': ['MTRP', 'SPORTC', 'FKHB', 'UC|UPPERST', 'NAC', 'UC|DOWNST', 'UADM', 'SHHC', 'MTR']
     },
-    "2#": {
-        'time': ['07:45', '18:45'],
-        'interval': [45],
-        'teachingDay': ['TD', 'NT'],
-        'weekday': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        'station': ['MTRP', 'SPORTC', 'SHAWHALL', 'FKHB', 'UC|UPPERST', 'NAC', 'UC|DOWNST', 'UADM', 'SHHC', 'MTR']
-    },
+    // "2#": {
+    //     'time': ['07:45', '18:45'],
+    //     'interval': [45],
+    //     'teachingDay': ['TD', 'NT'],
+    //     'weekday': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    //     'station': ['MTRP', 'SPORTC', 'SHAWHALL', 'FKHB', 'UC|UPPERST', 'NAC', 'UC|DOWNST', 'UADM', 'SHHC', 'MTR']
+    // },
     "3": {
         'time': ['09:00', '18:40'],
         'interval': [0, 20, 40],
