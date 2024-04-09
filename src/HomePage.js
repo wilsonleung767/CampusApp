@@ -10,7 +10,7 @@ import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
 import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion.js";
 import { customPlaces } from "./data/Places.mjs";
-import { toiletMarkers,waterFountainMarkers} from "./data/Markers.js";
+import { toiletMarkers,waterFountainMarkers,placesOfInterestMarkers} from "./data/Markers.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
@@ -45,6 +45,7 @@ const HomePage = () => {
 
   const [showToiletMarkers, setShowToiletMarkers] = useState(false);
   const [showWaterFountainMarkers, setShowWaterFountainMarkers] = useState(false);
+  const [showPlacesOfInterestMarkers, setShowPlacesOfInterestMarkers] = useState(false);
   const [busRouteMarkers, setBusRouteMarkers] = useState([]);
   const [startStationName, setStartStationName] = useState('');
   const [endStationName, setEndStationName] = useState(''); 
@@ -161,7 +162,7 @@ const HomePage = () => {
     if (!walkDirectionsResponse) return null;
 
     // Combine toilet and water fountain markers into a single array for convenience
-    const specialMarkers = [...toiletMarkers, ...waterFountainMarkers];
+    const specialMarkers = [...toiletMarkers, ...waterFountainMarkers, ...placesofinterestMarkers];
 
     // Check if destination coordinates match any special marker coordinates
     const isDestinationSpecialMarker = specialMarkers.some(marker => 
@@ -434,6 +435,7 @@ const HomePage = () => {
           setShowInfoPage(false)
           setShowToiletMarkers(false)
           setShowWaterFountainMarkers(false)
+          setShowPlacesOfInterestMarkers(false)
           setSelectedBusPolyline(null)
           setBusRouteMarkers([])
           setSelectedBusRoute(null)
@@ -593,6 +595,14 @@ const HomePage = () => {
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 5);
 }
+  function findFiveNearestPlacesOfInterest(origin) {
+    return placesOfInterestMarkers.map(facility => ({
+        ...facility,
+        distance: calculateEuclideanDistance(origin[0], origin[1], facility.lat, facility.lng)
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 5);
+}
 function getNearestToilet(originCoord) {
   const nearestToilets = findFiveNearestToilet(originCoord);
   return nearestToilets[0]
@@ -601,7 +611,10 @@ function getNearestWaterFountain(originCoord) {
   const nearestWaterFountain = findFiveNearestWaterFountain(originCoord);
   return nearestWaterFountain[0]
 }
-
+function getNearestPlacesOfInterest(originCoord) {
+  const nearestPlacesOfInterest = findFiveNearestPlacesOfInterest(originCoord);
+  return nearestPlacesOfInterest[0]
+}
 function getNearestBuilding(originCoord){
   return customPlaces.map(placeObj => {
     const placeName = Object.keys(placeObj)[0]
@@ -676,6 +689,7 @@ const mapOptions = {
   
   const [nearestToiletMarker, setNearestToiletMarker] = useState(null);
   const [nearestWaterFountainMarker, setNearestWaterFountainMarker] = useState(null);
+  const [nearestPlacesOfInterest, setNearestPlacesOfInterestMarker] = useState(null);
   const selectPlace = (inputString, isOrigin, showOriginSearch) => {
     console.log("Place selected: ", inputString);
     // If 'Nearest Toilet' is selected, calculate the nearest toilet
@@ -709,10 +723,28 @@ const mapOptions = {
       console.error('An error occurred while finding the nearest water fountain:', error);
       
       }
-    } 
+
+    }
+    else if (inputString.toLowerCase() === 'nearest places of interest'){
+      setShowPlacesOfInterestMarkers(true);
+      const originCoords = showOriginSearch ? originCoord : currentUserLocation; 
+      try {
+        const nearestPlacesOfInterest = getNearestPlacesOfInterest(originCoords);
+
+        setDestinationName(nearestPlacesOfInterest.name);
+        setDestinationCoord([nearestPlacesOfInterest.lat, nearestPlacesOfInterest.lng]);
+        setNearestPlacesOfInterestMarker(nearestPlacesOfInterest);
+        console.log(`Nearest places of interest set to: ${nearestPlacesOfInterest.name}`);
+    } catch (error) {
+      console.error('An error occurred while finding the nearest places of interest:', error);
+      
+      }
+
+    }  
     else {
             setShowToiletMarkers(false);
             setShowWaterFountainMarkers(false);
+            setShowPlacesOfInterestMarkers(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
             if (placeObj) {
@@ -757,10 +789,23 @@ const mapOptions = {
     // }
   };
 
-  const touristSpotMarkers = [
+  const renderPlacesOfInterestMarkers = () => {
+      if (!showPlacesOfInterestMarkers) return null;
       
+      return placesOfInterestMarkers.map((marker, index) => (
+        <MarkerF
+            key={index}
+            position={{ lat: marker.lat, lng: marker.lng }}
+            title={marker.name}
+            onClick={() => handleMarkerClick(marker)}
+            icon={{
+              url: marker.imageUrl , 
+              scaledSize: new google.maps.Size(30,30 ), 
+              }}
+            />
+        ));  
       
-    ];
+    };
 
   const renderToiletMarkers = () => {
       if (!showToiletMarkers) return null;
