@@ -189,12 +189,12 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             <>
             {travelType === "walk" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="92%">
-                    <Typography textAlign={"center"}mt={3} variant="h6">Walking Directions</Typography>
+                    <Typography textAlign={"center"}mt={3} variant="h6">Walking Path</Typography>
                     <Box textAlign={"center"}mt={0.5} variant="h6"> 
                     <Typography variant="h7" color="#2c6bf2">{originName} </Typography>
                     <Typography fontSize={18}> to  </Typography>
                     <Typography variant="h7" color={'red'}>{destinationName}</Typography>
-                    <Typography mt={1}variant="h6" color="#9b17f1">Short Cut Description</Typography>
+                    <Typography mt={1}variant="h6" color="#9b17f1">Short Cut In Purple</Typography>
                     
                     </Box>
                     <ol>

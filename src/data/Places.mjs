@@ -91,7 +91,7 @@ export const customPlaces = [
   { "Li Wai Chun Building (LWC)": { lat: 22.4150119, lng: 114.2070794 } },
   { "Lee Wai Chun Building Café (LWCBC)": { lat: 22.4148564, lng: 114.2072683 } },
   { "Li Wai Chun Building Halal Food Outlet (清真can)": { lat: 22.415112, lng: 114.207061 } },
-
+  {"Lee Woo Sing College":{lat: 22.422143552795866, lng:114.20449697139466}},
   { "Basic Medical Sciences Building Snack Bar (MEDCAN)": { lat: 22.41953916, lng: 114.2088099 } },
   { "Mong Man Wai Building (MMW)": { lat: 22.419994, lng: 114.2092386 } },
   { "Morningside College Café (MSC)": { lat: 22.4188168, lng: 114.2102646 } },
@@ -154,11 +154,12 @@ export const customPlaces = [
   { "United College Staff Canteen": { lat: 22.4210291, lng: 114.2057937 } },
   { "U.C. Staff Residence": { lat: 22.4232652, lng: 114.2054315 } },
   { "Si Yuan Amenities Centre": { lat: 22.4214323, lng: 114.2043289 } },
+  {"University Gym (UGYM)": {lat: 22.41970611279107, lng:114.21191670285472}},
 
 
     { "Nearest Toilet":{} },
-
-    { "Nearest Water Fountain":{} }
+    { "Nearest Water Fountain":{} },
+    { "Tourist Attraction":{} }
   ];
   
 export const stationLocation = [
