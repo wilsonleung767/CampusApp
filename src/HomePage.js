@@ -2,7 +2,6 @@ import React, { useMemo,useState, useEffect, useRef , useLayoutEffect} from "rea
 import { GoogleMap, useLoadScript,  MarkerF,Polyline,  LoadScript, Autocomplete, DirectionsRenderer,InfoWindow,Marker} from "@react-google-maps/api";
 // import {Box,Button,ButtonGroup,Flex,HStack,IconButton,Input,SkeletonText,Text} from '@chakra-ui/react'
 import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon,} from "@mui/material";
-import LocationPicker from "location-picker";
 import { FaLocationArrow, FaTimes,FaRoute } from 'react-icons/fa'
 import {FaLocationCrosshairs,FaRobot} from 'react-icons/fa6'
 import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
@@ -34,6 +33,12 @@ import { getFullPlaceName , getFullPlaceNameWithAlias} from "./components/PairPl
 import { shortCutPair } from "./data/CustomRoute.mjs";
 
 const HomePage = () => {
+  
+  // Map Type
+  const [mapType, setMapType] = useState("roadmap");
+  const toggleMapType = () => {
+    setMapType(prevMapType => (prevMapType === "roadmap" ? "satellite" : "roadmap"));
+  };
   
   // Search Bar
   const [showOriginSearch, setShowOriginSearch] = useState(false);
@@ -633,6 +638,7 @@ function getNearestBuilding(originCoord){
   
 }
 
+//Google Map display options 
 const mapOptions = {
   styles: [
     {
@@ -652,7 +658,8 @@ const mapOptions = {
   scaleControl: false,
   streetViewControl: false,
   rotateControl: false,
-  fullscreenControl: false
+  fullscreenControl: false,
+
   };
           
           
@@ -1070,6 +1077,51 @@ const mapOptions = {
 
 
         </Box>
+        <Box
+        position="absolute"
+        left={0}
+        bottom={0}
+        zIndex={10}
+        p={0.5}
+        display="flex"
+        width="auto"
+        
+      >
+        <Button
+          sx={{
+            fontSize: '0.725rem',
+            bgcolor: mapType === "roadmap" ? 'primary.main' : 'grey.300',
+            color: mapType === "roadmap" ? 'primary.contrastText' : 'text.primary',
+            '&:hover': {
+              bgcolor: mapType === "roadmap" ? 'primary.dark' : 'grey.400',
+            },
+            borderRadius: '0', // Set border-radius of the button to 0
+          }}
+          variant={mapType === "roadmap" ? "contained" : "outlined"}
+          onClick={() => setMapType("roadmap")}
+        >
+          Roadmap
+        </Button>
+        <Button
+          sx={{
+            fontSize: '0.725rem', 
+            bgcolor: mapType === "satellite" ? 'primary.main' : 'grey.300',
+            color: mapType === "satellite" ? 'primary.contrastText' : 'text.primary',
+            '&:hover': {
+              bgcolor: mapType === "satellite" ? 'primary.dark' : 'grey.400',
+            },
+            borderRadius: '0', // Set border-radius of the button to 0
+          }}
+          variant={mapType === "satellite" ? "contained" : "outlined"}
+          onClick={() => setMapType("satellite")}
+        >
+          Satellite
+        </Button>
+      </Box>
+
+
+
+
 
       {/* Google Map */}
       <Box 
@@ -1084,6 +1136,7 @@ const mapOptions = {
           mapContainerStyle={{ width: '100%', height: '100%' }}
           onLoad={map => setMap(map)}
           onClick={() => setShowInfoPage(false)}
+          mapTypeId={google.maps.MapTypeId[mapType.toUpperCase()]}
           >
           {isLoaded && map && (
                 <RealTimeUserLocationTracker
