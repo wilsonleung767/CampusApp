@@ -26,6 +26,7 @@ import toiletImg from './image/toilet.png';
 import toiletImgHighlighted from './image/toiletHighlighted.png';
 import waterFountainImg from './image/waterFountain.png';
 import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png';
+import beaconImg from './image/beacon.jpg';
 import busStopImg from './image/busStop.png';
 import { busDetails } from "./data/busDetails.mjs";
 import { stationLocation} from "./data/Places.mjs";
@@ -799,8 +800,10 @@ const mapOptions = {
             title={marker.name}
             onClick={() => handleMarkerClick(marker)}
             icon={{
-              url: marker.imageUrl , 
-              scaledSize: new google.maps.Size(30,30 ), 
+              url: nearestPlacesOfInterest && marker.name === nearestPlacesOfInterest.name ? toiletImgHighlighted : beaconImg , 
+              scaledSize: new google.maps.Size(30,30 ),
+              //url: marker.imageUrl , 
+              //scaledSize: new google.maps.Size(30,30 ), 
               }}
             />
         ));  
