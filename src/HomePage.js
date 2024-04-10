@@ -737,7 +737,7 @@ const mapOptions = {
       }
 
     }
-    else if (inputString.toLowerCase() === 'places of interest'){
+    else if (inputString.toLowerCase() === 'tourist spot'){
       setShowToiletMarkers(false);
       setShowWaterFountainMarkers(false);
       setShowPlacesOfInterestMarkers(true);
