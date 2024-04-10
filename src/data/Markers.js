@@ -1,3 +1,21 @@
+import chinesepillarsImg from '../image/Chinesepillars.jpg';
+import gateofwisdomImg from '../image/GateOfWisdom.jpg';
+import beaconImg from '../image/beacon.jpg';
+import theuniversitymallImg from '../image/theuniversitymall.jpg';
+import culturalsquareImg from '../image/culturalsquare.jpg';
+import weiyuanlakeImg from '../image/weiyuanlake.jpg';
+import philosophypathIng from '../image/philosophypath.jpg';
+import newasiaconcourseImg from '../image/newasiaConcourse.jpg';
+import thegentlemantowerImg from '../image/thewatertower.jpg';
+import theclocktowerImg from '../image/theclocktower.jpg';
+import theladytowerImg from '../image/theladytower.jpg';
+import lecturetheatreImg from '../image/lecturetheatre.jpg';
+import thecascadeImg from '../image/thecascade.jpg';
+import pavilionofharmonyImg from '../image/pavilionofharmony.jpg';
+import thecrookedbridgeImg from '../image/TheCrookedBridge.png';
+import herbalgardenImg from '../image/herbalgarden.jpg';
+
+
 export const toiletMarkers = [
     { lat: 22.4162632, lng: 114.210932, name: "Yasumoto International Academic Park" },
     { lat: 22.4166888, lng: 114.2116889, name: "Wu Ho Man Yuen Building" },
@@ -82,21 +100,20 @@ export const waterFountainMarkers = [
  ];
 
  export const placesOfInterestMarkers = [
-    { lat: 22.4180288, lng: 114.2030076, name: "University Main Entrance or Chinese Pillars", imageUrl: "./image/Chinesepillars.jpg" },
-    { lat: 22.4194296, lng: 114.205434, name: "Gate of Wisdom" },
-    { lat: 22.4194801, lng: 114.2054286, name: "The Beacon", "imageUrl": "./image/Chinesepillars.jpg" },
-    { lat: 22.4194922, lng: 114.2068884, name: "The University Mall" },
-    { lat: 22.4186705, lng: 114.205386, name: "Cultural Square" },
-    { lat: 22.4158874, lng: 114.2097931, name: "Weiyuan Lake" },
-    { lat: 22.4156241, lng: 114.2097725, name: "Philosophy Path" },
-    { lat: 22.421045, lng: 114.2082715, name: "New Asia Concourse" },
-    { lat: 22.4207804, lng: 114.2086022, name: "The Water Tower (nickname: the Gentleman Tower)" },
-    { lat: 22.420989, lng: 114.2089572, name: "The Clock Tower" },
-    { lat: 22.4215355, lng: 114.2098694, name: "Pavilion of Harmony" },
-    { lat: 22.4212999, lng: 114.2041098, name: "OM" },
-    { lat: 22.4208762, lng: 114.2052056, name: "The Water Tower (nickname: the Lady Tower)" },
-    { lat: 22.4223761, lng: 114.2015713, name: "Lecture Theatre" },
-    { lat: 22.42091061, lng: 114.2050658, name: "The Cascade" },
-    { lat: 22.4167182, lng: 114.2067815, name: "The Crooked Bridge and the Arched Bridge" },
-    { lat: 22.41795733, lng: 114.2063854, name: "Herbal Garden" }
+    { lat: 22.4180288, lng: 114.2030076, name: "University Main Entrance or Chinese Pillars", imageUrl: chinesepillarsImg },
+    { lat: 22.4194296, lng: 114.205434, name: "Gate of Wisdom", imageUrl: gateofwisdomImg },
+    { lat: 22.4194801, lng: 114.2054286, name: "The Beacon",  imageUrl: beaconImg },
+    { lat: 22.4194922, lng: 114.2068884, name: "The University Mall", imageUrl: theuniversitymallImg },
+    { lat: 22.4186705, lng: 114.205386, name: "Cultural Square", imageUrl: culturalsquareImg },
+    { lat: 22.4158874, lng: 114.2097931, name: "Weiyuan Lake", imageUrl: weiyuanlakeImg },
+    { lat: 22.4156241, lng: 114.2097725, name: "Philosophy Path", imageUrl: philosophypathIng },
+    { lat: 22.421045, lng: 114.2082715, name: "New Asia Concourse", imageUrl: newasiaconcourseImg },
+    { lat: 22.4207804, lng: 114.2086022, name: "The Water Tower (nickname: the Gentleman Tower)", imageUrl: thegentlemantowerImg },
+    { lat: 22.420989, lng: 114.2089572, name: "The Clock Tower", imageUrl: theclocktowerImg},
+    { lat: 22.4215355, lng: 114.2098694, name: "Pavilion of Harmony", imageUrl: pavilionofharmonyImg},
+    { lat: 22.4208762, lng: 114.2052056, name: "The Water Tower (nickname: the Lady Tower)", imageUrl: theladytowerImg },
+    { lat: 22.4223761, lng: 114.2015713, name: "Lecture Theatre", imageUrl: lecturetheatreImg},
+    { lat: 22.42091061, lng: 114.2050658, name: "The Cascade", imageUrl: thecascadeImg },
+    { lat: 22.4167182, lng: 114.2067815, name: "The Crooked Bridge and the Arched Bridge", imageUrl:thecrookedbridgeImg },
+    { lat: 22.41795733, lng: 114.2063854, name: "Herbal Garden", imageUrl: herbalgardenImg }
 ];

@@ -161,7 +161,7 @@ export const customPlaces = [
 
     { "Nearest Water Fountain":{} },
 
-    { "Nearest Places Of Interest":{} }
+    { "Places Of Interest":{} }
   ];
   
 export const stationLocation = [
