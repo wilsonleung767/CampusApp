@@ -1,6 +1,8 @@
-# Getting Started with Create React App
+# CUHK Virtual Campus App - SEEM 2024 Final Year Project (Group P)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
+To help visitors or students find their path easier, we created this web app to help visitors and students to let them enjoy their time in the Chinese University of Hong Kong (CUHK).  
+The primary goal of this project is to develop a comprehensive campus navigation system for CUHK that leverages question-answering technologies and integrates seamlessly with mobile devices (iPhone, Android Phones and Windows Phone). The system will allow visitors to easily find their ways around the CUHK campus using natural language queries and GPS integration. These advanced features will save all users time and effort, leading to a more effective and convenient journey in CUHK. For instance, CUHK Virtual Campus App promotes engagement and cooperation to establish a lively and inclusive virtual community. The software will help to create a more cohesive and supportive school atmosphere by developing a sense of belonging. 
 
 ## Available Scripts
 
