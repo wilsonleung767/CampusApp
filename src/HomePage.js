@@ -1078,15 +1078,15 @@ const mapOptions = {
 
         </Box>
         <Box
-        position="absolute"
-        left={0}
-        bottom={0}
-        zIndex={10}
-        p={0.5}
-        display="flex"
-        width="auto"
-        
-      >
+          position="absolute"
+          left={0}
+          bottom={0}
+          zIndex={showInfoPage ? 0 : 10}
+          p={0.5}
+          display="flex"
+          width="auto"
+          
+        >
         <Button
           sx={{
             fontSize: '0.725rem',
@@ -1180,24 +1180,6 @@ const mapOptions = {
       </Box>
 
 
-      {/* Toggle Toilet Layer Button */}
-      {/* <Box 
-        position="absolute" 
-        bottom="5%" 
-        left="50%" 
-        transform="translateX(-50%)">
-        <Button variant="contained" color="primary" onClick={() => setShowToiletMarkers(!showToiletMarkers)}>
-          Toggle Toilet Layer
-        </Button>
-        <Button variant="contained" color="primary" onClick={() => showBusRoute({ lat: 22.415917172642065, lng: 114.211104527007 }, {lat: 22.419788004309634, lng: 114.20867167235077} )}>
-          show bus route
-        </Button>
-        <Button variant="contained" color="primary" onClick={() =>{  setOriginCoord([22.416390590230055, 114.2106063761265]) 
-                                                                    getNearestBuilding(originCoord)}}>
-          show nearest building
-        </Button>
-      </Box> */}
-    
 
     </Box>
            
