@@ -9,7 +9,7 @@ import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
 import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion.js";
 import { customPlaces } from "./data/Places.mjs";
-import { toiletMarkers,waterFountainMarkers,placesOfInterestMarkers} from "./data/Markers.js";
+import { toiletMarkers,waterFountainMarkers,placesOfInterestMarkers,canteenMarkers} from "./data/Markers.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
@@ -31,6 +31,8 @@ import { busDetails } from "./data/busDetails.mjs";
 import { stationLocation} from "./data/Places.mjs";
 import { getFullPlaceName , getFullPlaceNameWithAlias} from "./components/PairPlaceAlias.mjs";
 import { shortCutPair } from "./data/CustomRoute.mjs";
+import canteenImg from './image/canteenIcon.png';
+import canteenImgHighlighted from './image/canteeniconHighlighted.png';
 
 const HomePage = () => {
   
@@ -52,6 +54,8 @@ const HomePage = () => {
   const [showToiletMarkers, setShowToiletMarkers] = useState(false);
   const [showWaterFountainMarkers, setShowWaterFountainMarkers] = useState(false);
   const [showPlacesOfInterestMarkers, setShowPlacesOfInterestMarkers] = useState(false);
+  const [showCanteenMarkers, setShowCanteenMarkers] = useState(false);
+
   const [busRouteMarkers, setBusRouteMarkers] = useState([]);
   const [startStationName, setStartStationName] = useState('');
   const [endStationName, setEndStationName] = useState(''); 
@@ -168,7 +172,7 @@ const HomePage = () => {
     if (!walkDirectionsResponse) return null;
 
     // Combine toilet and water fountain markers into a single array for convenience
-    const specialMarkers = [...toiletMarkers, ...waterFountainMarkers];
+    const specialMarkers = [...toiletMarkers, ...waterFountainMarkers, ...placesOfInterestMarkers, ...canteenMarkers];
 
     // Check if destination coordinates match any special marker coordinates
     const isDestinationSpecialMarker = specialMarkers.some(marker => 
@@ -442,6 +446,7 @@ const HomePage = () => {
           setShowToiletMarkers(false)
           setShowWaterFountainMarkers(false)
           setShowPlacesOfInterestMarkers(false)
+          setShowCanteenMarkers(false)
           setSelectedBusPolyline(null)
           setBusRouteMarkers([])
           setSelectedBusRoute(null)
@@ -499,7 +504,7 @@ const HomePage = () => {
 
     startBuilding = await retrieveNearestBuilding(originCoords);
     // endBuilding = await retrieveNearestBuilding(destinationCoord);
-    console.log("Start building is: " + startBuilding);
+    
     
     const startBuildingAlias = pairPlaceAlias(startBuilding)
     const endBuildingAlias = pairPlaceAlias(destinationName)
@@ -609,6 +614,15 @@ const HomePage = () => {
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 5);
 }
+function findFiveNearestCanteen(origin) {
+  return canteenMarkers.map(facility => ({
+      ...facility,
+      distance: calculateEuclideanDistance(origin[0], origin[1], facility.lat, facility.lng)
+  }))
+  .sort((a, b) => a.distance - b.distance)
+  .slice(0, 5);
+}
+
 function getNearestToilet(originCoord) {
   const nearestToilets = findFiveNearestToilet(originCoord);
   return nearestToilets[0]
@@ -621,6 +635,11 @@ function getNearestPlacesOfInterest(originCoord) {
   const nearestPlacesOfInterest = findFiveNearestPlacesOfInterest(originCoord);
   return nearestPlacesOfInterest[0]
 }
+function getNearestCanteen(originCoord) {
+  const nearestCanteen = findFiveNearestCanteen(originCoord);
+  return nearestCanteen[0]
+}
+
 function getNearestBuilding(originCoord){
   return customPlaces.map(placeObj => {
     const placeName = Object.keys(placeObj)[0]
@@ -635,8 +654,8 @@ function getNearestBuilding(originCoord){
     })
     .sort((a, b) => a.distance - b.distance)
     [0].name;
-  
 }
+
 
 //Google Map display options 
 const mapOptions = {
@@ -661,12 +680,11 @@ const mapOptions = {
   fullscreenControl: false,
 
   };
-  
-  const handleNLPQuery = async () => {  }
           
           
           
-  // Function to handle place selection
+          
+          // Function to handle place selection
           
   const [suggestions, setSuggestions] = useState([]);
   const [activeInput, setActiveInput] = useState(""); // "" or "origin" or "destination"
@@ -684,17 +702,23 @@ const mapOptions = {
       const filteredSuggestions = customPlaces
       .map(placeObj => Object.keys(placeObj)[0])
       .filter(placeName => placeName.toLowerCase().includes(value.toLowerCase()))
-      .slice(0, 5);
+      .slice(0, 12);
       
       setSuggestions(filteredSuggestions);
     }
   };
   
+  const handleNLPQuery = () => {  
+    // const NLPResult = getNLPResult(NLPQuery)
+    // selectPlace(NLPResult, "destination")
+  };
   
   
   const [nearestToiletMarker, setNearestToiletMarker] = useState(null);
   const [nearestWaterFountainMarker, setNearestWaterFountainMarker] = useState(null);
   const [nearestPlacesOfInterest, setNearestPlacesOfInterestMarker] = useState(null);
+  const [nearestCanteenMarker, setNearestCanteenMarker] = useState(null);
+
   const selectPlace = (inputString, isOrigin, showOriginSearch) => {
     console.log("Place selected: ", inputString);
     // If 'Nearest Toilet' is selected, calculate the nearest toilet
@@ -702,6 +726,7 @@ const mapOptions = {
       setShowWaterFountainMarkers(false);
       setShowPlacesOfInterestMarkers(false);
       setShowToiletMarkers(true);
+      setShowCanteenMarkers (false);
       // Determine the origin coordinates based on the current origin or user's location
       const originCoords = showOriginSearch ? originCoord : currentUserLocation; // Assume currentUserLocation is obtained elsewhere
       try {
@@ -720,6 +745,7 @@ const mapOptions = {
       setShowPlacesOfInterestMarkers(false);
       setShowToiletMarkers(false);
       setShowWaterFountainMarkers(true);
+      setShowCanteenMarkers (false);
       const originCoords = showOriginSearch ? originCoord : currentUserLocation; 
       try {
         const nearestWaterFountain = getNearestWaterFountain(originCoords);
@@ -738,6 +764,7 @@ const mapOptions = {
       setShowToiletMarkers(false);
       setShowWaterFountainMarkers(false);
       setShowPlacesOfInterestMarkers(true);
+      setShowCanteenMarkers (false);
 //      const originCoords = showOriginSearch ? originCoord : currentUserLocation; 
 //      try {
 //        const nearestPlacesOfInterest = getNearestPlacesOfInterest(originCoords);
@@ -750,12 +777,29 @@ const mapOptions = {
 //      console.error('An error occurred while finding the nearest places of interest:', error);
 //      
       }
+    else if (inputString.toLowerCase() === 'canteen / restaurant'){
+      setShowToiletMarkers(false);
+      setShowWaterFountainMarkers(false);
+      setShowPlacesOfInterestMarkers(false);
+      setShowCanteenMarkers (true);
+      const originCoords = showOriginSearch ? originCoord : currentUserLocation; 
+      try {
+        const nearestCanteen = getNearestCanteen(originCoords);
 
-//    }  
+        setDestinationName(nearestCanteen.name);
+        setDestinationCoord([nearestCanteen.lat, nearestCanteen.lng]);
+        setNearestCanteenMarker(nearestCanteen);
+        console.log(`Nearest water fountain set to: ${nearestCanteenMarker.name}`);
+    } catch (error) {
+      console.error('An error occurred while finding the nearest water fountain:', error);
+      
+      }
+
+    }
     else {
-            // setShowToiletMarkers(false);
-            // setShowWaterFountainMarkers(false);
-            // setShowPlacesOfInterestMarkers(false);
+            setShowToiletMarkers(false);
+            setShowWaterFountainMarkers(false);
+            setShowPlacesOfInterestMarkers(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
             if (placeObj) {
@@ -851,6 +895,22 @@ const mapOptions = {
         />
       ));
     };
+    const renderCanteenMarkers = () => {  
+      if (!showCanteenMarkers) return null;
+      return canteenMarkers.map((marker, index) => (
+        <MarkerF
+            key={index}
+            position={{ lat: marker.lat, lng: marker.lng }}
+            title={marker.name}
+            onClick={() => handleMarkerClick(marker)}
+            icon={{
+                url: nearestCanteenMarker && marker.name === nearestCanteenMarker.name ? canteenImgHighlighted : canteenImg , 
+                scaledSize: new google.maps.Size(30, 36), 
+                }}
+        />
+      ));
+    
+    }
   
   const getStationCoordinatesForRoute = (busRoute) => {
     const routeStations = busDetails[busRoute].station;
@@ -1000,13 +1060,13 @@ const mapOptions = {
                 style: { borderRadius: '20px', paddingRight: "5px" },
                 endAdornment: (
                   <InputAdornment position="end">
-                    {/* <IconButton>
+                    <IconButton>
                       <FaRobot onClick={() => {
                                                 setNLPSearchToggleToggle(prev => !prev)
                                                 setDestinationName("")
                                                 setNLPQuery("")
                                               }} size={25} color = {NLPSearchToggle? "#2f77eb":""} />
-                    </IconButton> */}
+                    </IconButton>
                     {showOriginSearch ? 
                                       <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
                                         <MdKeyboardArrowUp size={32} />
@@ -1149,6 +1209,7 @@ const mapOptions = {
           {renderToiletMarkers()}
           {renderWaterFountainMarkers()}
           {renderPlacesOfInterestMarkers()}
+          {renderCanteenMarkers()}
           {/* {travelType === "bus" ?renderBusStationMarkers() : null} */}
 
           {travelType === "walk" ? renderWalkDirectionsResponse() : renderBusDirectionsResponse()}    

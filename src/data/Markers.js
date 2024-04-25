@@ -117,3 +117,20 @@ export const waterFountainMarkers = [
     { lat: 22.4167182, lng: 114.2067815, name: "The Crooked Bridge and the Arched Bridge", imageUrl:thecrookedbridgeImg },
     { lat: 22.41795733, lng: 114.2063854, name: "Herbal Garden", imageUrl: herbalgardenImg }
 ];
+
+export const canteenMarkers = [
+    { lat: 22.4183161, lng: 114.2051955, name: "Benjamin Franklin Centre Student Canteen" },
+    { lat: 22.4185407, lng: 114.2051832, name: "Benjamin Franklin Centre Staff Canteen" },
+    { lat: 22.416558859057037, lng: 114.2098421542757, name: "Chung Chi Tang Student Canteen (CCCAN)" },
+    { lat: 22.415112, lng: 114.207061, name: "Li Wai Chun Building Halal Food Outlet (清真can)" },
+    { lat: 22.41953916, lng: 114.2088099, name: "Basic Medical Sciences Building Snack Bar (SUBWAY,MEDCAN)" },
+    { lat: 22.4191667, lng: 114.2105628, name: "Morningside College Dining Hall (MSDH,晨can)" },
+    { lat: 22.4210948, lng: 114.2091857, name: "New Asia College Student Canteen (NACSC, NACAN, NACSF)" },
+    { lat: 22.4224691, lng: 114.2008772, name: "Canteen of Shaw College" },
+    { lat: 22.4181046, lng: 114.2102281, name: "SHHO College Student Canteen" },
+    { lat: 22.4210088, lng: 114.2059463, name: "United College Student Canteen (UCG)" },
+    { lat: 22.4210291, lng: 114.2057937, name: "United College Staff Canteen" },
+    { lat: 22.4183019, lng: 114.2055878, name: "Benjamin Franklin Centre Coffee Corner (BFCCC,COFFEE CON)" },
+    { lat: 22.417152014324497, lng: 114.20882757223514, name: "Paper & Coffee" },
+    { lat: 22.418279834499785, lng: 114.20523704976578, name: "Woodlands Indian Vegetarian Restaurant" },
+];
