@@ -8,11 +8,41 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { getFullPlaceName } from '../PairPlaceAlias.mjs';
 import { shortCutPair } from '../../data/CustomRoute.mjs';
 import { getCurrentTimeInHongKong } from '../SearchBusRoute/getBusRoute.mjs';
+import { toiletMarkers,waterFountainMarkers,placesOfInterestMarkers} from "../../data/Markers.js";
 
 function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, destinationName}) {
     const [isDragging, setIsDragging] = useState(false);
     const [lastTouchY, setLastTouchY] = useState(0);
     const [infoPageHeight, setInfoPageHeight] = useState('45dvh'); // Initial height
+    const [photoUrl, setPhotoUrl] = useState(null);
+
+    useEffect(() => {
+        // Function to fetch photo URL based on location
+        const fetchPhoto = async () => {
+            try {
+                // Find the place of interest by name
+                const place = placesOfInterestMarkers.find(place => place.name === destinationName);
+                if (place) {
+                    // Set the photo URL if found
+                    setPhotoUrl(place.imageUrl);
+                }
+                else {
+                    // If destinationName is not found, set photoUrl to null
+                    setPhotoUrl(null);
+                }
+            } catch (error) {
+                console.error("Error fetching photo:", error);
+                // Handle error gracefully
+            }
+        };
+
+        // Call fetchPhoto function when destinationName changes
+        if (destinationName) {
+            fetchPhoto();
+        }
+    }, [destinationName]);
+
+
 
       // Only handle touch events on the drag handle
       const handleTouchStart = (e) => {
@@ -189,6 +219,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             <>
             {travelType === "walk" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="92%">
+                    {photoUrl && (<img src={photoUrl} alt="Place of Interest" style={{ width: '400px', height: '300px' }} />)}
                     <Typography textAlign={"center"}mt={3} variant="h6">Walking Path</Typography>
                     <Box textAlign={"center"}mt={0.5} variant="h6"> 
                     <Typography variant="h7" color="#2c6bf2">{originName} </Typography>
@@ -214,8 +245,8 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
             {travelType === "bus" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
+                    {photoUrl && (<img src={photoUrl} alt="Place of Interest" style={{ width: '400px', height: '300px' }} />)}
                     <Typography mt={3} variant="h6">CU Bus</Typography>
-
                     {busList.map((bus, index) => (
                         <Box key={index} width="93%">
 
