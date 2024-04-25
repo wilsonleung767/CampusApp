@@ -4,12 +4,13 @@ import { GoogleMap, useLoadScript,  MarkerF,Polyline,  LoadScript, Autocomplete,
 import { Button, IconButton, Box, TextField, Typography, ButtonGroup , InputAdornment, Icon,} from "@mui/material";
 import { FaLocationArrow, FaTimes,FaRoute } from 'react-icons/fa'
 import {FaLocationCrosshairs,FaRobot} from 'react-icons/fa6'
+import { IoRestaurant } from "react-icons/io5"
 import {MdKeyboardArrowUp,MdKeyboardArrowDown} from 'react-icons/md'
 import InfoPage from "./components/InfoPage/InfoPage";
 import RealTimeUserLocationTracker from "./components/RealTimeUserLocationTracker.js";
 import RenderSuggestions from "./components/SearchBarSuggestion/RenderSuggestion.js";
 import { customPlaces } from "./data/Places.mjs";
-import { toiletMarkers,waterFountainMarkers,placesOfInterestMarkers} from "./data/Markers.js";
+import { toiletMarkers,waterFountainMarkers,placesOfInterestMarkers, canteenMarkers} from "./data/Markers.js";
 // import getNLPResult from "./components/ChatgptSearch/handleSearch";
 import './HomePage.css'
 import { FaPersonWalking , FaMagnifyingGlass } from "react-icons/fa6";
@@ -17,7 +18,6 @@ import { FaBusSimple } from "react-icons/fa6";
 import { pairPlaceAlias } from "./components/PairPlaceAlias.mjs";
 import { getBusRoute } from "./components/SearchBusRoute/getBusRoute.mjs";
 import { busPolyline } from "./data/CustomRoute.mjs";
-
 import { calculateTripDurationByBus } from "./components/SearchBusRoute/calculateTripDurationByBus.mjs";
 import greyDot from './image/greyDot.png';
 import busStopGrey from './image/busStopGrey.png';
@@ -27,6 +27,8 @@ import waterFountainImg from './image/waterFountain.png';
 import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png';
 import beaconImg from './image/beacon.jpg';
 import busStopImg from './image/busStop.png';
+import canteenImg from './image/canteenIcon.png';
+import canteenImgHighlighted from './image/canteeniconHighlighted.png';
 import { busDetails } from "./data/busDetails.mjs";
 import { stationLocation} from "./data/Places.mjs";
 import { getFullPlaceName , getFullPlaceNameWithAlias} from "./components/PairPlaceAlias.mjs";
@@ -52,6 +54,7 @@ const HomePage = () => {
   const [showToiletMarkers, setShowToiletMarkers] = useState(false);
   const [showWaterFountainMarkers, setShowWaterFountainMarkers] = useState(false);
   const [showPlacesOfInterestMarkers, setShowPlacesOfInterestMarkers] = useState(false);
+  const [showCanteenMarkers, setShowCanteenMarkers] = useState(false);
   const [busRouteMarkers, setBusRouteMarkers] = useState([]);
   const [startStationName, setStartStationName] = useState('');
   const [endStationName, setEndStationName] = useState(''); 
@@ -169,7 +172,7 @@ const HomePage = () => {
     if (!walkDirectionsResponse) return null;
 
     // Combine toilet and water fountain markers into a single array for convenience
-    const specialMarkers = [...toiletMarkers, ...waterFountainMarkers];
+    const specialMarkers = [...toiletMarkers, ...waterFountainMarkers, ...placesOfInterestMarkers, ...canteenMarkers];
 
     // Check if destination coordinates match any special marker coordinates
     const isDestinationSpecialMarker = specialMarkers.some(marker => 
@@ -443,6 +446,7 @@ const HomePage = () => {
           setShowToiletMarkers(false)
           setShowWaterFountainMarkers(false)
           setShowPlacesOfInterestMarkers(false)
+          setShowCanteenMarkers(false)
           setSelectedBusPolyline(null)
           setBusRouteMarkers([])
           setSelectedBusRoute(null)
@@ -610,6 +614,15 @@ const HomePage = () => {
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 5);
 }
+  function findFiveNearestCanteen(origin) {
+    return canteenMarkers.map(facility => ({
+        ...facility,
+        distance: calculateEuclideanDistance(origin[0], origin[1], facility.lat, facility.lng)
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 5);
+  }
+
 function getNearestToilet(originCoord) {
   const nearestToilets = findFiveNearestToilet(originCoord);
   return nearestToilets[0]
@@ -622,6 +635,12 @@ function getNearestPlacesOfInterest(originCoord) {
   const nearestPlacesOfInterest = findFiveNearestPlacesOfInterest(originCoord);
   return nearestPlacesOfInterest[0]
 }
+
+function getNearestCanteen(originCoord) {
+  const nearestCanteen = findFiveNearestCanteen(originCoord);
+  return nearestCanteen[0]
+}
+
 function getNearestBuilding(originCoord){
   return customPlaces.map(placeObj => {
     const placeName = Object.keys(placeObj)[0]
@@ -696,6 +715,8 @@ const mapOptions = {
   const [nearestToiletMarker, setNearestToiletMarker] = useState(null);
   const [nearestWaterFountainMarker, setNearestWaterFountainMarker] = useState(null);
   const [nearestPlacesOfInterest, setNearestPlacesOfInterestMarker] = useState(null);
+  const [nearestCanteenMarker, setNearestCanteenMarker] = useState(null);
+
   const selectPlace = (inputString, isOrigin, showOriginSearch) => {
     console.log("Place selected: ", inputString);
     // If 'Nearest Toilet' is selected, calculate the nearest toilet
@@ -735,7 +756,7 @@ const mapOptions = {
       }
 
     }
-    else if (inputString.toLowerCase() === 'tourist spot'){
+    else if (inputString.toLowerCase() === 'tourist spot / attraction'){
       setShowToiletMarkers(false);
       setShowWaterFountainMarkers(false);
       setShowPlacesOfInterestMarkers(true);
@@ -751,7 +772,24 @@ const mapOptions = {
 //      console.error('An error occurred while finding the nearest places of interest:', error);
 //      
       }
+    else if (inputString.toLowerCase() === 'canteen / restaurant'){
+      setShowToiletMarkers(false);
+      setShowWaterFountainMarkers(false);
+      setShowPlacesOfInterestMarkers(false);
+      setShowCanteenMarkers(true);
+      const originCoords = showOriginSearch ? originCoord : currentUserLocation; 
+      try {
+        const nearestCanteen = getNearestCanteen(originCoords);
 
+        setDestinationName(nearestCanteen.name);
+        setDestinationCoord([nearestCanteen.lat, nearestCanteen.lng]);
+        setNearestCanteenMarker(nearestCanteen);
+        console.log(`Nearest canteen set to: ${nearestCanteen.name}`);
+    } catch (error) {
+      console.error('An error occurred while finding the nearest canteen:', error);
+      
+      }
+    }
 //    }  
     else {
             // setShowToiletMarkers(false);
@@ -812,7 +850,7 @@ const mapOptions = {
             onClick={() => handleMarkerClick(marker)}
             icon={{
               url: marker.imageUrl , 
-              scaledSize: new google.maps.Size(30,30 ),
+              scaledSize: new google.maps.Size(40,40 ),
               //url: marker.imageUrl , 
               //scaledSize: new google.maps.Size(30,30 ), 
               }}
@@ -837,7 +875,7 @@ const mapOptions = {
             />
         ));
     };
-    const renderWaterFountainMarkers = () => {
+  const renderWaterFountainMarkers = () => {
       if (!showWaterFountainMarkers) return null;
       return waterFountainMarkers.map((marker, index) => (
         <MarkerF
@@ -852,7 +890,23 @@ const mapOptions = {
         />
       ));
     };
+  const renderCanteenMarkers = () => {  
+    if (!showCanteenMarkers) return null;
+    return canteenMarkers.map((marker, index) => (
+      <MarkerF
+          key={index}
+          position={{ lat: marker.lat, lng: marker.lng }}
+          title={marker.name}
+          onClick={() => handleMarkerClick(marker)}
+          icon={{
+              url: nearestCanteenMarker && marker.name === nearestCanteenMarker.name ? canteenImgHighlighted : canteenImg , 
+              scaledSize: new google.maps.Size(32, 36), 
+              }}
+      />
+    ));
   
+  }
+
   const getStationCoordinatesForRoute = (busRoute) => {
     const routeStations = busDetails[busRoute].station;
     const stationCoordinates = [];
@@ -911,7 +965,7 @@ const mapOptions = {
               <div style={{ textAlign: 'center' }}>
                   <h4 style={{ margin: '0 0 10px 0' }}>{marker.name}</h4>
                   {/* Conditionally render the description if it exists */}
-                  {marker.imageUrl && (<img src={marker.imageUrl} alt="Place of Interest" style={{ width: '200px', height: '200px' }} />)}
+                  {marker.imageUrl && (<img src={marker.imageUrl} alt="Place of Interest" style={{ width: '180px', height: '180px' }} />)}
                   {marker.description && <p style={{ margin: '0 0 10px 0' }}>{marker.description}</p>}
                   <div style={{ marginTop:"20px" ,display: 'flex', justifyContent: 'center', gap: '10px' }}>
                       <button onClick={() => {
@@ -1151,6 +1205,7 @@ const mapOptions = {
           {renderToiletMarkers()}
           {renderWaterFountainMarkers()}
           {renderPlacesOfInterestMarkers()}
+          {renderCanteenMarkers()}
           {/* {travelType === "bus" ?renderBusStationMarkers() : null} */}
 
           {travelType === "walk" ? renderWalkDirectionsResponse() : renderBusDirectionsResponse()}    

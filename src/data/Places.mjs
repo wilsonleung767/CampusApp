@@ -1,5 +1,12 @@
 
 export const customPlaces = [
+  { "Nearest Toilet":{} },
+
+  { "Nearest Water Fountain":{} },
+
+  { "Tourist Spot / Attraction":{} },
+  { "Canteen / Restaurant":{} },
+
   { "Yasumoto International Academic Park (YIAP)": { lat: 22.4162632, lng: 114.210932 }},
   { "University Sports Centre" : {lat: 22.4186158 , lng: 114.2112792 } },
   { "Cheng Yu Tung Building" : {lat: 22.4121683	, lng: 114.2105302}},
@@ -109,7 +116,6 @@ export const customPlaces = [
   { "Grace Tien Hall": { lat: 22.4216069, lng: 114.2105438 } },
   { "Humanities Building": { lat: 22.421691, lng: 114.2080429 } },
   { "Ch'ien Mu Library": { lat: 22.4214255, lng: 114.2085327 } },
-  { "Pavilion of Harmony": { lat: 22.4215355, lng: 114.2098694 } },
   { "Xuesi Hall": { lat: 22.4215765, lng: 114.2095371 } },
   { "New Asia College Yun Chi Hsien": { lat: 22.420867, lng: 114.2094197 } },
   { "Orchid Lodge": { lat: 22.415612, lng: 114.2076353 } },
@@ -155,14 +161,10 @@ export const customPlaces = [
   { "U.C. Staff Residence": { lat: 22.4232652, lng: 114.2054315 } },
   { "Si Yuan Amenities Centre": { lat: 22.4214323, lng: 114.2043289 } },
   {"University Gym (UGYM)": {lat: 22.41970611279107, lng:114.21191670285472}},
-
+  {"Paper & Coffee": {lat:22.417152014324497, lng: 114.20882757223514}},
+  {"Woodlands Indian Vegetarian Restaurant": {lat: 22.418279834499785, lng: 114.20523704976578}},
   { "Pavilion of Harmony (POH)": {lat: 22.4215355, lng: 114.2098694}},
-
-    { "Nearest Toilet":{} },
-
-    { "Nearest Water Fountain":{} },
-
-    { "Tourist Spot":{} }
+  
   ];
   
 export const stationLocation = [
