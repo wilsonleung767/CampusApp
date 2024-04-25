@@ -99,7 +99,7 @@ export const customPlaces = [
   { "Lee Wai Chun Building Café (LWCBC)": { lat: 22.4148564, lng: 114.2072683 } },
   { "Li Wai Chun Building Halal Food Outlet (清真can)": { lat: 22.415112, lng: 114.207061 } },
   {"Lee Woo Sing College":{lat: 22.422143552795866, lng:114.20449697139466}},
-  { "Basic Medical Sciences Building Snack Bar (MEDCAN)": { lat: 22.41953916, lng: 114.2088099 } },
+  { "Basic Medical Sciences Building Snack Bar (SUBWAY,MEDCAN)": { lat: 22.41953916, lng: 114.2088099 } },
   { "Mong Man Wai Building (MMW)": { lat: 22.419994, lng: 114.2092386 } },
   { "Morningside College Café (MSC)": { lat: 22.4188168, lng: 114.2102646 } },
   { "Morningside College Dining Hall (MSDH,晨can)": { lat: 22.4191667, lng: 114.2105628 } },
@@ -164,7 +164,11 @@ export const customPlaces = [
   {"Paper & Coffee": {lat:22.417152014324497, lng: 114.20882757223514}},
   {"Woodlands Indian Vegetarian Restaurant": {lat: 22.418279834499785, lng: 114.20523704976578}},
   { "Pavilion of Harmony (POH)": {lat: 22.4215355, lng: 114.2098694}},
-  
+    { "Nearest Toilet":{} },
+    { "Nearest Water Fountain":{} },
+    { "Tourist Spot / Attraction":{} },
+    { "Canteen / Restaurant":{} },
+    
   ];
   
 export const stationLocation = [
@@ -199,3 +203,4 @@ export const stationLocation = [
   { "UCSR": { lat: 22.423261, lng: 114.205133 }},
   { "YIAP": { lat: 22.415880, lng: 114.210859 }}
 ];
+
