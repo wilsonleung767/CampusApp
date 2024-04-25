@@ -798,9 +798,9 @@ const mapOptions = {
 
     }
     else {
-            setShowToiletMarkers(false);
-            setShowWaterFountainMarkers(false);
-            setShowPlacesOfInterestMarkers(false);
+            // setShowToiletMarkers(false);
+            // setShowWaterFountainMarkers(false);
+            // setShowPlacesOfInterestMarkers(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
             if (placeObj) {

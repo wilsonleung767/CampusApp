@@ -126,7 +126,7 @@ export const customPlaces = [
   { "S.H. Ho College": { lat: 22.4183378, lng: 114.2101635 } },
   { "Connexion, S.H. Ho College Staff Common Room": { lat: 22.4180897, lng: 114.2102821 } },
   { "University Science Centre (SCIC)": { lat: 22.419829548079342, lng: 114.20803700579232} },
-
+  {"The University Mall (TUM)" : {lat: 22.4194922, lng: 114.2068884}},
   { "Ho Tim Hall (HTH)": { lat: 22.4184966, lng: 114.20996 } },
   { "Lee Quo Wei Hall (LQWH)": { lat: 22.4182823, lng: 114.2098402 } },
   { "Souvenir Counter (SOVC)": { lat: 22.418203, lng: 114.204598 } },
@@ -156,6 +156,8 @@ export const customPlaces = [
   {"Paper & Coffee": {lat:22.417152014324497, lng: 114.20882757223514}},
   {"Woodlands Indian Vegetarian Restaurant": {lat: 22.418279834499785, lng: 114.20523704976578}},
   { "Pavilion of Harmony (POH)": {lat: 22.4215355, lng: 114.2098694}},
+
+
     { "Nearest Toilet":{} },
     { "Nearest Water Fountain":{} },
     { "Tourist Spot / Attraction":{} },

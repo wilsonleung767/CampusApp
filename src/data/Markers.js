@@ -106,7 +106,7 @@ export const waterFountainMarkers = [
     { lat: 22.4194922, lng: 114.2068884, name: "The University Mall", imageUrl: theuniversitymallImg },
     { lat: 22.4186705, lng: 114.205386, name: "Cultural Square", imageUrl: culturalsquareImg },
     { lat: 22.4158874, lng: 114.2097931, name: "Weiyuan Lake", imageUrl: weiyuanlakeImg },
-    { lat: 22.4156241, lng: 114.2097725, name: "Philosophy Path", imageUrl: philosophypathIng },
+    { lat: 22.4156356, lng: 114.209757, name: "Philosophy Path (CCPP)", imageUrl: philosophypathIng },
     { lat: 22.421045, lng: 114.2082715, name: "New Asia Concourse", imageUrl: newasiaconcourseImg },
     { lat: 22.4207804, lng: 114.2086022, name: "The Water Tower (nickname: the Gentleman Tower)", imageUrl: thegentlemantowerImg },
     { lat: 22.420989, lng: 114.2089572, name: "The Clock Tower", imageUrl: theclocktowerImg},

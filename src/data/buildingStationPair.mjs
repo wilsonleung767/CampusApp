@@ -164,6 +164,7 @@ export const buildingStationPair = {
     "UCBH": ["UC", "UCBH"],
     "UCC": ["UC", "UCC"],
     "UCCAN": ["UC", "UCCAN"],
+    "TUM":["SHAWHALL", "SCIC", "UADM"],
     "UCG": ["UC", "UCG"],
     "UCHSH": ["CCHH", "UCHSH"],
     "UCMDM": ["UC", "UCMDM"],

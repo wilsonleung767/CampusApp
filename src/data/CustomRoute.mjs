@@ -7,10 +7,12 @@ const customPolyline = [
     { lat: 22.4195, lng: 114.2080 }
   ];
 export const shortCutPair = [
-  {origin: "Chung Chi Tang Student Canteen (CCCAN)", destination: "University Library (ULIB)", polyline: [ { lat: 22.416363910787226, lng: 114.2086163882472 },
-    { lat: 22.416302225131098, lng: 114.20863619531256 },
-    { lat: 22.416429340745808, lng: 114.20886878042378 },
-    { lat: 22.416494326657656, lng: 114.20908313130259 },
+  {origin: "Chung Chi Tang Student Canteen (CCCAN)", destination: "University Library (ULIB)", polyline: [ 
+    
+    {lat: 22.41655077260206, lng:114.20984519924647},
+    {lat: 22.416522511510482, lng: 114.20983885961628},
+    {lat: 22.416533415890655, lng: 114.20974729859842},
+    {lat: 22.416549532838708, lng: 114.20960380042932},
     { lat: 22.41653800569606, lng: 114.20930900642219 },
     { lat: 22.416749449149865, lng: 114.20925564106723 },
     { lat: 22.41682383493518, lng: 114.20919596192176 },
