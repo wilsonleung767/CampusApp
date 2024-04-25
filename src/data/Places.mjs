@@ -50,7 +50,6 @@ export const customPlaces = [
   { "Tse Chiu Kit Room (CK TSE)": { lat: 22.4165846, lng: 114.209053 } },
   { "Chen Kou Bun Building (CKB)": { lat: 22.4153137, lng: 114.2071823 } },
   { "School of Chinese Medicine (CMS)": { lat: 22.4154958, lng: 114.2070647 } },
-  { "University Station (CUMTR,GS,LGS,UNIMTR,MTR)": { lat: 22.4134548, lng: 114.2102967 } },
   { "CW Chu College (CWCC)": { lat: 22.4252047, lng: 114.2063931 } },
   { "CW Chu Hostel (CWH)": { lat: 22.4252047, lng: 114.2063931 } },
   { "Cheng Yu Tung Building (CYT)": { lat: 22.4121683, lng: 114.2105302 } },

@@ -392,7 +392,7 @@ export const shortCutPair = [
     "Walk straight and see Sir Philip Hadden-Cave Sports Field on right hand side",
     "Arrive University Gym",]},
     
-  {origin:"University MTR Station Piazza School Bus Stop (MTRP)", destination:"Sir Run Run Shaw Hall", polyline:[{'lat': 22.414015627184572, 'lng': 114.20973784621347},
+  {origin:"University MTR Station (MTR)", destination:"Sir Run Run Shaw Hall (SHAWHALL)", polyline:[{'lat': 22.414015627184572, 'lng': 114.20973784621347},
   {'lat': 22.414366672693387, 'lng': 114.21002957820104},
   {'lat': 22.414786028051306, 'lng': 114.2103597913268},
   {'lat': 22.415284979475015, 'lng': 114.21053555873137},

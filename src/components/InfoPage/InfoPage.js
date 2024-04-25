@@ -242,7 +242,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     <ol>
                         {shortcutDescription ? (
                             shortcutDescription.map((step, index) => (
-                                <li key={index}><strong>{step}</strong></li>
+                                <li key={index} style={{marginBottom:"0.5em"}} ><strong>{step}</strong></li>
                             ))
                         ) : (
                             // Fallback or default description when no shortcut is found
