@@ -7,6 +7,7 @@ import { FaLocationDot } from "react-icons/fa6";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { getFullPlaceName } from '../PairPlaceAlias.mjs';
 import { shortCutPair } from '../../data/CustomRoute.mjs';
+import { removeTextInParentheses } from '../PairPlaceAlias.mjs';
 import { getCurrentTimeInHongKong } from '../SearchBusRoute/getBusRoute.mjs';
 import { toiletMarkers,waterFountainMarkers,placesOfInterestMarkers} from "../../data/Markers.js";
 
@@ -194,7 +195,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
                     <Typography variant="body1">
                         <FaPersonWalking color="red" style={{ marginRight: "5px" }} />
                         Walk to <FaLocationDot color="red" /> <span style={{ color:"red" , fontWeight:"bold"}}>
-                        {getFullPlaceName(destinationName)}
+                        {removeTextInParentheses(destinationName)}
                         </span>
                     </Typography>
                     <Typography variant="body1" style={{ fontWeight: "bold" }}>

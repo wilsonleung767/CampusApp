@@ -61,6 +61,11 @@ export function getFullPlaceName(alias) {
     return null;
   }
 
+  export function removeTextInParentheses(inputString) {
+    // This regular expression matches any text between parentheses including the parentheses themselves
+    return inputString.replace(/\s*\([^()]*\)\s*/g, ' ').trim();
+}
 
-  console.log(getFullPlaceName("NAC"))
-  console.log(getFullPlaceNameWithAlias("NAC"))
+  // console.log(getFullPlaceName("ULIB"))
+  // console.log(getFullPlaceNameWithAlias("New Asia College (NAC)"))
+  // console.log(removeTextInParentheses("New Asia College (NAC)"))
