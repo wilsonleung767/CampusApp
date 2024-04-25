@@ -28,14 +28,18 @@ export function getFullPlaceName(alias) {
       ...stationLocation
     ];
 
-    for (const place of places) {
-      const [name] = Object.keys(place);
-      if (name.toLowerCase().includes(alias.toLowerCase())) {
-        let fullName = name.substring(0, name.indexOf('(')).trim();
-        return fullName;
-      }
-    }
-    return null;
+   // Split the alias at the "|" symbol and use the first part for matching
+   const mainAlias = alias.split('|')[0].trim();
+
+   for (const place of places) {
+       const [name] = Object.keys(place);
+       if (name.toLowerCase().includes(mainAlias.toLowerCase())) {
+           // Assuming the full name is before any '(' character in the place's name
+           let fullName = name.substring(0, name.indexOf('(')).trim();
+           return fullName;
+       }
+   }
+   return null;
   }
 
   export function getFullPlaceNameWithAlias(alias){

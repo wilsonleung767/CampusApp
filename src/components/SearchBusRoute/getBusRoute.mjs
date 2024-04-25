@@ -74,8 +74,8 @@ export const getBusRoute = (startBuilding, endBuilding, isTeachingDay) => {
                             let endStationLocation = getStationCoordinates(endStation, stationLocation);
                             res.push({
                                 busRoute: route,
-                                startStation: startStation,
-                                endStation: endStation,
+                                startStation: stops[startIndex],
+                                endStation: stops[endIndex],
                                 startStationLocation: startStationLocation,
                                 endStationLocation: endStationLocation,
                                 passedStations: passedStations

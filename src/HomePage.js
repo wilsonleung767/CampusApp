@@ -27,8 +27,6 @@ import waterFountainImg from './image/waterFountain.png';
 import waterFoundationImgHighlighted from './image/waterFountainHighlighted.png';
 import beaconImg from './image/beacon.jpg';
 import busStopImg from './image/busStop.png';
-import canteenImg from './image/canteenIcon.png';
-import canteenImgHighlighted from './image/canteeniconHighlighted.png';
 import { busDetails } from "./data/busDetails.mjs";
 import { stationLocation} from "./data/Places.mjs";
 import { getFullPlaceName , getFullPlaceNameWithAlias} from "./components/PairPlaceAlias.mjs";
@@ -973,7 +971,7 @@ const mapOptions = {
               <div style={{ textAlign: 'center' }}>
                   <h4 style={{ margin: '0 0 10px 0' }}>{marker.name}</h4>
                   {/* Conditionally render the description if it exists */}
-                  {marker.imageUrl && (<img src={marker.imageUrl} alt="Place of Interest" style={{ width: '180px', height: '180px' }} />)}
+                  {marker.imageUrl && (<img src={marker.imageUrl} alt="Place of Interest" style={{ width: '200px', height: '200px' }} />)}
                   {marker.description && <p style={{ margin: '0 0 10px 0' }}>{marker.description}</p>}
                   <div style={{ marginTop:"20px" ,display: 'flex', justifyContent: 'center', gap: '10px' }}>
                       <button onClick={() => {
@@ -1064,13 +1062,13 @@ const mapOptions = {
                 style: { borderRadius: '20px', paddingRight: "5px" },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton>
+                    {/* <IconButton>
                       <FaRobot onClick={() => {
                                                 setNLPSearchToggleToggle(prev => !prev)
                                                 setDestinationName("")
                                                 setNLPQuery("")
                                               }} size={25} color = {NLPSearchToggle? "#2f77eb":""} />
-                    </IconButton>
+                    </IconButton> */}
                     {showOriginSearch ? 
                                       <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
                                         <MdKeyboardArrowUp size={32} />
