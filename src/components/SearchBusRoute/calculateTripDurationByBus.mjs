@@ -10,7 +10,8 @@ import { calculateBusDuration } from "./calculateBusDuration.mjs";
 export function calculateTripDurationByBus(busRoute, startStation, endStation, timeOfOriginToStation, timeOfDepartureToDest) {
     let busDetails = null;
     // let currentTime = getCurrentTimeInHongKong();
-    const currentTime = new Date("2023-12-14T12:43:23.813Z")
+    // const currentTime = new Date("2023-12-14T12:43:23.813Z")
+    const currentTime = new Date("2024-04-26T10:53:23.813Z")
     const upcomingDepartures = findNextDepartureTime(busRoute, startStation, currentTime);
 
     if (upcomingDepartures.length > 0) {

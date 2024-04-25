@@ -42,7 +42,17 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
         }
     }, [destinationName]);
 
+    useEffect(() => {
+        // Log info for debugging
+        console.log("inside infopage originName",originName , "destinationName",destinationName);
+    }, [destinationName, originName]);
 
+    useEffect(() => {
+        // Select the first bus when busList changes and is not empty
+        if (busList && busList.length > 0) {
+            setSelectedBusIndex(0);  // Default to first bus
+        }
+    }, [busList]);
 
       // Only handle touch events on the drag handle
       const handleTouchStart = (e) => {
@@ -94,7 +104,8 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
         useEffect(() => {
             const updateWaitingTime = () => {
-                const currentTime = new Date("2023-12-14T04:43:23.813Z");
+                // const currentTime = new Date("2023-12-14T04:43:23.813Z");
+                const currentTime = new Date("2024-04-26T02:53:20.813Z")
                 // const currentTime = getCurrentTimeInHongKong();
                 console.log("currentTime in businfosection is", currentTime);
                 const departureTime = bus.departureTime;
