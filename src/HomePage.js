@@ -75,7 +75,8 @@ const HomePage = () => {
   const [walkDirectionsResponse, setWalkDirectionsResponse] = useState(null)
   const [distance, setDistance] = useState('')
   const [walkDuration, setWalkDuration] = useState('')
-  const [mapKey, setMapKey] = useState(0); 
+  const [mapKey, setMapKey] = useState(0);
+  const [photoUrl, setPhotoUrl] = useState(null);
   
   // Real time user location tracking 
   const [currentUserLocation, setCurrentUserLocation] = useState([]);
@@ -913,6 +914,7 @@ const mapOptions = {
               <div style={{ textAlign: 'center' }}>
                   <h4 style={{ margin: '0 0 10px 0' }}>{marker.name}</h4>
                   {/* Conditionally render the description if it exists */}
+                  {marker.imageUrl && (<img src={marker.imageUrl} alt="Place of Interest" style={{ width: '200px', height: '200px' }} />)}
                   {marker.description && <p style={{ margin: '0 0 10px 0' }}>{marker.description}</p>}
                   <div style={{ marginTop:"20px" ,display: 'flex', justifyContent: 'center', gap: '10px' }}>
                       <button onClick={() => {
