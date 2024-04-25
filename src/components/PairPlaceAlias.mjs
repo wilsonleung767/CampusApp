@@ -29,17 +29,18 @@ export function getFullPlaceName(alias) {
     ];
 
    // Split the alias at the "|" symbol and use the first part for matching
-   const mainAlias = alias.split('|')[0].trim();
+   const mainAlias = alias.split('|')[0].trim().toLowerCase();
 
-   for (const place of places) {
-       const [name] = Object.keys(place);
-       if (name.toLowerCase().includes(mainAlias.toLowerCase())) {
-           // Assuming the full name is before any '(' character in the place's name
-           let fullName = name.substring(0, name.indexOf('(')).trim();
-           return fullName;
-       }
-   }
-   return null;
+    for (const place of places) {
+        const [name] = Object.keys(place);
+        // Using regular expression to match alias inside parentheses or elsewhere in the name
+        if (new RegExp(`\\b${mainAlias}\\b`, 'i').test(name)) {
+            // Returns the full name before any ' (' character if present, otherwise returns the entire name
+            let fullName = name.includes('(') ? name.substring(0, name.indexOf(' (')).trim() : name.trim();
+            return fullName;
+        }
+    }
+    return null;
   }
 
   export function getFullPlaceNameWithAlias(alias){
@@ -47,15 +48,19 @@ export function getFullPlaceName(alias) {
       ...customPlaces,
       ...stationLocation
     ];
+    // Normalize the alias and prepare for regular expression matching
+    const normalizedAlias = alias.trim().toLowerCase();
+
     for (const place of places) {
-      const [name] = Object.keys(place);
-      if (name.toLowerCase().includes(alias.toLowerCase())) {
-        return name;
-      }
+        const [name] = Object.keys(place);
+        // Use a regular expression to match the alias anywhere in the name, enclosed by word boundaries
+        if (new RegExp(`\\b${normalizedAlias}\\b`, 'i').test(name)) {
+            return name;
+        }
     }
     return null;
   }
 
 
-  // console.log(getFullPlaceName("SCIC"))
-  // console.log(getFullPlaceNameWithAlias("SCIC"))
+  console.log(getFullPlaceName("NAC"))
+  console.log(getFullPlaceNameWithAlias("NAC"))
