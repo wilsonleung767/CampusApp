@@ -121,6 +121,7 @@ export const buildingStationPair = {
     "NAYCH": ["NAC", "NAYCH"],
     "ORLO": ["CCTEA", "YIAP", "MTRP", "MTR", "ORLO"],
     "PSC": ["MTRP", "MTR", "YIAP", "CCTEA", "PSC"],
+    "POH": ["NAC", "POH"], 
     "Paper&Coffee": ["MTRP", "MTR", "YIAP", "CCTEA", "Paper&Coffee"],
     "RESI10": ["RESI10"],
     "RESI15": ["RESI15"],

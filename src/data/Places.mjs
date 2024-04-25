@@ -156,6 +156,7 @@ export const customPlaces = [
   { "Si Yuan Amenities Centre": { lat: 22.4214323, lng: 114.2043289 } },
   {"University Gym (UGYM)": {lat: 22.41970611279107, lng:114.21191670285472}},
 
+  { "Pavilion of Harmony (POH)": {lat: 22.4215355, lng: 114.2098694}},
 
     { "Nearest Toilet":{} },
 

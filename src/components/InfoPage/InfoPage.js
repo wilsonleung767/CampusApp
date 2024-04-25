@@ -219,7 +219,7 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
             <>
             {travelType === "walk" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="92%">
-                    {photoUrl && (<img src={photoUrl} alt="Place of Interest" style={{ width: '400px', height: '300px' }} />)}
+                    {photoUrl && (<img src={photoUrl} alt="Place of Interest" style={{ width: '400px', height: '300px' , marginTop:"30px"}} />)}
                     <Typography textAlign={"center"}mt={3} variant="h6">Walking Path</Typography>
                     <Box textAlign={"center"}mt={0.5} variant="h6"> 
                     <Typography variant="h7" color="#2c6bf2">{originName} </Typography>
@@ -245,7 +245,6 @@ function InfoPage({ show, travelType, busList, onSelectBusRoute ,originName, des
 
             {travelType === "bus" && (
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%">
-                    {photoUrl && (<img src={photoUrl} alt="Place of Interest" style={{ width: '400px', height: '300px' }} />)}
                     <Typography mt={3} variant="h6">CU Bus</Typography>
                     {busList.map((bus, index) => (
                         <Box key={index} width="93%">

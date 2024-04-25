@@ -110,7 +110,7 @@ export const waterFountainMarkers = [
     { lat: 22.421045, lng: 114.2082715, name: "New Asia Concourse", imageUrl: newasiaconcourseImg },
     { lat: 22.4207804, lng: 114.2086022, name: "The Water Tower (nickname: the Gentleman Tower)", imageUrl: thegentlemantowerImg },
     { lat: 22.420989, lng: 114.2089572, name: "The Clock Tower", imageUrl: theclocktowerImg},
-    { lat: 22.4215355, lng: 114.2098694, name: "Pavilion of Harmony", imageUrl: pavilionofharmonyImg},
+    { lat: 22.4215355, lng: 114.2098694, name: "Pavilion of Harmony (POH)", imageUrl: pavilionofharmonyImg},
     { lat: 22.4208762, lng: 114.2052056, name: "The Water Tower (nickname: the Lady Tower)", imageUrl: theladytowerImg },
     { lat: 22.4223761, lng: 114.2015713, name: "Lecture Theatre", imageUrl: lecturetheatreImg},
     { lat: 22.42091061, lng: 114.2050658, name: "The Cascade", imageUrl: thecascadeImg },

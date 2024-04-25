@@ -499,7 +499,7 @@ const HomePage = () => {
 
     startBuilding = await retrieveNearestBuilding(originCoords);
     // endBuilding = await retrieveNearestBuilding(destinationCoord);
-    
+    console.log("Start building is: " + startBuilding);
     
     const startBuildingAlias = pairPlaceAlias(startBuilding)
     const endBuildingAlias = pairPlaceAlias(destinationName)
@@ -661,11 +661,12 @@ const mapOptions = {
   fullscreenControl: false,
 
   };
+  
+  const handleNLPQuery = async () => {  }
           
           
           
-          
-          // Function to handle place selection
+  // Function to handle place selection
           
   const [suggestions, setSuggestions] = useState([]);
   const [activeInput, setActiveInput] = useState(""); // "" or "origin" or "destination"
@@ -689,10 +690,6 @@ const mapOptions = {
     }
   };
   
-  const handleNLPQuery = () => {  
-    // const NLPResult = getNLPResult(NLPQuery)
-    // selectPlace(NLPResult, "destination")
-  };
   
   
   const [nearestToiletMarker, setNearestToiletMarker] = useState(null);
@@ -756,9 +753,9 @@ const mapOptions = {
 
 //    }  
     else {
-            setShowToiletMarkers(false);
-            setShowWaterFountainMarkers(false);
-            setShowPlacesOfInterestMarkers(false);
+            // setShowToiletMarkers(false);
+            // setShowWaterFountainMarkers(false);
+            // setShowPlacesOfInterestMarkers(false);
             let coord;
             const placeObj = customPlaces.find(p => Object.keys(p)[0] === inputString);
             if (placeObj) {
@@ -1003,13 +1000,13 @@ const mapOptions = {
                 style: { borderRadius: '20px', paddingRight: "5px" },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton>
+                    {/* <IconButton>
                       <FaRobot onClick={() => {
                                                 setNLPSearchToggleToggle(prev => !prev)
                                                 setDestinationName("")
                                                 setNLPQuery("")
                                               }} size={25} color = {NLPSearchToggle? "#2f77eb":""} />
-                    </IconButton>
+                    </IconButton> */}
                     {showOriginSearch ? 
                                       <IconButton    onClick={() => setShowOriginSearch(prev => !prev)} >
                                         <MdKeyboardArrowUp size={32} />
